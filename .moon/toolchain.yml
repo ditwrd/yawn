@@ -1,0 +1,52 @@
+# Moonrepo toolchain configuration
+# Configures moonrepo to work with mise-managed tools and project-specific settings
+# Based on Yawn project tech stack: Go, TypeScript/React, Bun, Python (uv)
+
+$schema: 'https://moonrepo.dev/schemas/toolchain.json'
+
+# TypeScript configuration - moonrepo-specific settings for monorepo
+typescript:
+  # Enable project references synchronization for monorepo efficiency
+  syncProjectReferences: true
+  
+  # Enable project references to paths mapping for imports
+  syncProjectReferencesToPaths: true
+  
+  # Enable routing output directory to cache for better performance
+  routeOutDirToCache: true
+  
+  # Include project reference sources in tsconfig.json for editor support
+  includeProjectReferenceSources: true
+  
+  # Include shared types from types/** directory (cross-language types)
+  includeSharedTypes: true
+  
+  # Create missing tsconfig.json files for dependencies automatically
+  createMissingConfig: true
+  
+  # Root options config file name for shared compiler options
+  rootOptionsConfigFileName: 'tsconfig.options.json'
+  
+  # Root config file name for project references
+  rootConfigFileName: 'tsconfig.json'
+  
+  # Project config file name (standard naming)
+  projectConfigFileName: 'tsconfig.json'
+  
+  # TypeScript root directory (project root)
+  root: '.'
+
+# Go configuration - use system version managed by mise
+unstable_go:
+  version: 'system'
+  workspaces: true
+
+# Bun configuration - use system version managed by mise
+bun:
+  version: 'system'
+
+# Note: Python is managed by uv, not mise or moonrepo
+# This avoids conflicts and follows the project's tooling strategy:
+# - mise: Primary tool version manager (install, pin, switch versions)
+# - moonrepo: Build orchestration and task runner (uses system tools)
+# - uv: Python ecosystem management (runtime + packages)

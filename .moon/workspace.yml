@@ -1,0 +1,42 @@
+# Moonrepo workspace configuration
+$schema: 'https://moonrepo.dev/schemas/workspace.json'
+
+# Version control system
+vcs:
+  manager: 'git'
+  defaultBranch: 'main'
+
+# Project discovery
+projects:
+  # Globs for finding projects - based on steering guide structure
+  globs:
+    - 'api/*'
+    - 'web/*'
+    - 'templates/*'
+    - 'types/*'
+    - 'tools/*'
+    - 'docs/*'
+  
+  # Explicit project sources
+  sources: {}
+
+# Pipeline configuration
+runner:
+  logRunningCommand: true
+  inheritColorsForPipedTasks: true
+  killProcessThreshold: 10000
+  autoCleanCache: true
+  cacheLifetime: '7d'
+  syncProjects: true
+  syncProjectDependencies: true
+  syncWorkspace: true
+  installDependencies: true
+
+# Generator configuration for templates
+generator:
+  templates:
+    - './templates'
+
+# Telemetry
+telemetry: false
+
