@@ -47,8 +47,7 @@ Key Features:
 This CLI provides commands to manage the Yawn platform server and workflows.`,
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
+// Execute adds all child commands to the root command. Called by main.main().
 func Execute() {
 	err := rootCmd.Execute()
 	if err != nil {
@@ -73,7 +72,7 @@ func init() {
 	viper.SetDefault("logger.level", "info")
 }
 
-// initConfig reads in config file and ENV variables if set.
+// initConfig reads config file and environment variables.
 func initConfig() {
 	if cfgFile != "" {
 		// Use config file from the flag.
@@ -110,7 +109,7 @@ func initConfig() {
 	}
 }
 
-// setAppDefaults sets default configuration values
+// setAppDefaults sets default application configuration values.
 func setAppDefaults() {
 	// Server defaults
 	viper.SetDefault("server.port", "8080")

@@ -154,4 +154,3 @@ func printServerInfo(config *config.Config) {
 	fmt.Println("✨ Yawn (Yet Another Workflow eNgine) - Asset-centric workflows ready!")
 	fmt.Println("Press Ctrl+C to stop the server")
 }
-

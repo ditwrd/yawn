@@ -14,6 +14,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
+
+// Package app provides application bootstrap and dependency injection using uber-go/fx.
 package app
 
 import (
@@ -24,11 +26,11 @@ import (
 	"github.com/ditwrd/yawn/api/internal/infrastructure/database"
 	"github.com/ditwrd/yawn/api/internal/infrastructure/logger"
 	"github.com/ditwrd/yawn/api/internal/infrastructure/web"
-	"go.uber.org/fx"
 	"github.com/labstack/echo/v4"
+	"go.uber.org/fx"
 )
 
-// NewFxApp creates a new fx application with all dependencies
+// NewFxApp creates a new fx application with all dependencies configured.
 func NewFxApp() *fx.App {
 	return fx.New(
 		// Provide configuration
@@ -46,7 +48,7 @@ func NewFxApp() *fx.App {
 	)
 }
 
-// NewFxAppWithConfig creates a new fx application with provided configuration
+// NewFxAppWithConfig creates a new fx application using provided configuration.
 func NewFxAppWithConfig(cfg *config.Config) *fx.App {
 	return fx.New(
 		// Provide configuration
@@ -64,12 +66,12 @@ func NewFxAppWithConfig(cfg *config.Config) *fx.App {
 	)
 }
 
-// loadConfig loads the application configuration
+// loadConfig loads the application configuration from default locations.
 func loadConfig() (*config.Config, error) {
 	return config.LoadConfig("")
 }
 
-// startServer starts the HTTP server
+// startServer starts the HTTP server with graceful shutdown support.
 func startServer(lc fx.Lifecycle, e *echo.Echo) {
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
@@ -85,4 +87,3 @@ func startServer(lc fx.Lifecycle, e *echo.Echo) {
 		},
 	})
 }
-
