@@ -170,3 +170,4 @@ dist
 # moon
 .moon/cache
 .moon/docker
+tmp/*
