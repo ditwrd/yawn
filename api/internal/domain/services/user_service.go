@@ -15,214 +15,156 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-// Package services defines the business logic layer for the YAWN application.
-//
-// This package contains service interfaces and implementations that encapsulate
-// business rules and orchestrate interactions between different components
-// of the application. Services act as an intermediary between the
-// presentation layer (handlers) and the data access layer (repositories).
-//
-// Architecture pattern:
-// The services follow the Domain-Driven Design (DDD) pattern where:
-// - Services contain business logic and use cases
-// - Services depend on repository interfaces, not implementations
-// - Services coordinate between multiple repositories when needed
-// - Services enforce business rules and invariants
-//
-// Current services:
-//   - UserService: Handles user-related business operations
-//
-// Example usage:
-//
-//	// Create a service instance
-//	userService := services.NewUserService()
-//
-//	// Use the service to create a user
-//	user := &models.User{
-//		Email: "user@example.com",
-//		PasswordHash: "hashed_password",
-//		Role: models.UserRoleUser,
-//	}
-//	err := userService.Create(user)
-//
-// Dependency injection:
-// Services should be created and managed through dependency injection
-// containers like Uber FX to ensure proper lifecycle management.
+// Package services provides business logic layer for the application.
 package services
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/ditwrd/yawn/api/internal/domain/models"
+	"github.com/ditwrd/yawn/api/internal/domain/repositories"
 )
 
-// UserService defines the business logic interface for user operations.
-//
-// This interface outlines the contract for user-related business operations,
-// encapsulating the use cases and business rules for user management.
-// It follows the dependency inversion principle by defining an interface
-// that can be implemented by different concrete services.
-//
-// Operations:
-//   - Create: Create a new user with business validation
-//   - GetByID: Retrieve a user by their unique identifier
-//   - GetByEmail: Retrieve a user by their email address
-//   - Update: Update an existing user with business validation
-//   - Delete: Soft delete a user (mark as deleted)
-//   - List: Retrieve a paginated list of users
-//
-// Business rules:
-//   - Email addresses must be unique
-//   - Password hashing should be handled before persistence
-//   - User roles should be validated against allowed values
-//   - Soft delete should be used instead of hard delete
-//
-// Error handling:
-// Implementations should return appropriate error types:
-//   - ValidationError for invalid input data
-//   - NotFoundError when a user doesn't exist
-//   - ConflictError for duplicate resources
-//   - InternalError for unexpected failures
+// UserService provides user business operations.
 type UserService interface {
-	// Create creates a new user with business validation
-	//
-	// This method validates the user data according to business rules
-	// and persists the new user to the data store.
-	//
-	// Parameters:
-	//   - user: The user to create (must have valid email and password hash)
-	//
-	// Returns:
-	//   - error: Any error encountered during creation (validation, conflict, etc.)
-	//
-	// Business rules:
-	//   - Email must be unique across all users
-	//   - Email must be a valid format
-	//   - PasswordHash must be properly hashed
-	//   - Role must be a valid UserRole value
 	Create(user *models.User) error
-
-	// GetByID retrieves a user by their unique identifier
-	//
-	// Parameters:
-	//   - id: The UUID of the user to retrieve
-	//
-	// Returns:
-	//   - *models.User: The user if found
-	//   - error: NotFoundError if user doesn't exist, InternalError for other failures
 	GetByID(id string) (*models.User, error)
-
-	// GetByEmail retrieves a user by their email address
-	//
-	// This is commonly used for authentication operations.
-	//
-	// Parameters:
-	//   - email: The email address of the user to retrieve
-	//
-	// Returns:
-	//   - *models.User: The user if found
-	//   - error: NotFoundError if user doesn't exist, InternalError for other failures
 	GetByEmail(email string) (*models.User, error)
-
-	// Update updates an existing user with business validation
-	//
-	// Parameters:
-	//   - user: The user data to update (must include valid ID)
-	//
-	// Returns:
-	//   - error: NotFoundError if user doesn't exist, ValidationError for invalid data
 	Update(user *models.User) error
-
-	// Delete soft deletes a user by their unique identifier
-	//
-	// This method marks the user as deleted but retains the record
-	// for audit purposes and data integrity.
-	//
-	// Parameters:
-	//   - id: The UUID of the user to delete
-	//
-	// Returns:
-	//   - error: NotFoundError if user doesn't exist, InternalError for other failures
 	Delete(id string) error
-
-	// List retrieves a paginated list of users
-	//
-	// Parameters:
-	//   - limit: Maximum number of users to return (for pagination)
-	//   - offset: Number of users to skip (for pagination)
-	//
-	// Returns:
-	//   - []models.User: Slice of users (may be empty)
-	//   - error: InternalError for database failures
-	//
-	// Pagination:
-	// The limit and offset parameters enable pagination of results.
-	// Typical usage: limit=20, offset=0 for first page, offset=20 for second page, etc.
 	List(limit, offset int) ([]models.User, error)
 }
 
-// userService is a concrete implementation of the UserService interface.
-//
-// This struct provides the actual business logic implementation for user operations.
-// In a complete implementation, this would typically depend on repository interfaces
-// to handle data persistence, but for now it serves as a placeholder with TODO
-// comments indicating where the actual business logic should be implemented.
-type userService struct{}
+// userService implements UserService.
+type userService struct {
+	userRepo repositories.UserRepository
+}
 
-// NewUserService creates a new UserService implementation.
-//
-// This factory function returns a new instance of the concrete userService
-// implementation. It's designed to be used with dependency injection containers
-// or manual dependency injection in the application setup.
-//
-// Returns:
-//   - UserService: An implementation of the UserService interface
-//
-// Example usage:
-//
-//	// Manual dependency injection
-//	userService := services.NewUserService()
-//
-//	// Using with dependency injection (Uber FX)
-//	fx.Provide(services.NewUserService)
-//
-// Future enhancements:
-// When repositories are properly implemented, this constructor should accept
-// repository dependencies as parameters:
-//
-//	func NewUserService(userRepo repositories.UserRepository) UserService {
-//		return &userService{
-//			userRepo: userRepo,
-//		}
-//	}
-func NewUserService() UserService {
-	return &userService{}
+// NewUserService creates a new user service.
+func NewUserService(userRepo repositories.UserRepository) UserService {
+	return &userService{
+		userRepo: userRepo,
+	}
 }
 
 func (s *userService) Create(user *models.User) error {
-	// TODO: Implement user creation logic
-	return nil
+	if user == nil {
+		return fmt.Errorf("user cannot be nil")
+	}
+
+	user.Email = strings.ToLower(strings.TrimSpace(user.Email))
+
+	if !strings.Contains(user.Email, "@") || !strings.Contains(user.Email, ".") {
+		return fmt.Errorf("invalid email format")
+	}
+
+	validRoles := []models.UserRole{models.UserRoleAdmin, models.UserRoleUser}
+	isValidRole := false
+	for _, role := range validRoles {
+		if user.Role == role {
+			isValidRole = true
+			break
+		}
+	}
+	if !isValidRole {
+		return fmt.Errorf("invalid user role: %s", user.Role)
+	}
+
+	existingUser, err := s.userRepo.GetByEmail(user.Email)
+	if err == nil && existingUser != nil {
+		return fmt.Errorf("user with email %s already exists", user.Email)
+	}
+
+	return s.userRepo.Create(user)
 }
 
 func (s *userService) GetByID(id string) (*models.User, error) {
-	// TODO: Implement user retrieval by ID
-	return nil, nil
+	if id == "" {
+		return nil, fmt.Errorf("user ID cannot be empty")
+	}
+
+	user, err := s.userRepo.GetByID(id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve user: %w", err)
+	}
+
+	return user, nil
 }
 
 func (s *userService) GetByEmail(email string) (*models.User, error) {
-	// TODO: Implement user retrieval by email
-	return nil, nil
+	if email == "" {
+		return nil, fmt.Errorf("email cannot be empty")
+	}
+
+	email = strings.ToLower(strings.TrimSpace(email))
+
+	user, err := s.userRepo.GetByEmail(email)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve user by email: %w", err)
+	}
+
+	return user, nil
 }
 
 func (s *userService) Update(user *models.User) error {
-	// TODO: Implement user update logic
-	return nil
+	if user == nil {
+		return fmt.Errorf("user cannot be nil")
+	}
+
+	if user.ID.String() == "" {
+		return fmt.Errorf("user ID cannot be empty for update")
+	}
+
+	existingUser, err := s.userRepo.GetByID(user.ID.String())
+	if err != nil {
+		return fmt.Errorf("user not found: %w", err)
+	}
+	if existingUser == nil {
+		return fmt.Errorf("user with ID %s not found", user.ID.String())
+	}
+
+	if user.Email != "" {
+		user.Email = strings.ToLower(strings.TrimSpace(user.Email))
+		if !strings.Contains(user.Email, "@") || !strings.Contains(user.Email, ".") {
+			return fmt.Errorf("invalid email format")
+		}
+	}
+
+	return s.userRepo.Update(user)
 }
 
 func (s *userService) Delete(id string) error {
-	// TODO: Implement user deletion logic
-	return nil
+	if id == "" {
+		return fmt.Errorf("user ID cannot be empty")
+	}
+
+	existingUser, err := s.userRepo.GetByID(id)
+	if err != nil {
+		return fmt.Errorf("user not found: %w", err)
+	}
+	if existingUser == nil {
+		return fmt.Errorf("user with ID %s not found", id)
+	}
+
+	return s.userRepo.Delete(id)
 }
 
 func (s *userService) List(limit, offset int) ([]models.User, error) {
-	// TODO: Implement user listing logic
-	return nil, nil
+	if limit <= 0 {
+		limit = 20
+	}
+	if limit > 100 {
+		limit = 100
+	}
+	if offset < 0 {
+		offset = 0
+	}
+
+	users, err := s.userRepo.List(limit, offset)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list users: %w", err)
+	}
+
+	return users, nil
 }
