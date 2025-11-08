@@ -73,6 +73,7 @@ func TestServeCommandFlagBinding(t *testing.T) {
 
 	// Test that viper gets the value (after binding)
 	viper.BindPFlag("server.port", serveCmd.Flags().Lookup("port"))
+
 	if viper.GetString("server.port") != "9000" {
 		t.Errorf(
 			"Expected viper to get port value '9000', got '%s'",
@@ -93,9 +94,11 @@ func TestRootCommandStructure(t *testing.T) {
 
 	// Test that serve command is added to root
 	found := false
+
 	for _, cmd := range rootCmd.Commands() {
 		if cmd.Use == "serve" {
 			found = true
+
 			break
 		}
 	}

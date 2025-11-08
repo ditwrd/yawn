@@ -21,6 +21,7 @@ package app
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"time"
 
@@ -120,11 +121,13 @@ func startServer(lc fx.Lifecycle, e *echo.Echo) {
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
 			go func() {
-				if err := e.Start(e.Server.Addr); err != nil &&
-					err != http.ErrServerClosed {
+				err := e.Start(e.Server.Addr)
+				if err != nil &&
+					!errors.Is(err, http.ErrServerClosed) {
 					e.Logger.Fatalf("Failed to start server: %v", err)
 				}
 			}()
+
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {

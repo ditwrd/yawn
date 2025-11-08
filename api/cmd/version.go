@@ -23,14 +23,14 @@ import (
 )
 
 var (
-	// Version information
+	// Version information.
 	Version   = "1.0.0"
 	GitCommit = "unknown"
 	BuildTime = "unknown"
 	GoVersion = "unknown"
 )
 
-// versionCmd represents the version command
+// versionCmd represents the version command.
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print Yawn platform version information",

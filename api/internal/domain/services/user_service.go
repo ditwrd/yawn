@@ -19,7 +19,9 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package services
 
 import (
+	"errors"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/ditwrd/yawn/api/internal/domain/models"
@@ -50,24 +52,19 @@ func NewUserService(userRepo repositories.UserRepository) UserService {
 
 func (s *userService) Create(user *models.User) error {
 	if user == nil {
-		return fmt.Errorf("user cannot be nil")
+		return errors.New("user cannot be nil")
 	}
 
 	user.Email = strings.ToLower(strings.TrimSpace(user.Email))
 
 	if !strings.Contains(user.Email, "@") ||
 		!strings.Contains(user.Email, ".") {
-		return fmt.Errorf("invalid email format")
+		return errors.New("invalid email format")
 	}
 
 	validRoles := []models.UserRole{models.UserRoleAdmin, models.UserRoleUser}
-	isValidRole := false
-	for _, role := range validRoles {
-		if user.Role == role {
-			isValidRole = true
-			break
-		}
-	}
+	isValidRole := slices.Contains(validRoles, user.Role)
+
 	if !isValidRole {
 		return fmt.Errorf("invalid user role: %s", user.Role)
 	}
@@ -82,7 +79,7 @@ func (s *userService) Create(user *models.User) error {
 
 func (s *userService) GetByID(id string) (*models.User, error) {
 	if id == "" {
-		return nil, fmt.Errorf("user ID cannot be empty")
+		return nil, errors.New("user ID cannot be empty")
 	}
 
 	user, err := s.userRepo.GetByID(id)
@@ -95,7 +92,7 @@ func (s *userService) GetByID(id string) (*models.User, error) {
 
 func (s *userService) GetByEmail(email string) (*models.User, error) {
 	if email == "" {
-		return nil, fmt.Errorf("email cannot be empty")
+		return nil, errors.New("email cannot be empty")
 	}
 
 	email = strings.ToLower(strings.TrimSpace(email))
@@ -110,17 +107,18 @@ func (s *userService) GetByEmail(email string) (*models.User, error) {
 
 func (s *userService) Update(user *models.User) error {
 	if user == nil {
-		return fmt.Errorf("user cannot be nil")
+		return errors.New("user cannot be nil")
 	}
 
 	if user.ID.String() == "" {
-		return fmt.Errorf("user ID cannot be empty for update")
+		return errors.New("user ID cannot be empty for update")
 	}
 
 	existingUser, err := s.userRepo.GetByID(user.ID.String())
 	if err != nil {
 		return fmt.Errorf("user not found: %w", err)
 	}
+
 	if existingUser == nil {
 		return fmt.Errorf("user with ID %s not found", user.ID.String())
 	}
@@ -129,7 +127,7 @@ func (s *userService) Update(user *models.User) error {
 		user.Email = strings.ToLower(strings.TrimSpace(user.Email))
 		if !strings.Contains(user.Email, "@") ||
 			!strings.Contains(user.Email, ".") {
-			return fmt.Errorf("invalid email format")
+			return errors.New("invalid email format")
 		}
 	}
 
@@ -138,13 +136,14 @@ func (s *userService) Update(user *models.User) error {
 
 func (s *userService) Delete(id string) error {
 	if id == "" {
-		return fmt.Errorf("user ID cannot be empty")
+		return errors.New("user ID cannot be empty")
 	}
 
 	existingUser, err := s.userRepo.GetByID(id)
 	if err != nil {
 		return fmt.Errorf("user not found: %w", err)
 	}
+
 	if existingUser == nil {
 		return fmt.Errorf("user with ID %s not found", id)
 	}
@@ -156,9 +155,11 @@ func (s *userService) List(limit, offset int) ([]models.User, error) {
 	if limit <= 0 {
 		limit = 20
 	}
+
 	if limit > 100 {
 		limit = 100
 	}
+
 	if offset < 0 {
 		offset = 0
 	}

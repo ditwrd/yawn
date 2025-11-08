@@ -32,6 +32,7 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -80,7 +81,7 @@ func NewUserHandler(
 // @Success 200 {object} dto.UserListResponse
 // @Failure 403 {object} dto.ErrorResponse
 // @Failure 500 {object} dto.ErrorResponse
-// @Router /users [get]
+// @Router /users [get].
 func (h *UserHandler) ListUsers(c echo.Context) error {
 	// Parse pagination parameters
 	page, err := strconv.Atoi(c.QueryParam("page"))
@@ -92,6 +93,7 @@ func (h *UserHandler) ListUsers(c echo.Context) error {
 	if err != nil || limit < 1 {
 		limit = 20
 	}
+
 	if limit > 100 {
 		limit = 100
 	}
@@ -106,6 +108,7 @@ func (h *UserHandler) ListUsers(c echo.Context) error {
 			Int("limit", limit).
 			Int("offset", offset).
 			Msg("Failed to list users")
+
 		return c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Error:   "Failed to retrieve users",
 			Code:    "LIST_FAILED",
@@ -153,7 +156,7 @@ func (h *UserHandler) ListUsers(c echo.Context) error {
 // @Failure 403 {object} dto.ErrorResponse
 // @Failure 404 {object} dto.ErrorResponse
 // @Failure 500 {object} dto.ErrorResponse
-// @Router /users/{id} [get]
+// @Router /users/{id} [get].
 func (h *UserHandler) GetUser(c echo.Context) error {
 	userIDStr := c.Param("id")
 	if userIDStr == "" {
@@ -181,6 +184,7 @@ func (h *UserHandler) GetUser(c echo.Context) error {
 			Err(err).
 			Str("user_id", userIDStr).
 			Msg("Failed to get user")
+
 		return c.JSON(http.StatusNotFound, dto.ErrorResponse{
 			Error:   "User not found",
 			Code:    "USER_NOT_FOUND",
@@ -219,7 +223,7 @@ func (h *UserHandler) GetUser(c echo.Context) error {
 // @Failure 403 {object} dto.ErrorResponse
 // @Failure 404 {object} dto.ErrorResponse
 // @Failure 500 {object} dto.ErrorResponse
-// @Router /users/{id} [put]
+// @Router /users/{id} [put].
 func (h *UserHandler) UpdateUser(c echo.Context) error {
 	userIDStr := c.Param("id")
 	if userIDStr == "" {
@@ -247,6 +251,7 @@ func (h *UserHandler) UpdateUser(c echo.Context) error {
 			Err(err).
 			Str("user_id", userIDStr).
 			Msg("Failed to bind update user request")
+
 		return c.JSON(http.StatusBadRequest, dto.ErrorResponse{
 			Error:   "Invalid request format",
 			Code:    "INVALID_REQUEST",
@@ -261,6 +266,7 @@ func (h *UserHandler) UpdateUser(c echo.Context) error {
 			Err(err).
 			Str("user_id", userIDStr).
 			Msg("Failed to get user for update")
+
 		return c.JSON(http.StatusNotFound, dto.ErrorResponse{
 			Error:   "User not found",
 			Code:    "USER_NOT_FOUND",
@@ -272,6 +278,7 @@ func (h *UserHandler) UpdateUser(c echo.Context) error {
 	if req.Email != "" {
 		existingUser.Email = strings.ToLower(strings.TrimSpace(req.Email))
 	}
+
 	if req.Role != "" {
 		existingUser.Role = models.UserRole(req.Role)
 	}
@@ -293,13 +300,8 @@ func (h *UserHandler) UpdateUser(c echo.Context) error {
 			models.UserRoleAdmin,
 			models.UserRoleUser,
 		}
-		isValidRole := false
-		for _, role := range validRoles {
-			if existingUser.Role == role {
-				isValidRole = true
-				break
-			}
-		}
+		isValidRole := slices.Contains(validRoles, existingUser.Role)
+
 		if !isValidRole {
 			return c.JSON(http.StatusBadRequest, dto.ErrorResponse{
 				Error: fmt.Sprintf(
@@ -319,6 +321,7 @@ func (h *UserHandler) UpdateUser(c echo.Context) error {
 			Err(err).
 			Str("user_id", userIDStr).
 			Msg("Failed to update user")
+
 		return c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Error:   "Failed to update user",
 			Code:    "UPDATE_FAILED",
@@ -355,7 +358,7 @@ func (h *UserHandler) UpdateUser(c echo.Context) error {
 // @Failure 403 {object} dto.ErrorResponse
 // @Failure 404 {object} dto.ErrorResponse
 // @Failure 500 {object} dto.ErrorResponse
-// @Router /users/{id} [delete]
+// @Router /users/{id} [delete].
 func (h *UserHandler) DeleteUser(c echo.Context) error {
 	userIDStr := c.Param("id")
 	if userIDStr == "" {
@@ -383,6 +386,7 @@ func (h *UserHandler) DeleteUser(c echo.Context) error {
 			Err(err).
 			Str("user_id", userIDStr).
 			Msg("Failed to get user for deletion")
+
 		return c.JSON(http.StatusNotFound, dto.ErrorResponse{
 			Error:   "User not found",
 			Code:    "USER_NOT_FOUND",
@@ -397,6 +401,7 @@ func (h *UserHandler) DeleteUser(c echo.Context) error {
 			Err(err).
 			Str("user_id", userIDStr).
 			Msg("Failed to delete user")
+
 		return c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Error:   "Failed to delete user",
 			Code:    "DELETE_FAILED",

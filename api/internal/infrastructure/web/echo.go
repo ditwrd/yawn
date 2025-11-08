@@ -54,6 +54,7 @@ func NewEcho(cfg *config.Config, logger *zerolog.Logger) *echo.Echo {
 				Int("status", v.Status).
 				Dur("duration", time.Since(v.StartTime)).
 				Msg("HTTP Request")
+
 			return nil
 		},
 	}))

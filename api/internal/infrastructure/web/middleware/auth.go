@@ -65,13 +65,14 @@ func (am *AuthMiddleware) JWT() echo.MiddlewareFunc {
 func (am *AuthMiddleware) customParseTokenFunc(
 	c echo.Context,
 	auth string,
-) (interface{}, error) {
+) (any, error) {
 	claims, err := am.jwtService.ValidateToken(auth)
 	if err != nil {
 		am.logger.Error().
 			Err(err).
 			Str("token", auth[:min(len(auth), 20)]+"...").
 			Msg("JWT token validation failed")
+
 		return nil, err
 	}
 
@@ -83,7 +84,7 @@ func (am *AuthMiddleware) customParseTokenFunc(
 	return &jwt.Token{
 		Raw:       auth,
 		Method:    jwt.SigningMethodHS256,
-		Header:    map[string]interface{}{"alg": "HS256", "typ": "JWT"},
+		Header:    map[string]any{"alg": "HS256", "typ": "JWT"},
 		Claims:    claims,
 		Signature: []byte{},
 		Valid:     true,
@@ -99,23 +100,24 @@ func (am *AuthMiddleware) customErrorHandler(c echo.Context, err error) error {
 		Msg("Authentication failed")
 
 	var extractionErr *echojwt.TokenExtractionError
+
 	var parsingErr *echojwt.TokenParsingError
 
 	if errors.As(err, &extractionErr) {
-		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+		return c.JSON(http.StatusUnauthorized, map[string]any{
 			"error": "Authentication token required",
 			"code":  "TOKEN_MISSING",
 		})
 	}
 
 	if errors.As(err, &parsingErr) {
-		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+		return c.JSON(http.StatusUnauthorized, map[string]any{
 			"error": "Invalid or expired authentication token",
 			"code":  "TOKEN_INVALID",
 		})
 	}
 
-	return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+	return c.JSON(http.StatusUnauthorized, map[string]any{
 		"error": "Authentication failed",
 		"code":  "AUTH_FAILED",
 	})
@@ -141,7 +143,7 @@ func (am *AuthMiddleware) OptionalAuth() echo.MiddlewareFunc {
 func (am *AuthMiddleware) optionalParseTokenFunc(
 	c echo.Context,
 	auth string,
-) (interface{}, error) {
+) (any, error) {
 	if auth == "" {
 		return nil, nil
 	}
@@ -152,6 +154,7 @@ func (am *AuthMiddleware) optionalParseTokenFunc(
 			Err(err).
 			Str("path", c.Request().URL.Path).
 			Msg("Optional authentication failed")
+
 		return nil, nil
 	}
 
@@ -163,7 +166,7 @@ func (am *AuthMiddleware) optionalParseTokenFunc(
 	return &jwt.Token{
 		Raw:       auth,
 		Method:    jwt.SigningMethodHS256,
-		Header:    map[string]interface{}{"alg": "HS256", "typ": "JWT"},
+		Header:    map[string]any{"alg": "HS256", "typ": "JWT"},
 		Claims:    claims,
 		Signature: []byte{},
 		Valid:     true,
@@ -226,11 +229,4 @@ func GetUserRole(c echo.Context) (string, error) {
 	}
 
 	return string(claims.Role), nil
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
 }

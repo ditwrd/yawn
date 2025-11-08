@@ -29,12 +29,13 @@ import (
 // It creates tables, indexes, foreign keys, and check constraints.
 func Migrate(db *gorm.DB) error {
 	// Enable foreign key constraints for SQLite
-	if err := enableForeignKeysForSQLite(db); err != nil {
+	err := enableForeignKeysForSQLite(db)
+	if err != nil {
 		return fmt.Errorf("failed to enable foreign keys for SQLite: %w", err)
 	}
 
 	// Run auto-migration for all models
-	if err := db.AutoMigrate(
+	err = db.AutoMigrate(
 		&models.User{},
 		&models.Project{},
 		&models.Asset{},
@@ -42,13 +43,15 @@ func Migrate(db *gorm.DB) error {
 		&models.Pipeline{},
 		&models.ProjectUser{},
 		&models.AssetPipeline{},
-	); err != nil {
+	)
+	if err != nil {
 		return fmt.Errorf("failed to run auto-migration: %w", err)
 	}
 
 	// Create additional constraints and indexes that aren't handled by
 	// AutoMigrate
-	if err := createAdditionalConstraints(db); err != nil {
+	err = createAdditionalConstraints(db)
+	if err != nil {
 		return fmt.Errorf("failed to create additional constraints: %w", err)
 	}
 
@@ -75,10 +78,11 @@ func enableForeignKeysForSQLite(db *gorm.DB) error {
 // manual setup.
 func createAdditionalConstraints(db *gorm.DB) error {
 	// Create composite unique index for ProjectUser lookup
-	if err := db.Exec(`
+	err := db.Exec(`
 		CREATE UNIQUE INDEX IF NOT EXISTS idx_project_users_project_user
 		ON project_users (project_id, user_id)
-	`).Error; err != nil {
+	`).Error
+	if err != nil {
 		return fmt.Errorf(
 			"failed to create unique index for project_users: %w",
 			err,
@@ -86,10 +90,11 @@ func createAdditionalConstraints(db *gorm.DB) error {
 	}
 
 	// Create index for AssetPipeline ordering
-	if err := db.Exec(`
+	err = db.Exec(`
 		CREATE INDEX IF NOT EXISTS idx_asset_pipelines_pipeline_order
 		ON asset_pipelines (pipeline_id, "order")
-	`).Error; err != nil {
+	`).Error
+	if err != nil {
 		return fmt.Errorf(
 			"failed to create composite index for asset_pipelines: %w",
 			err,
@@ -104,16 +109,19 @@ func createAdditionalConstraints(db *gorm.DB) error {
 func DropAllTables(db *gorm.DB) error {
 	// Get all table names
 	var tables []string
-	if err := db.Raw(`
+
+	err := db.Raw(`
 		SELECT name FROM sqlite_master
 		WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE 'gomigrate_%'
-	`).Scan(&tables).Error; err != nil {
+	`).Scan(&tables).Error
+	if err != nil {
 		return fmt.Errorf("failed to get table names: %w", err)
 	}
 
 	// Drop tables in reverse order to respect foreign key constraints
 	for _, table := range tables {
-		if err := db.Exec(fmt.Sprintf("DROP TABLE IF EXISTS %s", table)).Error; err != nil {
+		err := db.Exec("DROP TABLE IF EXISTS " + table).Error
+		if err != nil {
 			return fmt.Errorf("failed to drop table %s: %w", table, err)
 		}
 	}

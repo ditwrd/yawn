@@ -22,7 +22,9 @@ import (
 	"crypto/rand"
 	"crypto/subtle"
 	"encoding/base64"
+	"errors"
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -43,7 +45,7 @@ type PasswordService interface {
 // - Iterations: 2 (minimum recommended)
 // - Parallelism: 1 (minimum recommended)
 // - Salt length: 16 bytes (128 bits)
-// - Hash length: 32 bytes (256 bits)
+// - Hash length: 32 bytes (256 bits).
 type PasswordConfig struct {
 	// Argon2id parameters
 	Memory      uint32 `json:"memory"`      // Memory in KiB (19 MiB = 19456 KiB)
@@ -75,6 +77,7 @@ func NewPasswordService(config *PasswordConfig) PasswordService {
 func (s *passwordService) HashPassword(password string) (string, error) {
 	// Generate a cryptographically secure random salt
 	salt := make([]byte, s.config.SaltLength)
+
 	_, err := rand.Read(salt)
 	if err != nil {
 		return "", fmt.Errorf("failed to generate salt: %w", err)
@@ -144,27 +147,23 @@ func (s *passwordService) CheckPasswordStrength(password string) error {
 	}
 
 	if s.config.RequireUppercase && !s.hasUppercase(password) {
-		return fmt.Errorf("password must contain at least one uppercase letter")
+		return errors.New("password must contain at least one uppercase letter")
 	}
 
 	if s.config.RequireLowercase && !s.hasLowercase(password) {
-		return fmt.Errorf("password must contain at least one lowercase letter")
+		return errors.New("password must contain at least one lowercase letter")
 	}
 
 	if s.config.RequireNumbers && !s.hasNumber(password) {
-		return fmt.Errorf("password must contain at least one number")
+		return errors.New("password must contain at least one number")
 	}
 
 	if s.config.RequireSpecialChars && !s.hasSpecialChar(password) {
-		return fmt.Errorf(
-			"password must contain at least one special character",
-		)
+		return errors.New("password must contain at least one special character")
 	}
 
 	if s.isCommonPassword(password) {
-		return fmt.Errorf(
-			"password is too common, please choose a stronger one",
-		)
+		return errors.New("password is too common, please choose a stronger one")
 	}
 
 	return nil
@@ -176,6 +175,7 @@ func (s *passwordService) hasUppercase(password string) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -185,6 +185,7 @@ func (s *passwordService) hasLowercase(password string) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -194,6 +195,7 @@ func (s *passwordService) hasNumber(password string) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -206,6 +208,7 @@ func (s *passwordService) hasSpecialChar(password string) bool {
 			}
 		}
 	}
+
 	return false
 }
 
@@ -217,32 +220,31 @@ func (s *passwordService) isCommonPassword(password string) bool {
 	}
 
 	passwordLower := ""
+
+	var passwordLowerSb226 strings.Builder
+
 	for _, char := range password {
 		if char >= 'A' && char <= 'Z' {
-			passwordLower += string(char + 32)
+			passwordLowerSb226.WriteRune(char + 32)
 		} else {
-			passwordLower += string(char)
+			passwordLowerSb226.WriteRune(char)
 		}
 	}
 
-	for _, common := range commonPasswords {
-		if passwordLower == common {
-			return true
-		}
-	}
+	passwordLower += passwordLowerSb226.String()
 
-	return false
+	return slices.Contains(commonPasswords, passwordLower)
 }
 
 // parseArgon2Hash parses an Argon2id PHC string and returns its components.
 // Expected format:
-// $argon2id$v=19$m=<memory>,t=<iterations>,p=<parallelism>$<salt>$<hash>
+// $argon2id$v=19$m=<memory>,t=<iterations>,p=<parallelism>$<salt>$<hash>.
 func (s *passwordService) parseArgon2Hash(
 	hash string,
 ) (memory, iterations uint32, parallelism uint8, salt, decodedHash []byte, err error) {
 	// Basic validation of hash format
 	if len(hash) < 10 || hash[:10] != "$argon2id$" {
-		return 0, 0, 0, nil, nil, fmt.Errorf(
+		return 0, 0, 0, nil, nil, errors.New(
 			"invalid hash format: not an Argon2id hash",
 		)
 	}
@@ -259,6 +261,7 @@ func (s *passwordService) parseArgon2Hash(
 
 	// Parse parameters: m=<memory>,t=<iterations>,p=<parallelism>
 	params := parts[3]
+
 	memory, iterations, parallelism, err = parseArgon2Params(params)
 	if err != nil {
 		return 0, 0, 0, nil, nil, fmt.Errorf(
@@ -283,47 +286,53 @@ func (s *passwordService) parseArgon2Hash(
 }
 
 // parseArgon2Params parses the parameters string
-// (m=<memory>,t=<iterations>,p=<parallelism>)
+// (m=<memory>,t=<iterations>,p=<parallelism>).
 func parseArgon2Params(
 	params string,
 ) (memory, iterations uint32, parallelism uint8, err error) {
 	// Split by comma
 	paramParts := strings.Split(params, ",")
 	if len(paramParts) != 3 {
-		return 0, 0, 0, fmt.Errorf("invalid parameters format")
+		return 0, 0, 0, errors.New("invalid parameters format")
 	}
 
 	// Parse memory parameter
 	memoryStr := paramParts[0]
 	if len(memoryStr) < 2 || memoryStr[:2] != "m=" {
-		return 0, 0, 0, fmt.Errorf("invalid memory parameter")
+		return 0, 0, 0, errors.New("invalid memory parameter")
 	}
+
 	memory64, err := strconv.ParseUint(memoryStr[2:], 10, 32)
 	if err != nil {
 		return 0, 0, 0, fmt.Errorf("invalid memory value: %w", err)
 	}
+
 	memory = uint32(memory64)
 
 	// Parse iterations parameter
 	iterationsStr := paramParts[1]
 	if len(iterationsStr) < 2 || iterationsStr[:2] != "t=" {
-		return 0, 0, 0, fmt.Errorf("invalid iterations parameter")
+		return 0, 0, 0, errors.New("invalid iterations parameter")
 	}
+
 	iterations64, err := strconv.ParseUint(iterationsStr[2:], 10, 32)
 	if err != nil {
 		return 0, 0, 0, fmt.Errorf("invalid iterations value: %w", err)
 	}
+
 	iterations = uint32(iterations64)
 
 	// Parse parallelism parameter
 	parallelismStr := paramParts[2]
 	if len(parallelismStr) < 2 || parallelismStr[:2] != "p=" {
-		return 0, 0, 0, fmt.Errorf("invalid parallelism parameter")
+		return 0, 0, 0, errors.New("invalid parallelism parameter")
 	}
+
 	parallelism64, err := strconv.ParseUint(parallelismStr[2:], 10, 8)
 	if err != nil {
 		return 0, 0, 0, fmt.Errorf("invalid parallelism value: %w", err)
 	}
+
 	parallelism = uint8(parallelism64)
 
 	return memory, iterations, parallelism, nil

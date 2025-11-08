@@ -57,9 +57,10 @@ func (am *AuthorizationMiddleware) RequireRole(
 					Err(err).
 					Str("path", c.Request().URL.Path).
 					Msg("Failed to get user role for authorization")
+
 				return c.JSON(
 					http.StatusInternalServerError,
-					map[string]interface{}{
+					map[string]any{
 						"error": "Authorization check failed",
 						"code":  "AUTHZ_ERROR",
 					},
@@ -68,9 +69,11 @@ func (am *AuthorizationMiddleware) RequireRole(
 
 			// Check if user has required role
 			hasRequiredRole := false
+
 			for _, requiredRole := range roles {
 				if userRole == string(requiredRole) {
 					hasRequiredRole = true
+
 					break
 				}
 			}
@@ -83,12 +86,13 @@ func (am *AuthorizationMiddleware) RequireRole(
 						for i, role := range roles {
 							result[i] = string(role)
 						}
+
 						return result
 					}()).
 					Str("path", c.Request().URL.Path).
 					Msg("User role not authorized for resource")
 
-				return c.JSON(http.StatusForbidden, map[string]interface{}{
+				return c.JSON(http.StatusForbidden, map[string]any{
 					"error": "Insufficient permissions",
 					"code":  "INSUFFICIENT_PERMISSIONS",
 				})
@@ -122,9 +126,10 @@ func (am *AuthorizationMiddleware) RequireOwnership(
 					Err(err).
 					Str("path", c.Request().URL.Path).
 					Msg("Failed to get user ID for ownership check")
+
 				return c.JSON(
 					http.StatusInternalServerError,
-					map[string]interface{}{
+					map[string]any{
 						"error": "Authorization check failed",
 						"code":  "AUTHZ_ERROR",
 					},
@@ -137,9 +142,10 @@ func (am *AuthorizationMiddleware) RequireOwnership(
 					Err(err).
 					Str("path", c.Request().URL.Path).
 					Msg("Failed to get user role for ownership check")
+
 				return c.JSON(
 					http.StatusInternalServerError,
-					map[string]interface{}{
+					map[string]any{
 						"error": "Authorization check failed",
 						"code":  "AUTHZ_ERROR",
 					},
@@ -151,6 +157,7 @@ func (am *AuthorizationMiddleware) RequireOwnership(
 					Str("user_id", userID).
 					Str("path", c.Request().URL.Path).
 					Msg("Admin user bypassing ownership check")
+
 				return next(c)
 			}
 
@@ -160,7 +167,8 @@ func (am *AuthorizationMiddleware) RequireOwnership(
 					Str("param", paramName).
 					Str("path", c.Request().URL.Path).
 					Msg("Resource ID parameter missing for ownership check")
-				return c.JSON(http.StatusBadRequest, map[string]interface{}{
+
+				return c.JSON(http.StatusBadRequest, map[string]any{
 					"error": "Resource ID parameter missing",
 					"code":  "MISSING_RESOURCE_ID",
 				})
@@ -173,7 +181,8 @@ func (am *AuthorizationMiddleware) RequireOwnership(
 					Str("resource_id", resourceIDStr).
 					Str("path", c.Request().URL.Path).
 					Msg("Invalid resource ID format for ownership check")
-				return c.JSON(http.StatusBadRequest, map[string]interface{}{
+
+				return c.JSON(http.StatusBadRequest, map[string]any{
 					"error": "Invalid resource ID format",
 					"code":  "INVALID_RESOURCE_ID",
 				})
@@ -185,9 +194,10 @@ func (am *AuthorizationMiddleware) RequireOwnership(
 					Err(err).
 					Str("user_id", userID).
 					Msg("Invalid user ID format in context")
+
 				return c.JSON(
 					http.StatusInternalServerError,
-					map[string]interface{}{
+					map[string]any{
 						"error": "Invalid user context",
 						"code":  "INVALID_USER_CONTEXT",
 					},
@@ -201,7 +211,7 @@ func (am *AuthorizationMiddleware) RequireOwnership(
 					Str("path", c.Request().URL.Path).
 					Msg("User is not owner of resource")
 
-				return c.JSON(http.StatusForbidden, map[string]interface{}{
+				return c.JSON(http.StatusForbidden, map[string]any{
 					"error": "You don't have permission to access this resource",
 					"code":  "NOT_OWNER",
 				})
@@ -238,13 +248,14 @@ func (am *AuthorizationMiddleware) RequireOwnership(
 //	// Allow admin/maintainer users, OR users who own the resource
 //	e.Use(RequireRoleOrOwnership(models.UserRoleAdmin,
 //
-// models.UserRoleMaintainer, "project_id"))
+// models.UserRoleMaintainer, "project_id")).
 func (am *AuthorizationMiddleware) RequireRoleOrOwnership(
 	roles ...models.UserRole,
 ) echo.MiddlewareFunc {
 	// Extract resource ID parameter from the last argument if it's a string
 	var resourceRoles []models.UserRole
-	var resourceIDParam string = "id"
+
+	resourceIDParam := "id"
 
 	if len(roles) > 0 {
 		// Check if the last argument is a string (resource ID parameter)
@@ -269,9 +280,10 @@ func (am *AuthorizationMiddleware) RequireRoleOrOwnership(
 					Err(err).
 					Str("path", c.Request().URL.Path).
 					Msg("Failed to get user role for authorization")
+
 				return c.JSON(
 					http.StatusInternalServerError,
-					map[string]interface{}{
+					map[string]any{
 						"error": "Authorization check failed",
 						"code":  "AUTHZ_ERROR",
 					},
@@ -280,9 +292,11 @@ func (am *AuthorizationMiddleware) RequireRoleOrOwnership(
 
 			// Check if user has required role
 			hasRequiredRole := false
+
 			for _, requiredRole := range resourceRoles {
 				if userRole == string(requiredRole) {
 					hasRequiredRole = true
+
 					break
 				}
 			}
@@ -294,6 +308,7 @@ func (am *AuthorizationMiddleware) RequireRoleOrOwnership(
 
 			// If user doesn't have required role, check ownership
 			ownershipMiddleware := am.RequireOwnership(resourceIDParam)
+
 			return ownershipMiddleware(next)(c)
 		}
 	}
@@ -342,9 +357,10 @@ func (am *AuthorizationMiddleware) RequireCustomPermission(
 					Err(err).
 					Str("path", c.Request().URL.Path).
 					Msg("Failed to get user claims for custom permission check")
+
 				return c.JSON(
 					http.StatusInternalServerError,
-					map[string]interface{}{
+					map[string]any{
 						"error": "Authorization check failed",
 						"code":  "AUTHZ_ERROR",
 					},
@@ -359,9 +375,10 @@ func (am *AuthorizationMiddleware) RequireCustomPermission(
 					Str("user_id", claims.UserID.String()).
 					Str("path", c.Request().URL.Path).
 					Msg("Custom permission check failed")
+
 				return c.JSON(
 					http.StatusInternalServerError,
-					map[string]interface{}{
+					map[string]any{
 						"error": "Authorization check failed",
 						"code":  "AUTHZ_ERROR",
 					},
@@ -374,7 +391,7 @@ func (am *AuthorizationMiddleware) RequireCustomPermission(
 					Str("path", c.Request().URL.Path).
 					Msg("Custom permission check failed")
 
-				return c.JSON(http.StatusForbidden, map[string]interface{}{
+				return c.JSON(http.StatusForbidden, map[string]any{
 					"error": "Insufficient permissions",
 					"code":  "INSUFFICIENT_PERMISSIONS",
 				})

@@ -21,6 +21,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package config
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -86,8 +87,11 @@ func LoadConfig(configPath string) (*Config, error) {
 
 	if configPath != "" {
 		viper.SetConfigFile(configPath)
-		if err := viper.ReadInConfig(); err != nil {
-			if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+
+		err := viper.ReadInConfig()
+		if err != nil {
+			var configFileNotFoundError viper.ConfigFileNotFoundError
+			if errors.As(err, &configFileNotFoundError) {
 				// Config file not found, just use defaults and env vars
 				fmt.Println(
 					"Config file not found, using defaults and environment variables",
@@ -98,8 +102,10 @@ func LoadConfig(configPath string) (*Config, error) {
 		}
 	} else {
 		// Try to read config, but don't fail if it doesn't exist
-		if err := viper.ReadInConfig(); err != nil {
-			if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+		err := viper.ReadInConfig()
+		if err != nil {
+			var configFileNotFoundError viper.ConfigFileNotFoundError
+			if errors.As(err, &configFileNotFoundError) {
 				// Config file not found, just use defaults and env vars
 				fmt.Println("Config file not found, using defaults and environment variables")
 			} else {
@@ -109,7 +115,9 @@ func LoadConfig(configPath string) (*Config, error) {
 	}
 
 	var config Config
-	if err := viper.Unmarshal(&config); err != nil {
+
+	err := viper.Unmarshal(&config)
+	if err != nil {
 		return nil, fmt.Errorf("unable to decode config: %w", err)
 	}
 

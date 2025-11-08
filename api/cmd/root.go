@@ -27,7 +27,7 @@ import (
 
 var cfgFile string
 
-// rootCmd represents the base command when called without any subcommands
+// rootCmd represents the base command when called without any subcommands.
 var rootCmd = &cobra.Command{
 	Use:   "api",
 	Short: "Yawn (Yet Another Workflow eNgine) - Unified Workflow Platform",
@@ -110,7 +110,8 @@ func initConfig() {
 	setAppDefaults()
 
 	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
+	err := viper.ReadInConfig()
+	if err == nil {
 		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
 	}
 }

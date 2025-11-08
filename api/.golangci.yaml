@@ -1,7 +1,9 @@
 # See the dedicated "version" documentation section.
 version: "2"
 linters:
-  default: fast
+  default: all
+  disable:
+    - wsl
 formatters:
   enable:
     - gofumpt

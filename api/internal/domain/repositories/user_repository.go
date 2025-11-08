@@ -71,19 +71,23 @@ func (r *userRepository) Create(user *models.User) error {
 
 func (r *userRepository) GetByID(id string) (*models.User, error) {
 	var user models.User
+
 	err := r.db.Where("id = ?", id).First(&user).Error
 	if err != nil {
 		return nil, err
 	}
+
 	return &user, nil
 }
 
 func (r *userRepository) GetByEmail(email string) (*models.User, error) {
 	var user models.User
+
 	err := r.db.Where("email = ?", email).First(&user).Error
 	if err != nil {
 		return nil, err
 	}
+
 	return &user, nil
 }
 
@@ -97,6 +101,8 @@ func (r *userRepository) Delete(id string) error {
 
 func (r *userRepository) List(limit, offset int) ([]models.User, error) {
 	var users []models.User
+
 	err := r.db.Limit(limit).Offset(offset).Find(&users).Error
+
 	return users, err
 }

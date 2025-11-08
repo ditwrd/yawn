@@ -29,7 +29,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// setupTestDB creates an in-memory SQLite database for testing
+// setupTestDB creates an in-memory SQLite database for testing.
 func setupTestDB(t *testing.T) *gorm.DB {
 	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{
 		DisableForeignKeyConstraintWhenMigrating: false,
@@ -43,7 +43,7 @@ func setupTestDB(t *testing.T) *gorm.DB {
 	return db
 }
 
-// TestUserModelValidation tests User model validations and constraints
+// TestUserModelValidation tests User model validations and constraints.
 func TestUserModelValidation(t *testing.T) {
 	db := setupTestDB(t)
 
@@ -85,7 +85,7 @@ func TestUserModelValidation(t *testing.T) {
 	})
 }
 
-// TestProjectModelValidation tests Project model validations and constraints
+// TestProjectModelValidation tests Project model validations and constraints.
 func TestProjectModelValidation(t *testing.T) {
 	db := setupTestDB(t)
 
@@ -114,7 +114,7 @@ func TestProjectModelValidation(t *testing.T) {
 	})
 }
 
-// TestAssetModelValidation tests Asset model validations and constraints
+// TestAssetModelValidation tests Asset model validations and constraints.
 func TestAssetModelValidation(t *testing.T) {
 	db := setupTestDB(t)
 
@@ -153,7 +153,7 @@ func TestAssetModelValidation(t *testing.T) {
 }
 
 // TestRepositoryModelValidation tests Repository model validations and
-// constraints
+// constraints.
 func TestRepositoryModelValidation(t *testing.T) {
 	db := setupTestDB(t)
 
@@ -191,7 +191,7 @@ func TestRepositoryModelValidation(t *testing.T) {
 	})
 }
 
-// TestPipelineModelValidation tests Pipeline model validations and constraints
+// TestPipelineModelValidation tests Pipeline model validations and constraints.
 func TestPipelineModelValidation(t *testing.T) {
 	db := setupTestDB(t)
 
@@ -229,7 +229,7 @@ func TestPipelineModelValidation(t *testing.T) {
 }
 
 // TestProjectUserModelValidation tests ProjectUser model validations and
-// constraints
+// constraints.
 func TestProjectUserModelValidation(t *testing.T) {
 	db := setupTestDB(t)
 
@@ -268,7 +268,7 @@ func TestProjectUserModelValidation(t *testing.T) {
 }
 
 // TestAssetPipelineModelValidation tests AssetPipeline model validations and
-// constraints
+// constraints.
 func TestAssetPipelineModelValidation(t *testing.T) {
 	db := setupTestDB(t)
 

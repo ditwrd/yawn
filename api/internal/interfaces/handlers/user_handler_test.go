@@ -40,6 +40,7 @@ func setupTestEcho() (*echo.Echo, *MockUserService, *UserHandler) {
 	mockService := &MockUserService{}
 	logger := zerolog.New(bytes.NewBuffer(nil))
 	handler := NewUserHandler(mockService, &logger)
+
 	return e, mockService, handler
 }
 
@@ -48,6 +49,7 @@ func createTestUserWithParams(
 	role models.UserRole,
 ) *models.User {
 	userID, _ := uuid.FromString(id)
+
 	return &models.User{
 		ID:    userID,
 		Email: email,
@@ -78,6 +80,7 @@ func TestUserHandler_ListUsers_AdminSuccess(t *testing.T) {
 	assert.Equal(t, http.StatusOK, rec.Code)
 
 	var response dto.UserListResponse
+
 	err = json.Unmarshal(rec.Body.Bytes(), &response)
 	require.NoError(t, err)
 
@@ -119,6 +122,7 @@ func TestUserHandler_GetUser_SelfAccessSuccess(t *testing.T) {
 	assert.Equal(t, http.StatusOK, rec.Code)
 
 	var response dto.UserResponse
+
 	err = json.Unmarshal(rec.Body.Bytes(), &response)
 	require.NoError(t, err)
 
@@ -153,6 +157,7 @@ func TestUserHandler_UpdateUser_AdminSuccess(t *testing.T) {
 		bytes.NewReader(reqBody),
 	)
 	req.Header.Set("Content-Type", "application/json")
+
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetParamNames("id")
@@ -167,6 +172,7 @@ func TestUserHandler_UpdateUser_AdminSuccess(t *testing.T) {
 	assert.Equal(t, http.StatusOK, rec.Code)
 
 	var response dto.UserResponse
+
 	err = json.Unmarshal(rec.Body.Bytes(), &response)
 	require.NoError(t, err)
 
@@ -207,6 +213,7 @@ func TestUserHandler_DeleteUser_AdminSuccess(t *testing.T) {
 	assert.Equal(t, http.StatusOK, rec.Code)
 
 	var response dto.UserDeleteResponse
+
 	err = json.Unmarshal(rec.Body.Bytes(), &response)
 	require.NoError(t, err)
 
@@ -237,6 +244,7 @@ func TestUserHandler_ListUsers_NonAdminAccess(t *testing.T) {
 	assert.Equal(t, http.StatusOK, rec.Code)
 
 	var response dto.UserListResponse
+
 	err = json.Unmarshal(rec.Body.Bytes(), &response)
 	require.NoError(t, err)
 

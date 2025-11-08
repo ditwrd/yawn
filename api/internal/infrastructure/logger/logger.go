@@ -34,10 +34,12 @@ func NewLogger(cfg *config.Config) *zerolog.Logger {
 	level, err := zerolog.ParseLevel(cfg.Logger.Level)
 	if err != nil {
 		level = zerolog.InfoLevel
+
 		log.Warn().
 			Err(err).
 			Msgf("Invalid log level '%s', using 'info'", cfg.Logger.Level)
 	}
+
 	zerolog.SetGlobalLevel(level)
 
 	// Configure output format

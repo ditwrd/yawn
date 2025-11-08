@@ -19,6 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package services
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -115,6 +116,7 @@ func (s *jwtService) GenerateAccessToken(user *models.User) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
 	return token.SignedString([]byte(s.config.AccessSecret))
 }
 
@@ -137,6 +139,7 @@ func (s *jwtService) generateRefreshToken(user *models.User) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
 	return token.SignedString([]byte(s.config.RefreshSecret))
 }
 
@@ -145,8 +148,9 @@ func (s *jwtService) ValidateToken(tokenString string) (*TokenClaims, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to check blacklist status: %w", err)
 	}
+
 	if blacklisted {
-		return nil, fmt.Errorf("token has been invalidated")
+		return nil, errors.New("token has been invalidated")
 	}
 
 	unverifiedToken, _, err := jwt.NewParser().
@@ -157,10 +161,11 @@ func (s *jwtService) ValidateToken(tokenString string) (*TokenClaims, error) {
 
 	claims, ok := unverifiedToken.Claims.(*TokenClaims)
 	if !ok {
-		return nil, fmt.Errorf("invalid token claims type")
+		return nil, errors.New("invalid token claims type")
 	}
 
 	var secret string
+
 	switch claims.Type {
 	case TokenTypeAccess:
 		secret = s.config.AccessSecret
@@ -173,13 +178,14 @@ func (s *jwtService) ValidateToken(tokenString string) (*TokenClaims, error) {
 	token, err := jwt.ParseWithClaims(
 		tokenString,
 		&TokenClaims{},
-		func(token *jwt.Token) (interface{}, error) {
+		func(token *jwt.Token) (any, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf(
 					"unexpected signing method: %v",
 					token.Header["alg"],
 				)
 			}
+
 			return []byte(secret), nil
 		},
 	)
@@ -188,12 +194,12 @@ func (s *jwtService) ValidateToken(tokenString string) (*TokenClaims, error) {
 	}
 
 	if !token.Valid {
-		return nil, fmt.Errorf("invalid token")
+		return nil, errors.New("invalid token")
 	}
 
 	validatedClaims, ok := token.Claims.(*TokenClaims)
 	if !ok {
-		return nil, fmt.Errorf("invalid token claims type after validation")
+		return nil, errors.New("invalid token claims type after validation")
 	}
 
 	if err := s.validateClaims(validatedClaims); err != nil {
@@ -221,15 +227,15 @@ func (s *jwtService) validateClaims(claims *TokenClaims) error {
 	}
 
 	if claims.ExpiresAt == nil {
-		return fmt.Errorf("missing expiration claim")
+		return errors.New("missing expiration claim")
 	}
 
 	if time.Now().After(claims.ExpiresAt.Time) {
-		return fmt.Errorf("token has expired")
+		return errors.New("token has expired")
 	}
 
 	if claims.UserID == uuid.Nil {
-		return fmt.Errorf("invalid user ID in token")
+		return errors.New("invalid user ID in token")
 	}
 
 	return nil
@@ -261,6 +267,7 @@ func (s *jwtService) InvalidateToken(tokenString string) error {
 	}
 
 	s.blacklist[tokenString] = claims.ExpiresAt.Time
+
 	return nil
 }
 
@@ -272,6 +279,7 @@ func (s *jwtService) IsTokenBlacklisted(tokenString string) (bool, error) {
 
 	if time.Now().After(expirationTime) {
 		delete(s.blacklist, tokenString)
+
 		return false, nil
 	}
 

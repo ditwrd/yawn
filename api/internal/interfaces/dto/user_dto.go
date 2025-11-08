@@ -25,11 +25,11 @@ package dto
 
 // UserResponse represents user information returned by API endpoints.
 type UserResponse struct {
-	ID        string `json:"id"         example:"123e4567-e89b-12d3-a456-426614174000"`
-	Email     string `json:"email"      example:"user@example.com"`
-	Role      string `json:"role"       example:"user"`
-	CreatedAt string `json:"created_at" example:"2025-01-01T00:00:00Z"`
-	UpdatedAt string `json:"updated_at" example:"2025-01-01T00:00:00Z"`
+	ID        string `example:"123e4567-e89b-12d3-a456-426614174000" json:"id"`
+	Email     string `example:"user@example.com"                     json:"email"`
+	Role      string `example:"user"                                 json:"role"`
+	CreatedAt string `example:"2025-01-01T00:00:00Z"                 json:"created_at"`
+	UpdatedAt string `example:"2025-01-01T00:00:00Z"                 json:"updated_at"`
 }
 
 // UserListResponse represents a paginated list of users.
@@ -42,11 +42,11 @@ type UserListResponse struct {
 
 // UpdateUserRequest represents a user update request.
 type UpdateUserRequest struct {
-	Email string `json:"email,omitempty" example:"newemail@example.com"`
-	Role  string `json:"role,omitempty"  example:"admin"`
+	Email string `example:"newemail@example.com" json:"email,omitempty"`
+	Role  string `example:"admin"                json:"role,omitempty"`
 }
 
 // UserDeleteResponse represents a successful user deletion response.
 type UserDeleteResponse struct {
-	Message string `json:"message" example:"User deleted successfully"`
+	Message string `example:"User deleted successfully" json:"message"`
 }

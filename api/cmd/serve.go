@@ -30,7 +30,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-// serveCmd represents the serve command
+// serveCmd represents the serve command.
 var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "Start the Yawn workflow platform server",
@@ -103,8 +103,10 @@ func runServe(cmd *cobra.Command, args []string) error {
 
 	// Start the application in a goroutine
 	errCh := make(chan error, 1)
+
 	go func() {
-		if err := a.Start(ctx); err != nil {
+		err := a.Start(ctx)
+		if err != nil {
 			errCh <- fmt.Errorf("failed to start application: %w", err)
 		}
 	}()
@@ -133,21 +135,24 @@ func runServe(cmd *cobra.Command, args []string) error {
 	}
 
 	fmt.Println("Server stopped successfully")
+
 	return nil
 }
 
 // loadCommandConfig loads configuration for commands, reusing the viper from
-// root.go
+// root.go.
 func loadCommandConfig() (*config.Config, error) {
 	var cfg config.Config
-	if err := viper.Unmarshal(&cfg); err != nil {
+
+	err := viper.Unmarshal(&cfg)
+	if err != nil {
 		return nil, fmt.Errorf("unable to decode config: %w", err)
 	}
 
 	return &cfg, nil
 }
 
-// printServerInfo prints server startup information
+// printServerInfo prints server startup information.
 func printServerInfo(config *config.Config) {
 	fmt.Printf("🚀 Starting Yawn Platform Server\n")
 	fmt.Printf(
@@ -156,9 +161,11 @@ func printServerInfo(config *config.Config) {
 		config.Server.Port,
 	)
 	fmt.Printf("💾 Database: %s\n", config.Database.Type)
+
 	if viper.GetBool("dev") {
 		fmt.Printf("🔧 Development mode: enabled (hot-reload for workflows)\n")
 	}
+
 	fmt.Printf(
 		"🌐 Web Interface: http://%s:%s\n",
 		config.Server.Host,

@@ -31,6 +31,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -88,13 +89,14 @@ func NewAuthHandler(
 // @Failure 400 {object} dto.ErrorResponse
 // @Failure 409 {object} dto.ErrorResponse
 // @Failure 500 {object} dto.ErrorResponse
-// @Router /auth/register [post]
+// @Router /auth/register [post].
 func (h *AuthHandler) Register(c echo.Context) error {
 	var req dto.RegisterRequest
 	if err := c.Bind(&req); err != nil {
 		h.logger.Warn().
 			Err(err).
 			Msg("Failed to bind registration request")
+
 		return c.JSON(http.StatusBadRequest, dto.ErrorResponse{
 			Error:   "Invalid request format",
 			Code:    "INVALID_REQUEST",
@@ -117,6 +119,7 @@ func (h *AuthHandler) Register(c echo.Context) error {
 		h.logger.Info().
 			Str("email", req.Email).
 			Msg("Registration attempt with existing email")
+
 		return c.JSON(http.StatusConflict, dto.ErrorResponse{
 			Error:   "User with this email already exists",
 			Code:    "USER_EXISTS",
@@ -131,6 +134,7 @@ func (h *AuthHandler) Register(c echo.Context) error {
 			Err(err).
 			Str("email", req.Email).
 			Msg("Failed to hash password during registration")
+
 		return c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Error:   "Failed to process registration",
 			Code:    "INTERNAL_ERROR",
@@ -152,6 +156,7 @@ func (h *AuthHandler) Register(c echo.Context) error {
 			Err(err).
 			Str("email", user.Email).
 			Msg("Failed to create user during registration")
+
 		return c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Error:   "Failed to create account",
 			Code:    "CREATE_FAILED",
@@ -184,13 +189,14 @@ func (h *AuthHandler) Register(c echo.Context) error {
 // @Failure 400 {object} dto.ErrorResponse
 // @Failure 401 {object} dto.ErrorResponse
 // @Failure 500 {object} dto.ErrorResponse
-// @Router /auth/login [post]
+// @Router /auth/login [post].
 func (h *AuthHandler) Login(c echo.Context) error {
 	var req dto.LoginRequest
 	if err := c.Bind(&req); err != nil {
 		h.logger.Warn().
 			Err(err).
 			Msg("Failed to bind login request")
+
 		return c.JSON(http.StatusBadRequest, dto.ErrorResponse{
 			Error:   "Invalid request format",
 			Code:    "INVALID_REQUEST",
@@ -215,6 +221,7 @@ func (h *AuthHandler) Login(c echo.Context) error {
 		h.logger.Info().
 			Str("email", req.Email).
 			Msg("Login attempt with non-existent email")
+
 		return c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
 			Error:   "Invalid email or password",
 			Code:    "INVALID_CREDENTIALS",
@@ -232,6 +239,7 @@ func (h *AuthHandler) Login(c echo.Context) error {
 			Err(err).
 			Str("user_id", user.ID.String()).
 			Msg("Failed to validate password during login")
+
 		return c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Error:   "Login failed",
 			Code:    "INTERNAL_ERROR",
@@ -244,6 +252,7 @@ func (h *AuthHandler) Login(c echo.Context) error {
 			Str("user_id", user.ID.String()).
 			Str("email", user.Email).
 			Msg("Login attempt with invalid password")
+
 		return c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
 			Error:   "Invalid email or password",
 			Code:    "INVALID_CREDENTIALS",
@@ -258,6 +267,7 @@ func (h *AuthHandler) Login(c echo.Context) error {
 			Err(err).
 			Str("user_id", user.ID.String()).
 			Msg("Failed to generate JWT tokens during login")
+
 		return c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Error:   "Login failed",
 			Code:    "TOKEN_GENERATION_FAILED",
@@ -296,13 +306,14 @@ func (h *AuthHandler) Login(c echo.Context) error {
 // @Failure 400 {object} dto.ErrorResponse
 // @Failure 401 {object} dto.ErrorResponse
 // @Failure 500 {object} dto.ErrorResponse
-// @Router /auth/refresh [post]
+// @Router /auth/refresh [post].
 func (h *AuthHandler) Refresh(c echo.Context) error {
 	var req dto.RefreshRequest
 	if err := c.Bind(&req); err != nil {
 		h.logger.Warn().
 			Err(err).
 			Msg("Failed to bind refresh request")
+
 		return c.JSON(http.StatusBadRequest, dto.ErrorResponse{
 			Error:   "Invalid request format",
 			Code:    "INVALID_REQUEST",
@@ -325,6 +336,7 @@ func (h *AuthHandler) Refresh(c echo.Context) error {
 		h.logger.Info().
 			Err(err).
 			Msg("Failed to refresh token")
+
 		return c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
 			Error:   "Invalid or expired refresh token",
 			Code:    "INVALID_REFRESH_TOKEN",
@@ -354,13 +366,14 @@ func (h *AuthHandler) Refresh(c echo.Context) error {
 // @Success 200 {object} dto.LogoutResponse
 // @Failure 400 {object} dto.ErrorResponse
 // @Failure 500 {object} dto.ErrorResponse
-// @Router /auth/logout [post]
+// @Router /auth/logout [post].
 func (h *AuthHandler) Logout(c echo.Context) error {
 	var req dto.LogoutRequest
 	if err := c.Bind(&req); err != nil {
 		h.logger.Warn().
 			Err(err).
 			Msg("Failed to bind logout request")
+
 		return c.JSON(http.StatusBadRequest, dto.ErrorResponse{
 			Error:   "Invalid request format",
 			Code:    "INVALID_REQUEST",
@@ -399,25 +412,29 @@ func (h *AuthHandler) Logout(c echo.Context) error {
 // validateRegisterRequest validates the registration request.
 func (h *AuthHandler) validateRegisterRequest(req *dto.RegisterRequest) error {
 	if req.Email == "" {
-		return fmt.Errorf("email is required")
+		return errors.New("email is required")
 	}
+
 	if req.Password == "" {
-		return fmt.Errorf("password is required")
+		return errors.New("password is required")
 	}
+
 	if len(req.Email) > 255 {
-		return fmt.Errorf("email address is too long (max 255 characters)")
+		return errors.New("email address is too long (max 255 characters)")
 	}
+
 	if len(req.Password) > 128 {
-		return fmt.Errorf("password is too long (max 128 characters)")
+		return errors.New("password is too long (max 128 characters)")
 	}
 
 	// Basic email validation
 	if !strings.Contains(req.Email, "@") || !strings.Contains(req.Email, ".") {
-		return fmt.Errorf("invalid email format")
+		return errors.New("invalid email format")
 	}
 
 	// Validate password strength
-	if err := h.passwordService.CheckPasswordStrength(req.Password); err != nil {
+	err := h.passwordService.CheckPasswordStrength(req.Password)
+	if err != nil {
 		return fmt.Errorf("password does not meet requirements: %w", err)
 	}
 
@@ -427,16 +444,19 @@ func (h *AuthHandler) validateRegisterRequest(req *dto.RegisterRequest) error {
 // validateLoginRequest validates the login request.
 func (h *AuthHandler) validateLoginRequest(req *dto.LoginRequest) error {
 	if req.Email == "" {
-		return fmt.Errorf("email is required")
+		return errors.New("email is required")
 	}
+
 	if req.Password == "" {
-		return fmt.Errorf("password is required")
+		return errors.New("password is required")
 	}
+
 	if len(req.Email) > 255 {
-		return fmt.Errorf("email address is too long (max 255 characters)")
+		return errors.New("email address is too long (max 255 characters)")
 	}
+
 	if len(req.Password) > 128 {
-		return fmt.Errorf("password is too long (max 128 characters)")
+		return errors.New("password is too long (max 128 characters)")
 	}
 
 	return nil
@@ -445,10 +465,11 @@ func (h *AuthHandler) validateLoginRequest(req *dto.LoginRequest) error {
 // validateRefreshRequest validates the refresh request.
 func (h *AuthHandler) validateRefreshRequest(req *dto.RefreshRequest) error {
 	if req.RefreshToken == "" {
-		return fmt.Errorf("refresh_token is required")
+		return errors.New("refresh_token is required")
 	}
+
 	if len(req.RefreshToken) > 2048 {
-		return fmt.Errorf("refresh token is too long")
+		return errors.New("refresh token is too long")
 	}
 
 	return nil
@@ -457,10 +478,11 @@ func (h *AuthHandler) validateRefreshRequest(req *dto.RefreshRequest) error {
 // validateLogoutRequest validates the logout request.
 func (h *AuthHandler) validateLogoutRequest(req *dto.LogoutRequest) error {
 	if req.AccessToken == "" {
-		return fmt.Errorf("access_token is required")
+		return errors.New("access_token is required")
 	}
+
 	if len(req.AccessToken) > 2048 {
-		return fmt.Errorf("access token is too long")
+		return errors.New("access token is too long")
 	}
 
 	return nil
