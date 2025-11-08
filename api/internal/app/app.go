@@ -15,7 +15,8 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-// Package app provides application bootstrap and dependency injection using uber-go/fx.
+// Package app provides application bootstrap and dependency injection using
+// uber-go/fx.
 package app
 
 import (
@@ -119,7 +120,8 @@ func startServer(lc fx.Lifecycle, e *echo.Echo) {
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
 			go func() {
-				if err := e.Start(e.Server.Addr); err != nil && err != http.ErrServerClosed {
+				if err := e.Start(e.Server.Addr); err != nil &&
+					err != http.ErrServerClosed {
 					e.Logger.Fatalf("Failed to start server: %v", err)
 				}
 			}()
@@ -135,7 +137,7 @@ func startServer(lc fx.Lifecycle, e *echo.Echo) {
 
 func newJWTService() services.JWTService {
 	return services.NewJWTService(&services.JWTConfig{
-		AccessSecret:  "your-access-secret-key", // Use config in production
+		AccessSecret:  "your-access-secret-key",  // Use config in production
 		RefreshSecret: "your-refresh-secret-key", // Use config in production
 		AccessExpiry:  15 * time.Minute,
 		RefreshExpiry: 7 * 24 * time.Hour, // 7 days
@@ -173,26 +175,50 @@ func newUserService(userRepo repositories.UserRepository) services.UserService {
 
 // Middleware providers
 
-func newAuthMiddleware(jwtService services.JWTService, logger *zerolog.Logger) *middleware.AuthMiddleware {
+func newAuthMiddleware(
+	jwtService services.JWTService,
+	logger *zerolog.Logger,
+) *middleware.AuthMiddleware {
 	return middleware.NewAuthMiddleware(jwtService, logger)
 }
 
-func newAuthzMiddleware(logger *zerolog.Logger) *middleware.AuthorizationMiddleware {
+func newAuthzMiddleware(
+	logger *zerolog.Logger,
+) *middleware.AuthorizationMiddleware {
 	return middleware.NewAuthorizationMiddleware(logger)
 }
 
 // Handler providers
 
-func newAuthHandler(userService services.UserService, jwtService services.JWTService, passwordService services.PasswordService, logger *zerolog.Logger) *handlers.AuthHandler {
-	return handlers.NewAuthHandler(userService, jwtService, passwordService, logger)
+func newAuthHandler(
+	userService services.UserService,
+	jwtService services.JWTService,
+	passwordService services.PasswordService,
+	logger *zerolog.Logger,
+) *handlers.AuthHandler {
+	return handlers.NewAuthHandler(
+		userService,
+		jwtService,
+		passwordService,
+		logger,
+	)
 }
 
-func newUserHandler(userService services.UserService, logger *zerolog.Logger) *handlers.UserHandler {
+func newUserHandler(
+	userService services.UserService,
+	logger *zerolog.Logger,
+) *handlers.UserHandler {
 	return handlers.NewUserHandler(userService, logger)
 }
 
 // setupRoutes configures all application routes.
-func setupRoutes(e *echo.Echo, authHandler *handlers.AuthHandler, userHandler *handlers.UserHandler, authMiddleware *middleware.AuthMiddleware, authzMiddleware *middleware.AuthorizationMiddleware) {
+func setupRoutes(
+	e *echo.Echo,
+	authHandler *handlers.AuthHandler,
+	userHandler *handlers.UserHandler,
+	authMiddleware *middleware.AuthMiddleware,
+	authzMiddleware *middleware.AuthorizationMiddleware,
+) {
 	web.SetupRoutes(e, &web.RouterConfig{
 		AuthHandler:     authHandler,
 		UserHandler:     userHandler,

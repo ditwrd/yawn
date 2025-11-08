@@ -33,7 +33,10 @@ func TestServeCommand(t *testing.T) {
 	}
 
 	if serveCmd.Short != "Start the Yawn workflow platform server" {
-		t.Errorf("Expected serveCmd.Short to be 'Start the Yawn workflow platform server', got '%s'", serveCmd.Short)
+		t.Errorf(
+			"Expected serveCmd.Short to be 'Start the Yawn workflow platform server', got '%s'",
+			serveCmd.Short,
+		)
 	}
 
 	// Test flags
@@ -71,7 +74,10 @@ func TestServeCommandFlagBinding(t *testing.T) {
 	// Test that viper gets the value (after binding)
 	viper.BindPFlag("server.port", serveCmd.Flags().Lookup("port"))
 	if viper.GetString("server.port") != "9000" {
-		t.Errorf("Expected viper to get port value '9000', got '%s'", viper.GetString("server.port"))
+		t.Errorf(
+			"Expected viper to get port value '9000', got '%s'",
+			viper.GetString("server.port"),
+		)
 	}
 }
 

@@ -17,7 +17,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 // Package repositories provides data access layer implementations.
 //
-// Uses Repository pattern with GORM ORM for user data persistence and retrieval.
+// Uses Repository pattern with GORM ORM for user data persistence and
+// retrieval.
 // Supports PostgreSQL/SQLite with soft deletes and interface-based testing.
 package repositories
 
@@ -50,14 +51,16 @@ type UserRepository interface {
 	List(limit, offset int) ([]models.User, error)
 }
 
-// userRepository provides GORM-based implementation of UserRepository interface.
+// userRepository provides GORM-based implementation of UserRepository
+// interface.
 // Supports PostgreSQL/SQLite with soft deletes and connection pooling.
 type userRepository struct {
 	// db provides GORM database connection for user operations
 	db *gorm.DB
 }
 
-// NewUserRepository creates a new UserRepository instance with provided GORM connection.
+// NewUserRepository creates a new UserRepository instance with provided GORM
+// connection.
 func NewUserRepository(db *gorm.DB) UserRepository {
 	return &userRepository{db: db}
 }

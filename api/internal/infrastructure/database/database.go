@@ -15,7 +15,8 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-// Package database provides GORM database connection with PostgreSQL/SQLite support,
+// Package database provides GORM database connection with PostgreSQL/SQLite
+// support,
 // connection pooling, and optimized settings.
 package database
 
@@ -30,7 +31,8 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-// NewDatabase creates a GORM database connection with connection pooling and caching.
+// NewDatabase creates a GORM database connection with connection pooling and
+// caching.
 func NewDatabase(cfg *config.Config) (*gorm.DB, error) {
 	var dialector gorm.Dialector
 
@@ -42,7 +44,10 @@ func NewDatabase(cfg *config.Config) (*gorm.DB, error) {
 		dsn := cfg.Database.GetDSN()
 		dialector = sqlite.Open(dsn)
 	default:
-		return nil, fmt.Errorf("unsupported database type: %s", cfg.Database.Type)
+		return nil, fmt.Errorf(
+			"unsupported database type: %s",
+			cfg.Database.Type,
+		)
 	}
 
 	// Configure GORM

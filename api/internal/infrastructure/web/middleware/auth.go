@@ -37,7 +37,10 @@ type AuthMiddleware struct {
 }
 
 // NewAuthMiddleware creates a new authentication middleware.
-func NewAuthMiddleware(jwtService services.JWTService, logger *zerolog.Logger) *AuthMiddleware {
+func NewAuthMiddleware(
+	jwtService services.JWTService,
+	logger *zerolog.Logger,
+) *AuthMiddleware {
 	return &AuthMiddleware{
 		jwtService: jwtService,
 		logger:     logger,
@@ -59,7 +62,10 @@ func (am *AuthMiddleware) JWT() echo.MiddlewareFunc {
 }
 
 // customParseTokenFunc provides custom token parsing with our JWT service.
-func (am *AuthMiddleware) customParseTokenFunc(c echo.Context, auth string) (interface{}, error) {
+func (am *AuthMiddleware) customParseTokenFunc(
+	c echo.Context,
+	auth string,
+) (interface{}, error) {
 	claims, err := am.jwtService.ValidateToken(auth)
 	if err != nil {
 		am.logger.Error().
@@ -132,7 +138,10 @@ func (am *AuthMiddleware) OptionalAuth() echo.MiddlewareFunc {
 	})
 }
 
-func (am *AuthMiddleware) optionalParseTokenFunc(c echo.Context, auth string) (interface{}, error) {
+func (am *AuthMiddleware) optionalParseTokenFunc(
+	c echo.Context,
+	auth string,
+) (interface{}, error) {
 	if auth == "" {
 		return nil, nil
 	}
@@ -161,7 +170,10 @@ func (am *AuthMiddleware) optionalParseTokenFunc(c echo.Context, auth string) (i
 	}, nil
 }
 
-func (am *AuthMiddleware) optionalErrorHandler(c echo.Context, err error) error {
+func (am *AuthMiddleware) optionalErrorHandler(
+	c echo.Context,
+	err error,
+) error {
 	return nil
 }
 
@@ -173,12 +185,16 @@ func GetUserClaims(c echo.Context) (*services.TokenClaims, error) {
 
 	token, ok := c.Get("user").(*jwt.Token)
 	if !ok {
-		return nil, errors.New("JWT library version mismatch: token not found in context or incorrect type")
+		return nil, errors.New(
+			"JWT library version mismatch: token not found in context or incorrect type",
+		)
 	}
 
 	claims, ok := token.Claims.(*services.TokenClaims)
 	if !ok {
-		return nil, errors.New("JWT library version mismatch: claims not found or incorrect type")
+		return nil, errors.New(
+			"JWT library version mismatch: claims not found or incorrect type",
+		)
 	}
 
 	return claims, nil
@@ -211,6 +227,7 @@ func GetUserRole(c echo.Context) (string, error) {
 
 	return string(claims.Role), nil
 }
+
 func min(a, b int) int {
 	if a < b {
 		return a

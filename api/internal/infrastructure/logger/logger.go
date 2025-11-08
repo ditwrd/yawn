@@ -15,7 +15,8 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-// Package logger provides structured logging using zerolog with JSON/console output.
+// Package logger provides structured logging using zerolog with JSON/console
+// output.
 package logger
 
 import (
@@ -26,13 +27,16 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// NewLogger creates a zerolog logger with configurable level and JSON/console format.
+// NewLogger creates a zerolog logger with configurable level and JSON/console
+// format.
 func NewLogger(cfg *config.Config) *zerolog.Logger {
 	// Set log level
 	level, err := zerolog.ParseLevel(cfg.Logger.Level)
 	if err != nil {
 		level = zerolog.InfoLevel
-		log.Warn().Err(err).Msgf("Invalid log level '%s', using 'info'", cfg.Logger.Level)
+		log.Warn().
+			Err(err).
+			Msgf("Invalid log level '%s', using 'info'", cfg.Logger.Level)
 	}
 	zerolog.SetGlobalLevel(level)
 

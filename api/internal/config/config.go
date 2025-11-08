@@ -15,8 +15,9 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-// Package config provides configuration management with YAML files, environment variables,
-// and defaults. Supports PostgreSQL/SQLite, JWT, HTTP server, and logging settings.
+// Package config provides configuration management with YAML files, environment
+// variables, and defaults. Supports PostgreSQL/SQLite, JWT, HTTP server, and
+// logging settings.
 package config
 
 import (
@@ -88,7 +89,9 @@ func LoadConfig(configPath string) (*Config, error) {
 		if err := viper.ReadInConfig(); err != nil {
 			if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 				// Config file not found, just use defaults and env vars
-				fmt.Println("Config file not found, using defaults and environment variables")
+				fmt.Println(
+					"Config file not found, using defaults and environment variables",
+				)
 			} else {
 				return nil, fmt.Errorf("error reading config file: %w", err)
 			}
@@ -144,8 +147,15 @@ func setDefaults() {
 func (d *DatabaseConfig) GetDSN() string {
 	switch strings.ToLower(d.Type) {
 	case "postgres", "postgresql":
-		return fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
-			d.Host, d.User, d.Password, d.Name, d.Port, d.SSLMode)
+		return fmt.Sprintf(
+			"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
+			d.Host,
+			d.User,
+			d.Password,
+			d.Name,
+			d.Port,
+			d.SSLMode,
+		)
 	case "sqlite":
 		return d.Path
 	default:

@@ -15,10 +15,12 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-// Package handlers provides HTTP request handlers for authentication operations.
+// Package handlers provides HTTP request handlers for authentication
+// operations.
 //
-// This package contains handlers for user registration, login, logout, and token refresh.
-// All handlers follow RESTful conventions with proper error handling and JSON responses.
+// This package contains handlers for user registration, login, logout, and
+// token refresh. All handlers follow RESTful conventions with proper error
+// handling and JSON responses.
 //
 // Security features:
 //   - Input validation and sanitization
@@ -206,7 +208,9 @@ func (h *AuthHandler) Login(c echo.Context) error {
 	}
 
 	// Find user by email
-	user, err := h.userService.GetByEmail(strings.ToLower(strings.TrimSpace(req.Email)))
+	user, err := h.userService.GetByEmail(
+		strings.ToLower(strings.TrimSpace(req.Email)),
+	)
 	if err != nil || user == nil {
 		h.logger.Info().
 			Str("email", req.Email).
@@ -219,7 +223,10 @@ func (h *AuthHandler) Login(c echo.Context) error {
 	}
 
 	// Validate password
-	valid, err := h.passwordService.ValidatePassword(req.Password, user.PasswordHash)
+	valid, err := h.passwordService.ValidatePassword(
+		req.Password,
+		user.PasswordHash,
+	)
 	if err != nil {
 		h.logger.Error().
 			Err(err).

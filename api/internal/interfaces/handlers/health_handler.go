@@ -18,7 +18,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 // Package handlers provides HTTP request handlers for the YAWN application.
 //
-// Follows Controller pattern with JSON responses, proper status codes, and health check
+// Follows Controller pattern with JSON responses, proper status codes, and
+// health check
 // endpoints for Kubernetes liveness/readiness probes and monitoring systems.
 package handlers
 

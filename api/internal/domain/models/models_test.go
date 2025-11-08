@@ -152,7 +152,8 @@ func TestAssetModelValidation(t *testing.T) {
 	})
 }
 
-// TestRepositoryModelValidation tests Repository model validations and constraints
+// TestRepositoryModelValidation tests Repository model validations and
+// constraints
 func TestRepositoryModelValidation(t *testing.T) {
 	db := setupTestDB(t)
 
@@ -227,7 +228,8 @@ func TestPipelineModelValidation(t *testing.T) {
 	})
 }
 
-// TestProjectUserModelValidation tests ProjectUser model validations and constraints
+// TestProjectUserModelValidation tests ProjectUser model validations and
+// constraints
 func TestProjectUserModelValidation(t *testing.T) {
 	db := setupTestDB(t)
 
@@ -265,7 +267,8 @@ func TestProjectUserModelValidation(t *testing.T) {
 	})
 }
 
-// TestAssetPipelineModelValidation tests AssetPipeline model validations and constraints
+// TestAssetPipelineModelValidation tests AssetPipeline model validations and
+// constraints
 func TestAssetPipelineModelValidation(t *testing.T) {
 	db := setupTestDB(t)
 

@@ -15,9 +15,11 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-// Package web provides HTTP server configuration and middleware using Echo framework.
+// Package web provides HTTP server configuration and middleware using Echo
+// framework.
 //
-// Configures Echo with request logging, CORS, recovery, and request ID middleware.
+// Configures Echo with request logging, CORS, recovery, and request ID
+// middleware.
 // Supports configurable server timeouts and structured logging integration.
 package web
 
@@ -34,7 +36,8 @@ import (
 // NewEcho creates a new Echo instance with middleware and server configuration.
 //
 // Configures request logging, CORS, recovery, and request ID middleware.
-// Sets server timeouts and address from configuration. Returns ready-to-use Echo instance.
+// Sets server timeouts and address from configuration. Returns ready-to-use
+// Echo instance.
 func NewEcho(cfg *config.Config, logger *zerolog.Logger) *echo.Echo {
 	e := echo.New()
 
@@ -61,8 +64,19 @@ func NewEcho(cfg *config.Config, logger *zerolog.Logger) *echo.Echo {
 	// CORS middleware
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"}, // Configure appropriately for production
-		AllowMethods: []string{echo.GET, echo.PUT, echo.POST, echo.DELETE, echo.OPTIONS},
-		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
+		AllowMethods: []string{
+			echo.GET,
+			echo.PUT,
+			echo.POST,
+			echo.DELETE,
+			echo.OPTIONS,
+		},
+		AllowHeaders: []string{
+			echo.HeaderOrigin,
+			echo.HeaderContentType,
+			echo.HeaderAccept,
+			echo.HeaderAuthorization,
+		},
 	}))
 
 	// Request ID middleware

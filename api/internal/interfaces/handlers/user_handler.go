@@ -15,10 +15,12 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-// Package handlers provides HTTP request handlers for user management operations.
+// Package handlers provides HTTP request handlers for user management
+// operations.
 //
-// This package contains handlers for user CRUD operations with proper authorization.
-// All handlers follow RESTful conventions with proper error handling and JSON responses.
+// This package contains handlers for user CRUD operations with proper
+// authorization. All handlers follow RESTful conventions with proper error
+// handling and JSON responses.
 //
 // Security features:
 //   - Role-based access control (admin/self access)
@@ -56,7 +58,10 @@ type UserHandler struct {
 //
 // Returns:
 //   - *UserHandler: An instance of the user handler
-func NewUserHandler(userService services.UserService, logger *zerolog.Logger) *UserHandler {
+func NewUserHandler(
+	userService services.UserService,
+	logger *zerolog.Logger,
+) *UserHandler {
 	return &UserHandler{
 		userService: userService,
 		logger:      logger,
@@ -126,7 +131,9 @@ func (h *UserHandler) ListUsers(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, dto.UserListResponse{
 		Users: userResponses,
-		Total: len(users), // In a real implementation, you'd get the total count from the database
+		Total: len(
+			users,
+		), // In a real implementation, you'd get the total count from the database
 		Page:  page,
 		Limit: limit,
 	})
@@ -135,7 +142,8 @@ func (h *UserHandler) ListUsers(c echo.Context) error {
 // GetUser handles GET /users/{id} endpoint.
 //
 // @Summary Get user by ID
-// @Description Returns user details. Users can only access their own data, admins can access any user.
+// @Description Returns user details. Users can only access their own data,
+// admins can access any user.
 // @Tags users
 // @Accept json
 // @Produce json
@@ -199,7 +207,8 @@ func (h *UserHandler) GetUser(c echo.Context) error {
 // UpdateUser handles PUT /users/{id} endpoint.
 //
 // @Summary Update user information
-// @Description Updates user information. Users can only update their own data, admins can update any user.
+// @Description Updates user information. Users can only update their own data,
+// admins can update any user.
 // @Tags users
 // @Accept json
 // @Produce json
@@ -269,7 +278,8 @@ func (h *UserHandler) UpdateUser(c echo.Context) error {
 
 	// Validate the updated user
 	if req.Email != "" {
-		if !strings.Contains(existingUser.Email, "@") || !strings.Contains(existingUser.Email, ".") {
+		if !strings.Contains(existingUser.Email, "@") ||
+			!strings.Contains(existingUser.Email, ".") {
 			return c.JSON(http.StatusBadRequest, dto.ErrorResponse{
 				Error:   "Invalid email format",
 				Code:    "VALIDATION_ERROR",
@@ -279,7 +289,10 @@ func (h *UserHandler) UpdateUser(c echo.Context) error {
 	}
 
 	if req.Role != "" {
-		validRoles := []models.UserRole{models.UserRoleAdmin, models.UserRoleUser}
+		validRoles := []models.UserRole{
+			models.UserRoleAdmin,
+			models.UserRoleUser,
+		}
 		isValidRole := false
 		for _, role := range validRoles {
 			if existingUser.Role == role {
@@ -289,7 +302,10 @@ func (h *UserHandler) UpdateUser(c echo.Context) error {
 		}
 		if !isValidRole {
 			return c.JSON(http.StatusBadRequest, dto.ErrorResponse{
-				Error:   fmt.Sprintf("Invalid user role: %s", existingUser.Role),
+				Error: fmt.Sprintf(
+					"Invalid user role: %s",
+					existingUser.Role,
+				),
 				Code:    "VALIDATION_ERROR",
 				Details: "Valid roles are: admin, user",
 			})

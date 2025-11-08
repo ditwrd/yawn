@@ -59,13 +59,19 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	// Global persistent flags
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file for Yawn platform settings (default is $HOME/.yawn.yaml, ./config.yaml, or ./yawn.yaml)")
-	rootCmd.PersistentFlags().Bool("verbose", false, "enable verbose logging for workflow execution and platform operations")
-	rootCmd.PersistentFlags().StringP("log-level", "l", "info", "log level for platform and workflow logging (debug, info, warn, error)")
+	rootCmd.PersistentFlags().
+		StringVar(&cfgFile, "config", "", "config file for Yawn platform settings (default is $HOME/.yawn.yaml, ./config.yaml, or ./yawn.yaml)")
+	rootCmd.PersistentFlags().
+		Bool("verbose", false, "enable verbose logging for workflow execution and platform operations")
+	rootCmd.PersistentFlags().
+		StringP("log-level", "l", "info", "log level for platform and workflow logging (debug, info, warn, error)")
 
 	// Bind flags to viper
 	viper.BindPFlag("verbose", rootCmd.PersistentFlags().Lookup("verbose"))
-	viper.BindPFlag("logger.level", rootCmd.PersistentFlags().Lookup("log-level"))
+	viper.BindPFlag(
+		"logger.level",
+		rootCmd.PersistentFlags().Lookup("log-level"),
+	)
 
 	// Set default values
 	viper.SetDefault("verbose", false)

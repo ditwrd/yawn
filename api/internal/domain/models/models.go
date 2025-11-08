@@ -17,7 +17,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 // Package models defines domain models for the YAWN application.
 //
-// Contains core entities: User, Project, Asset, Repository, Pipeline, and relationship models.
+// Contains core entities: User, Project, Asset, Repository, Pipeline, and
+// relationship models.
 // Uses UUID v7 primary keys, GORM soft deletes, and supports PostgreSQL/SQLite.
 package models
 
@@ -123,7 +124,8 @@ type Pipeline struct {
 	Assets  []Asset `gorm:"many2many:asset_pipelines" json:"assets,omitempty"`
 }
 
-// ProjectUser represents the many-to-many relationship between projects and users.
+// ProjectUser represents the many-to-many relationship between projects and
+// users.
 type ProjectUser struct {
 	ID        uuid.UUID   `gorm:"type:uuid;primary_key"                                 json:"id"`
 	ProjectID uuid.UUID   `gorm:"type:uuid;not null;index:idx_project_users_project_id" json:"project_id"`
@@ -146,7 +148,8 @@ const (
 	ProjectRoleViewer     ProjectRole = "viewer"
 )
 
-// AssetPipeline represents the many-to-many relationship between assets and pipelines.
+// AssetPipeline represents the many-to-many relationship between assets and
+// pipelines.
 type AssetPipeline struct {
 	ID         uuid.UUID `gorm:"type:uuid;primary_key"                                    json:"id"`
 	PipelineID uuid.UUID `gorm:"type:uuid;not null;index:idx_asset_pipelines_pipeline_id" json:"pipeline_id"`

@@ -39,9 +39,9 @@ func TestPasswordService_Argon2Hashing(t *testing.T) {
 		assert.True(t, strings.HasPrefix(hash, "$argon2id$v=19$"))
 
 		// Verify hash contains expected parameters
-		assert.Contains(t, hash, "m=19456")  // Memory
-		assert.Contains(t, hash, "t=2")      // Iterations
-		assert.Contains(t, hash, "p=1")      // Parallelism
+		assert.Contains(t, hash, "m=19456") // Memory
+		assert.Contains(t, hash, "t=2")     // Iterations
+		assert.Contains(t, hash, "p=1")     // Parallelism
 	})
 
 	t.Run("validate correct password", func(t *testing.T) {
@@ -77,25 +77,32 @@ func TestPasswordService_Argon2Hashing(t *testing.T) {
 		assert.NotEqual(t, hash1, hash2)
 	})
 
-	t.Run("same password produces different hashes (different salts)", func(t *testing.T) {
-		password := "SecurePass123!"
+	t.Run(
+		"same password produces different hashes (different salts)",
+		func(t *testing.T) {
+			password := "SecurePass123!"
 
-		hash1, err1 := service.HashPassword(password)
-		hash2, err2 := service.HashPassword(password)
+			hash1, err1 := service.HashPassword(password)
+			hash2, err2 := service.HashPassword(password)
 
-		require.NoError(t, err1)
-		require.NoError(t, err2)
-		assert.NotEqual(t, hash1, hash2) // Different salts should produce different hashes
+			require.NoError(t, err1)
+			require.NoError(t, err2)
+			assert.NotEqual(
+				t,
+				hash1,
+				hash2,
+			) // Different salts should produce different hashes
 
-		// But both should validate correctly
-		valid1, err1 := service.ValidatePassword(password, hash1)
-		valid2, err2 := service.ValidatePassword(password, hash2)
+			// But both should validate correctly
+			valid1, err1 := service.ValidatePassword(password, hash1)
+			valid2, err2 := service.ValidatePassword(password, hash2)
 
-		require.NoError(t, err1)
-		require.NoError(t, err2)
-		assert.True(t, valid1)
-		assert.True(t, valid2)
-	})
+			require.NoError(t, err1)
+			require.NoError(t, err2)
+			assert.True(t, valid1)
+			assert.True(t, valid2)
+		},
+	)
 
 	t.Run("validate invalid hash format", func(t *testing.T) {
 		password := "SecurePass123!"
@@ -124,11 +131,11 @@ func TestPasswordService_Configuration(t *testing.T) {
 		config := DefaultPasswordConfig()
 
 		// Argon2id parameters
-		assert.Equal(t, uint32(19456), config.Memory)     // 19 MiB
-		assert.Equal(t, uint32(2), config.Iterations)     // 2 iterations
-		assert.Equal(t, uint8(1), config.Parallelism)     // 1 parallel thread
-		assert.Equal(t, uint32(16), config.SaltLength)    // 16 bytes salt
-		assert.Equal(t, uint32(32), config.KeyLength)     // 32 bytes hash
+		assert.Equal(t, uint32(19456), config.Memory)  // 19 MiB
+		assert.Equal(t, uint32(2), config.Iterations)  // 2 iterations
+		assert.Equal(t, uint8(1), config.Parallelism)  // 1 parallel thread
+		assert.Equal(t, uint32(16), config.SaltLength) // 16 bytes salt
+		assert.Equal(t, uint32(32), config.KeyLength)  // 32 bytes hash
 
 		// Password strength requirements
 		assert.Equal(t, 8, config.MinLength)
@@ -140,12 +147,12 @@ func TestPasswordService_Configuration(t *testing.T) {
 
 	t.Run("custom configuration", func(t *testing.T) {
 		config := &PasswordConfig{
-			Memory:      32768,  // 32 MiB
-			Iterations:  3,      // 3 iterations
-			Parallelism: 2,      // 2 parallel threads
-			SaltLength:  32,     // 32 bytes salt
-			KeyLength:   64,     // 64 bytes hash
-			MinLength:   12,
+			Memory:              32768, // 32 MiB
+			Iterations:          3,     // 3 iterations
+			Parallelism:         2,     // 2 parallel threads
+			SaltLength:          32,    // 32 bytes salt
+			KeyLength:           64,    // 64 bytes hash
+			MinLength:           12,
 			RequireUppercase:    true,
 			RequireLowercase:    true,
 			RequireNumbers:      true,
@@ -178,7 +185,9 @@ func TestPasswordService_ParseArgon2Hash(t *testing.T) {
 		// This is a real Argon2id hash format
 		hash := "$argon2id$v=19$m=19456,t=2,p=1$c29tZXNhbHQ$RGFlbW9uSW5zZWN1cml0eUNoZWNr"
 
-		memory, iterations, parallelism, salt, decodedHash, err := service.(*passwordService).parseArgon2Hash(hash)
+		memory, iterations, parallelism, salt, decodedHash, err := service.(*passwordService).parseArgon2Hash(
+			hash,
+		)
 
 		require.NoError(t, err)
 		assert.Equal(t, uint32(19456), memory)
@@ -192,14 +201,21 @@ func TestPasswordService_ParseArgon2Hash(t *testing.T) {
 		invalidHashes := []string{
 			"not-a-hash",
 			"$bcrypt$something",
-			"$argon2i$v=19$m=19456,t=2,p=1$salt$hash", // argon2i instead of argon2id
+			"$argon2i$v=19$m=19456,t=2,p=1$salt$hash",  // argon2i instead of argon2id
 			"$argon2id$v=18$m=19456,t=2,p=1$salt$hash", // wrong version
-			"$argon2id$v=19$m=19456,t=2$invalid", // missing parallelism
+			"$argon2id$v=19$m=19456,t=2$invalid",       // missing parallelism
 		}
 
 		for _, invalidHash := range invalidHashes {
-			_, _, _, _, _, err := service.(*passwordService).parseArgon2Hash(invalidHash)
-			require.Error(t, err, "expected error for invalid hash: %s", invalidHash)
+			_, _, _, _, _, err := service.(*passwordService).parseArgon2Hash(
+				invalidHash,
+			)
+			require.Error(
+				t,
+				err,
+				"expected error for invalid hash: %s",
+				invalidHash,
+			)
 		}
 	})
 }

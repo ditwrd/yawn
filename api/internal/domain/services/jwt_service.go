@@ -29,7 +29,9 @@ import (
 
 // JWTService provides JWT token operations for authentication.
 type JWTService interface {
-	GenerateTokenPair(user *models.User) (accessToken, refreshToken string, err error)
+	GenerateTokenPair(
+		user *models.User,
+	) (accessToken, refreshToken string, err error)
 	GenerateAccessToken(user *models.User) (string, error)
 	ValidateToken(tokenString string) (*TokenClaims, error)
 	RefreshToken(refreshTokenString string) (string, error)
@@ -78,7 +80,9 @@ func NewJWTService(config *JWTConfig) JWTService {
 	}
 }
 
-func (s *jwtService) GenerateTokenPair(user *models.User) (string, string, error) {
+func (s *jwtService) GenerateTokenPair(
+	user *models.User,
+) (string, string, error) {
 	accessToken, err := s.GenerateAccessToken(user)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to generate access token: %w", err)
@@ -145,7 +149,8 @@ func (s *jwtService) ValidateToken(tokenString string) (*TokenClaims, error) {
 		return nil, fmt.Errorf("token has been invalidated")
 	}
 
-	unverifiedToken, _, err := jwt.NewParser().ParseUnverified(tokenString, &TokenClaims{})
+	unverifiedToken, _, err := jwt.NewParser().
+		ParseUnverified(tokenString, &TokenClaims{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse token: %w", err)
 	}
@@ -165,13 +170,19 @@ func (s *jwtService) ValidateToken(tokenString string) (*TokenClaims, error) {
 		return nil, fmt.Errorf("unknown token type: %s", claims.Type)
 	}
 
-	token, err := jwt.ParseWithClaims(tokenString, &TokenClaims{}, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return []byte(secret), nil
-	})
-
+	token, err := jwt.ParseWithClaims(
+		tokenString,
+		&TokenClaims{},
+		func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf(
+					"unexpected signing method: %v",
+					token.Header["alg"],
+				)
+			}
+			return []byte(secret), nil
+		},
+	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to validate token: %w", err)
 	}
@@ -194,11 +205,19 @@ func (s *jwtService) ValidateToken(tokenString string) (*TokenClaims, error) {
 
 func (s *jwtService) validateClaims(claims *TokenClaims) error {
 	if claims.Issuer != s.config.Issuer {
-		return fmt.Errorf("invalid issuer: expected %s, got %s", s.config.Issuer, claims.Issuer)
+		return fmt.Errorf(
+			"invalid issuer: expected %s, got %s",
+			s.config.Issuer,
+			claims.Issuer,
+		)
 	}
 
 	if len(claims.Audience) == 0 || claims.Audience[0] != s.config.Audience {
-		return fmt.Errorf("invalid audience: expected %s, got %v", s.config.Audience, claims.Audience)
+		return fmt.Errorf(
+			"invalid audience: expected %s, got %v",
+			s.config.Audience,
+			claims.Audience,
+		)
 	}
 
 	if claims.ExpiresAt == nil {

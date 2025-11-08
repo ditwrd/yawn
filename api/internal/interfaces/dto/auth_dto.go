@@ -18,7 +18,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 // Package dto defines data transfer objects for API requests and responses.
 //
 // This package contains the DTOs used for authentication-related HTTP requests
-// and responses in the YAWN API. All DTOs include proper JSON tags and validation
+// and responses in the YAWN API. All DTOs include proper JSON tags and
+// validation
 // tags for request binding and response formatting.
 //
 // Design principles:
@@ -31,36 +32,36 @@ package dto
 
 // RegisterRequest represents a user registration request.
 type RegisterRequest struct {
-	Email    string `json:"email" example:"user@example.com"`
+	Email    string `json:"email"    example:"user@example.com"`
 	Password string `json:"password" example:"SecurePass123!"`
 }
 
 // RegisterResponse represents a user registration response.
 type RegisterResponse struct {
-	ID    string `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	ID    string `json:"id"    example:"123e4567-e89b-12d3-a456-426614174000"`
 	Email string `json:"email" example:"user@example.com"`
-	Role  string `json:"role" example:"user"`
+	Role  string `json:"role"  example:"user"`
 }
 
 // LoginRequest represents a user login request.
 type LoginRequest struct {
-	Email    string `json:"email" example:"user@example.com"`
+	Email    string `json:"email"    example:"user@example.com"`
 	Password string `json:"password" example:"SecurePass123!"`
 }
 
 // UserInfo represents basic user information returned in login response.
 type UserInfo struct {
-	ID    string `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	ID    string `json:"id"    example:"123e4567-e89b-12d3-a456-426614174000"`
 	Email string `json:"email" example:"user@example.com"`
-	Role  string `json:"role" example:"user"`
+	Role  string `json:"role"  example:"user"`
 }
 
 // LoginResponse represents a user login response with JWT tokens.
 type LoginResponse struct {
-	AccessToken  string   `json:"access_token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
+	AccessToken  string   `json:"access_token"  example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
 	RefreshToken string   `json:"refresh_token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
-	TokenType    string   `json:"token_type" example:"Bearer"`
-	ExpiresIn    int      `json:"expires_in" example:"900"`
+	TokenType    string   `json:"token_type"    example:"Bearer"`
+	ExpiresIn    int      `json:"expires_in"    example:"900"`
 	User         UserInfo `json:"user"`
 }
 
@@ -72,8 +73,8 @@ type RefreshRequest struct {
 // RefreshResponse represents a token refresh response.
 type RefreshResponse struct {
 	AccessToken string `json:"access_token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
-	TokenType   string `json:"token_type" example:"Bearer"`
-	ExpiresIn   int    `json:"expires_in" example:"900"`
+	TokenType   string `json:"token_type"   example:"Bearer"`
+	ExpiresIn   int    `json:"expires_in"   example:"900"`
 }
 
 // LogoutRequest represents a logout request.
@@ -88,7 +89,7 @@ type LogoutResponse struct {
 
 // ErrorResponse represents a standard error response.
 type ErrorResponse struct {
-	Error   string `json:"error" example:"Validation failed"`
-	Code    string `json:"code" example:"VALIDATION_ERROR"`
+	Error   string `json:"error"             example:"Validation failed"`
+	Code    string `json:"code"              example:"VALIDATION_ERROR"`
 	Details string `json:"details,omitempty" example:"Please check your input and try again"`
 }

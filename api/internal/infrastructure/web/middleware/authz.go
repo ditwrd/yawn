@@ -15,7 +15,8 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-// Package middleware provides authorization middleware for role-based access control.
+// Package middleware provides authorization middleware for role-based access
+// control.
 package middleware
 
 import (
@@ -35,14 +36,18 @@ type AuthorizationMiddleware struct {
 }
 
 // NewAuthorizationMiddleware creates a new authorization middleware.
-func NewAuthorizationMiddleware(logger *zerolog.Logger) *AuthorizationMiddleware {
+func NewAuthorizationMiddleware(
+	logger *zerolog.Logger,
+) *AuthorizationMiddleware {
 	return &AuthorizationMiddleware{
 		logger: logger,
 	}
 }
 
 // RequireRole creates middleware that requires specific user roles.
-func (am *AuthorizationMiddleware) RequireRole(roles ...models.UserRole) echo.MiddlewareFunc {
+func (am *AuthorizationMiddleware) RequireRole(
+	roles ...models.UserRole,
+) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			// Get user role from context
@@ -52,10 +57,13 @@ func (am *AuthorizationMiddleware) RequireRole(roles ...models.UserRole) echo.Mi
 					Err(err).
 					Str("path", c.Request().URL.Path).
 					Msg("Failed to get user role for authorization")
-				return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-					"error": "Authorization check failed",
-					"code":  "AUTHZ_ERROR",
-				})
+				return c.JSON(
+					http.StatusInternalServerError,
+					map[string]interface{}{
+						"error": "Authorization check failed",
+						"code":  "AUTHZ_ERROR",
+					},
+				)
 			}
 
 			// Check if user has required role
@@ -98,7 +106,9 @@ func (am *AuthorizationMiddleware) RequireAdmin() echo.MiddlewareFunc {
 }
 
 // RequireOwnership creates middleware that requires resource ownership.
-func (am *AuthorizationMiddleware) RequireOwnership(resourceIDParam ...string) echo.MiddlewareFunc {
+func (am *AuthorizationMiddleware) RequireOwnership(
+	resourceIDParam ...string,
+) echo.MiddlewareFunc {
 	paramName := "id"
 	if len(resourceIDParam) > 0 {
 		paramName = resourceIDParam[0]
@@ -112,10 +122,13 @@ func (am *AuthorizationMiddleware) RequireOwnership(resourceIDParam ...string) e
 					Err(err).
 					Str("path", c.Request().URL.Path).
 					Msg("Failed to get user ID for ownership check")
-				return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-					"error": "Authorization check failed",
-					"code":  "AUTHZ_ERROR",
-				})
+				return c.JSON(
+					http.StatusInternalServerError,
+					map[string]interface{}{
+						"error": "Authorization check failed",
+						"code":  "AUTHZ_ERROR",
+					},
+				)
 			}
 
 			userRole, err := GetUserRole(c)
@@ -124,10 +137,13 @@ func (am *AuthorizationMiddleware) RequireOwnership(resourceIDParam ...string) e
 					Err(err).
 					Str("path", c.Request().URL.Path).
 					Msg("Failed to get user role for ownership check")
-				return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-					"error": "Authorization check failed",
-					"code":  "AUTHZ_ERROR",
-				})
+				return c.JSON(
+					http.StatusInternalServerError,
+					map[string]interface{}{
+						"error": "Authorization check failed",
+						"code":  "AUTHZ_ERROR",
+					},
+				)
 			}
 
 			if userRole == string(models.UserRoleAdmin) {
@@ -169,10 +185,13 @@ func (am *AuthorizationMiddleware) RequireOwnership(resourceIDParam ...string) e
 					Err(err).
 					Str("user_id", userID).
 					Msg("Invalid user ID format in context")
-				return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-					"error": "Invalid user context",
-					"code":  "INVALID_USER_CONTEXT",
-				})
+				return c.JSON(
+					http.StatusInternalServerError,
+					map[string]interface{}{
+						"error": "Invalid user context",
+						"code":  "INVALID_USER_CONTEXT",
+					},
+				)
 			}
 
 			if userUUID != resourceID {
@@ -193,18 +212,23 @@ func (am *AuthorizationMiddleware) RequireOwnership(resourceIDParam ...string) e
 	}
 }
 
-// RequireRoleOrOwnership creates middleware that requires specific roles OR ownership.
+// RequireRoleOrOwnership creates middleware that requires specific roles OR
+// ownership.
 //
-// This middleware provides flexible authorization where users can access a resource
+// This middleware provides flexible authorization where users can access a
+// resource
 // if they have one of the specified roles OR they own the resource.
 // Admin users automatically pass all checks.
 //
 // Parameters:
 //   - roles: List of allowed roles
-//   - resourceIDParam: URL parameter name containing the resource ID (default: "id")
+//
+// - resourceIDParam: URL parameter name containing the resource ID (default:
+// "id")
 //
 // Returns:
-//   - echo.MiddlewareFunc: Echo middleware function for role or ownership verification
+// - echo.MiddlewareFunc: Echo middleware function for role or ownership
+// verification
 //
 // Example:
 //
@@ -212,15 +236,21 @@ func (am *AuthorizationMiddleware) RequireOwnership(resourceIDParam ...string) e
 //	e.Use(RequireRoleOrOwnership(models.UserRoleAdmin))
 //
 //	// Allow admin/maintainer users, OR users who own the resource
-//	e.Use(RequireRoleOrOwnership(models.UserRoleAdmin, models.UserRoleMaintainer, "project_id"))
-func (am *AuthorizationMiddleware) RequireRoleOrOwnership(roles ...models.UserRole) echo.MiddlewareFunc {
+//	e.Use(RequireRoleOrOwnership(models.UserRoleAdmin,
+//
+// models.UserRoleMaintainer, "project_id"))
+func (am *AuthorizationMiddleware) RequireRoleOrOwnership(
+	roles ...models.UserRole,
+) echo.MiddlewareFunc {
 	// Extract resource ID parameter from the last argument if it's a string
 	var resourceRoles []models.UserRole
 	var resourceIDParam string = "id"
 
 	if len(roles) > 0 {
 		// Check if the last argument is a string (resource ID parameter)
-		if lastArg := roles[len(roles)-1]; len(lastArg) > 0 && lastArg[0] >= 'a' && lastArg[0] <= 'z' {
+		if lastArg := roles[len(roles)-1]; len(lastArg) > 0 &&
+			lastArg[0] >= 'a' &&
+			lastArg[0] <= 'z' {
 			// Last argument looks like a string parameter name
 			resourceIDParam = string(lastArg)
 			resourceRoles = roles[:len(roles)-1]
@@ -239,10 +269,13 @@ func (am *AuthorizationMiddleware) RequireRoleOrOwnership(roles ...models.UserRo
 					Err(err).
 					Str("path", c.Request().URL.Path).
 					Msg("Failed to get user role for authorization")
-				return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-					"error": "Authorization check failed",
-					"code":  "AUTHZ_ERROR",
-				})
+				return c.JSON(
+					http.StatusInternalServerError,
+					map[string]interface{}{
+						"error": "Authorization check failed",
+						"code":  "AUTHZ_ERROR",
+					},
+				)
 			}
 
 			// Check if user has required role
@@ -266,7 +299,8 @@ func (am *AuthorizationMiddleware) RequireRoleOrOwnership(roles ...models.UserRo
 	}
 }
 
-// CustomPermissionChecker defines a function type for custom permission checking.
+// CustomPermissionChecker defines a function type for custom permission
+// checking.
 //
 // This function allows for complex authorization logic beyond simple roles
 // and ownership checks.
@@ -286,12 +320,19 @@ type CustomPermissionChecker func(c echo.Context, claims *services.TokenClaims) 
 // Example:
 //
 //	// Custom checker that allows access to user's own resources or admin users
-//	checker := func(c echo.Context, claims *services.TokenClaims) (bool, error) {
-//		resourceUserID := c.Param("user_id")
-//		return claims.UserID.String() == resourceUserID || claims.Role == models.UserRoleAdmin, nil
+//	checker := func(c echo.Context, claims *services.TokenClaims) (bool, error)
+//
+//	{
+//			resourceUserID := c.Param("user_id")
+//			return claims.UserID.String() == resourceUserID || claims.Role ==
+//
+// models.UserRoleAdmin, nil
+//
 //	}
 //	e.Use(RequireCustomPermission(checker))
-func (am *AuthorizationMiddleware) RequireCustomPermission(checker CustomPermissionChecker) echo.MiddlewareFunc {
+func (am *AuthorizationMiddleware) RequireCustomPermission(
+	checker CustomPermissionChecker,
+) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			// Get user claims from context
@@ -301,10 +342,13 @@ func (am *AuthorizationMiddleware) RequireCustomPermission(checker CustomPermiss
 					Err(err).
 					Str("path", c.Request().URL.Path).
 					Msg("Failed to get user claims for custom permission check")
-				return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-					"error": "Authorization check failed",
-					"code":  "AUTHZ_ERROR",
-				})
+				return c.JSON(
+					http.StatusInternalServerError,
+					map[string]interface{}{
+						"error": "Authorization check failed",
+						"code":  "AUTHZ_ERROR",
+					},
+				)
 			}
 
 			// Check custom permission
@@ -315,10 +359,13 @@ func (am *AuthorizationMiddleware) RequireCustomPermission(checker CustomPermiss
 					Str("user_id", claims.UserID.String()).
 					Str("path", c.Request().URL.Path).
 					Msg("Custom permission check failed")
-				return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-					"error": "Authorization check failed",
-					"code":  "AUTHZ_ERROR",
-				})
+				return c.JSON(
+					http.StatusInternalServerError,
+					map[string]interface{}{
+						"error": "Authorization check failed",
+						"code":  "AUTHZ_ERROR",
+					},
+				)
 			}
 
 			if !hasPermission {

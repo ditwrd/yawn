@@ -85,17 +85,23 @@ type MockJWTService struct {
 	mock.Mock
 }
 
-func (m *MockJWTService) GenerateTokenPair(user *models.User) (string, string, error) {
+func (m *MockJWTService) GenerateTokenPair(
+	user *models.User,
+) (string, string, error) {
 	args := m.Called(user)
 	return args.String(0), args.String(1), args.Error(2)
 }
 
-func (m *MockJWTService) GenerateAccessToken(user *models.User) (string, error) {
+func (m *MockJWTService) GenerateAccessToken(
+	user *models.User,
+) (string, error) {
 	args := m.Called(user)
 	return args.String(0), args.Error(1)
 }
 
-func (m *MockJWTService) ValidateToken(tokenString string) (*services.TokenClaims, error) {
+func (m *MockJWTService) ValidateToken(
+	tokenString string,
+) (*services.TokenClaims, error) {
 	args := m.Called(tokenString)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -103,7 +109,9 @@ func (m *MockJWTService) ValidateToken(tokenString string) (*services.TokenClaim
 	return args.Get(0).(*services.TokenClaims), args.Error(1)
 }
 
-func (m *MockJWTService) RefreshToken(refreshTokenString string) (string, error) {
+func (m *MockJWTService) RefreshToken(
+	refreshTokenString string,
+) (string, error) {
 	args := m.Called(refreshTokenString)
 	return args.String(0), args.Error(1)
 }
@@ -128,7 +136,9 @@ func (m *MockPasswordService) HashPassword(password string) (string, error) {
 	return args.String(0), args.Error(1)
 }
 
-func (m *MockPasswordService) ValidatePassword(password, hash string) (bool, error) {
+func (m *MockPasswordService) ValidatePassword(
+	password, hash string,
+) (bool, error) {
 	args := m.Called(password, hash)
 	return args.Bool(0), args.Error(1)
 }
@@ -152,7 +162,9 @@ func (t *TestPasswordService) HashPassword(password string) (string, error) {
 	return "hashed_password", nil
 }
 
-func (t *TestPasswordService) ValidatePassword(password, hash string) (bool, error) {
+func (t *TestPasswordService) ValidatePassword(
+	password, hash string,
+) (bool, error) {
 	if !t.shouldValidatePassword {
 		return false, nil
 	}
@@ -178,7 +190,12 @@ func setupTestAuthHandler() (*AuthHandler, *MockUserService, *MockJWTService, *T
 
 	logger := zerolog.New(zerolog.NewConsoleWriter())
 
-	handler := NewAuthHandler(mockUserService, mockJWTService, testPasswordService, &logger)
+	handler := NewAuthHandler(
+		mockUserService,
+		mockJWTService,
+		testPasswordService,
+		&logger,
+	)
 	return handler, mockUserService, mockJWTService, testPasswordService
 }
 
@@ -214,7 +231,8 @@ type LoginTestCase struct {
 	expectedError    string
 }
 
-// TestAuthHandler_Register tests user registration functionality using table-driven approach.
+// TestAuthHandler_Register tests user registration functionality using
+// table-driven approach.
 func TestAuthHandler_Register(t *testing.T) {
 	testCases := []RegisterTestCase{
 		{
@@ -224,9 +242,11 @@ func TestAuthHandler_Register(t *testing.T) {
 				Password: "SecurePass123!",
 			},
 			setupMocks: func(mus *MockUserService, mjs *MockJWTService, tps *TestPasswordService) {
-				mus.On("GetByEmail", "test@example.com").Return(nil, fmt.Errorf("not found"))
+				mus.On("GetByEmail", "test@example.com").
+					Return(nil, fmt.Errorf("not found"))
 				mus.On("Create", mock.MatchedBy(func(user *models.User) bool {
-					return user.Email == "test@example.com" && user.Role == models.UserRoleUser
+					return user.Email == "test@example.com" &&
+						user.Role == models.UserRoleUser
 				})).Return(nil)
 			},
 			expectedStatus: http.StatusCreated,
@@ -248,7 +268,8 @@ func TestAuthHandler_Register(t *testing.T) {
 					PasswordHash: "hashed_password",
 					Role:         models.UserRoleUser,
 				}
-				mus.On("GetByEmail", "existing@example.com").Return(existingUser, nil)
+				mus.On("GetByEmail", "existing@example.com").
+					Return(existingUser, nil)
 			},
 			expectedStatus: http.StatusConflict,
 			expectedResponse: dto.ErrorResponse{
@@ -344,8 +365,10 @@ func TestAuthHandler_Register(t *testing.T) {
 				Password: "SecurePass123!",
 			},
 			setupMocks: func(mus *MockUserService, mjs *MockJWTService, tps *TestPasswordService) {
-				mus.On("GetByEmail", "test@example.com").Return(nil, fmt.Errorf("not found"))
-				mus.On("Create", mock.AnythingOfType("*models.User")).Return(fmt.Errorf("database error"))
+				mus.On("GetByEmail", "test@example.com").
+					Return(nil, fmt.Errorf("not found"))
+				mus.On("Create", mock.AnythingOfType("*models.User")).
+					Return(fmt.Errorf("database error"))
 			},
 			expectedStatus: http.StatusInternalServerError,
 			expectedResponse: dto.ErrorResponse{
@@ -362,7 +385,8 @@ func TestAuthHandler_Register(t *testing.T) {
 			},
 			setupMocks: func(mus *MockUserService, mjs *MockJWTService, tps *TestPasswordService) {
 				tps.shouldHashPassword = false // Configure to fail hashing
-				mus.On("GetByEmail", "test@example.com").Return(nil, fmt.Errorf("not found"))
+				mus.On("GetByEmail", "test@example.com").
+					Return(nil, fmt.Errorf("not found"))
 			},
 			expectedStatus: http.StatusInternalServerError,
 			expectedResponse: dto.ErrorResponse{
@@ -386,7 +410,11 @@ func TestAuthHandler_Register(t *testing.T) {
 			reqBody, err := json.Marshal(tc.request)
 			require.NoError(t, err)
 
-			request := httptest.NewRequest(http.MethodPost, "/auth/register", bytes.NewBuffer(reqBody))
+			request := httptest.NewRequest(
+				http.MethodPost,
+				"/auth/register",
+				bytes.NewBuffer(reqBody),
+			)
 			request.Header.Set("Content-Type", "application/json")
 			rec := httptest.NewRecorder()
 			c := e.NewContext(request, rec)
@@ -404,8 +432,16 @@ func TestAuthHandler_Register(t *testing.T) {
 				var response dto.ErrorResponse
 				err = json.Unmarshal(rec.Body.Bytes(), &response)
 				assert.NoError(t, err)
-				assert.Equal(t, tc.expectedResponse.(dto.ErrorResponse).Error, response.Error)
-				assert.Equal(t, tc.expectedResponse.(dto.ErrorResponse).Code, response.Code)
+				assert.Equal(
+					t,
+					tc.expectedResponse.(dto.ErrorResponse).Error,
+					response.Error,
+				)
+				assert.Equal(
+					t,
+					tc.expectedResponse.(dto.ErrorResponse).Code,
+					response.Code,
+				)
 			} else {
 				// Success response
 				var response dto.RegisterResponse
@@ -423,7 +459,8 @@ func TestAuthHandler_Register(t *testing.T) {
 	}
 }
 
-// TestAuthHandler_Login tests user login functionality using table-driven approach.
+// TestAuthHandler_Login tests user login functionality using table-driven
+// approach.
 func TestAuthHandler_Login(t *testing.T) {
 	testCases := []LoginTestCase{
 		{
@@ -434,8 +471,12 @@ func TestAuthHandler_Login(t *testing.T) {
 			},
 			setupMocks: func(mus *MockUserService, mjs *MockJWTService, tps *TestPasswordService) {
 				user := createTestUser()
-				mus.On("GetByEmail", "test@example.com").Return(user, nil).Once()
-				mjs.On("GenerateTokenPair", user).Return("access_token", "refresh_token", nil).Once()
+				mus.On("GetByEmail", "test@example.com").
+					Return(user, nil).
+					Once()
+				mjs.On("GenerateTokenPair", user).
+					Return("access_token", "refresh_token", nil).
+					Once()
 			},
 			expectedStatus: http.StatusOK,
 			expectedResponse: dto.LoginResponse{
@@ -458,7 +499,9 @@ func TestAuthHandler_Login(t *testing.T) {
 			setupMocks: func(mus *MockUserService, mjs *MockJWTService, tps *TestPasswordService) {
 				user := createTestUser()
 				tps.shouldValidatePassword = false // Configure to fail validation
-				mus.On("GetByEmail", "test@example.com").Return(user, nil).Once()
+				mus.On("GetByEmail", "test@example.com").
+					Return(user, nil).
+					Once()
 			},
 			expectedStatus: http.StatusUnauthorized,
 			expectedResponse: dto.ErrorResponse{
@@ -474,7 +517,8 @@ func TestAuthHandler_Login(t *testing.T) {
 				Password: "SecurePass123!",
 			},
 			setupMocks: func(mus *MockUserService, mjs *MockJWTService, tps *TestPasswordService) {
-				mus.On("GetByEmail", "nonexistent@example.com").Return(nil, fmt.Errorf("not found"))
+				mus.On("GetByEmail", "nonexistent@example.com").
+					Return(nil, fmt.Errorf("not found"))
 			},
 			expectedStatus: http.StatusUnauthorized,
 			expectedResponse: dto.ErrorResponse{
@@ -523,8 +567,12 @@ func TestAuthHandler_Login(t *testing.T) {
 			},
 			setupMocks: func(mus *MockUserService, mjs *MockJWTService, tps *TestPasswordService) {
 				user := createTestUser()
-				mus.On("GetByEmail", "test@example.com").Return(user, nil).Once()
-				mjs.On("GenerateTokenPair", user).Return("", "", fmt.Errorf("token generation failed")).Once()
+				mus.On("GetByEmail", "test@example.com").
+					Return(user, nil).
+					Once()
+				mjs.On("GenerateTokenPair", user).
+					Return("", "", fmt.Errorf("token generation failed")).
+					Once()
 			},
 			expectedStatus: http.StatusInternalServerError,
 			expectedResponse: dto.ErrorResponse{
@@ -542,7 +590,9 @@ func TestAuthHandler_Login(t *testing.T) {
 			setupMocks: func(mus *MockUserService, mjs *MockJWTService, tps *TestPasswordService) {
 				user := createTestUser()
 				tps.shouldValidatePassword = false // Configure to return false
-				mus.On("GetByEmail", "test@example.com").Return(user, nil).Once()
+				mus.On("GetByEmail", "test@example.com").
+					Return(user, nil).
+					Once()
 			},
 			expectedStatus: http.StatusUnauthorized,
 			expectedResponse: dto.ErrorResponse{
@@ -566,7 +616,11 @@ func TestAuthHandler_Login(t *testing.T) {
 			reqBody, err := json.Marshal(tc.request)
 			require.NoError(t, err)
 
-			request := httptest.NewRequest(http.MethodPost, "/auth/login", bytes.NewBuffer(reqBody))
+			request := httptest.NewRequest(
+				http.MethodPost,
+				"/auth/login",
+				bytes.NewBuffer(reqBody),
+			)
 			request.Header.Set("Content-Type", "application/json")
 			rec := httptest.NewRecorder()
 			c := e.NewContext(request, rec)
@@ -631,7 +685,10 @@ type LogoutTestCase struct {
 // Helper functions for better test organization
 
 // createEchoContext creates a new Echo context for testing
-func createEchoContext(method, path string, body []byte) (echo.Context, *httptest.ResponseRecorder) {
+func createEchoContext(
+	method, path string,
+	body []byte,
+) (echo.Context, *httptest.ResponseRecorder) {
 	e := echo.New()
 	req := httptest.NewRequest(method, path, bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
@@ -640,7 +697,11 @@ func createEchoContext(method, path string, body []byte) (echo.Context, *httptes
 }
 
 // assertErrorResponse validates error response structure
-func assertErrorResponse(t *testing.T, body []byte, expected dto.ErrorResponse) {
+func assertErrorResponse(
+	t *testing.T,
+	body []byte,
+	expected dto.ErrorResponse,
+) {
 	var response dto.ErrorResponse
 	err := json.Unmarshal(body, &response)
 	require.NoError(t, err)
@@ -651,7 +712,8 @@ func assertErrorResponse(t *testing.T, body []byte, expected dto.ErrorResponse) 
 	}
 }
 
-// TestAuthHandler_Refresh tests token refresh functionality using table-driven approach.
+// TestAuthHandler_Refresh tests token refresh functionality using table-driven
+// approach.
 func TestAuthHandler_Refresh(t *testing.T) {
 	testCases := []RefreshTestCase{
 		{
@@ -660,7 +722,9 @@ func TestAuthHandler_Refresh(t *testing.T) {
 				RefreshToken: "valid_refresh_token",
 			},
 			setupMocks: func(mus *MockUserService, mjs *MockJWTService, tps *TestPasswordService) {
-				mjs.On("RefreshToken", "valid_refresh_token").Return("new_access_token", nil).Once()
+				mjs.On("RefreshToken", "valid_refresh_token").
+					Return("new_access_token", nil).
+					Once()
 			},
 			expectedStatus: http.StatusOK,
 			expectedResponse: dto.RefreshResponse{
@@ -675,7 +739,9 @@ func TestAuthHandler_Refresh(t *testing.T) {
 				RefreshToken: "invalid_token",
 			},
 			setupMocks: func(mus *MockUserService, mjs *MockJWTService, tps *TestPasswordService) {
-				mjs.On("RefreshToken", "invalid_token").Return("", fmt.Errorf("invalid token")).Once()
+				mjs.On("RefreshToken", "invalid_token").
+					Return("", fmt.Errorf("invalid token")).
+					Once()
 			},
 			expectedStatus: http.StatusUnauthorized,
 			expectedResponse: dto.ErrorResponse{
@@ -728,7 +794,11 @@ func TestAuthHandler_Refresh(t *testing.T) {
 			reqBody, err := json.Marshal(tc.request)
 			require.NoError(t, err)
 
-			c, rec := createEchoContext(http.MethodPost, "/auth/refresh", reqBody)
+			c, rec := createEchoContext(
+				http.MethodPost,
+				"/auth/refresh",
+				reqBody,
+			)
 
 			// Execute
 			err = handler.Refresh(c)
@@ -740,7 +810,11 @@ func TestAuthHandler_Refresh(t *testing.T) {
 			// Parse and verify response
 			if tc.expectedStatus >= 400 {
 				// Error response
-				assertErrorResponse(t, rec.Body.Bytes(), tc.expectedResponse.(dto.ErrorResponse))
+				assertErrorResponse(
+					t,
+					rec.Body.Bytes(),
+					tc.expectedResponse.(dto.ErrorResponse),
+				)
 			} else {
 				// Success response
 				var response dto.RefreshResponse
@@ -759,7 +833,8 @@ func TestAuthHandler_Refresh(t *testing.T) {
 	}
 }
 
-// TestAuthHandler_Logout tests logout functionality using table-driven approach.
+// TestAuthHandler_Logout tests logout functionality using table-driven
+// approach.
 func TestAuthHandler_Logout(t *testing.T) {
 	testCases := []LogoutTestCase{
 		{
@@ -768,7 +843,9 @@ func TestAuthHandler_Logout(t *testing.T) {
 				AccessToken: "valid_access_token",
 			},
 			setupMocks: func(mus *MockUserService, mjs *MockJWTService, tps *TestPasswordService) {
-				mjs.On("InvalidateToken", "valid_access_token").Return(nil).Once()
+				mjs.On("InvalidateToken", "valid_access_token").
+					Return(nil).
+					Once()
 			},
 			expectedStatus: http.StatusOK,
 			expectedResponse: dto.LogoutResponse{
@@ -781,7 +858,9 @@ func TestAuthHandler_Logout(t *testing.T) {
 				AccessToken: "problematic_token",
 			},
 			setupMocks: func(mus *MockUserService, mjs *MockJWTService, tps *TestPasswordService) {
-				mjs.On("InvalidateToken", "problematic_token").Return(fmt.Errorf("token invalidation failed")).Once()
+				mjs.On("InvalidateToken", "problematic_token").
+					Return(fmt.Errorf("token invalidation failed")).
+					Once()
 			},
 			expectedStatus: http.StatusOK,
 			expectedResponse: dto.LogoutResponse{
@@ -845,7 +924,11 @@ func TestAuthHandler_Logout(t *testing.T) {
 			reqBody, err := json.Marshal(tc.request)
 			require.NoError(t, err)
 
-			c, rec := createEchoContext(http.MethodPost, "/auth/logout", reqBody)
+			c, rec := createEchoContext(
+				http.MethodPost,
+				"/auth/logout",
+				reqBody,
+			)
 
 			// Execute
 			err = handler.Logout(c)
@@ -857,7 +940,11 @@ func TestAuthHandler_Logout(t *testing.T) {
 			// Parse and verify response
 			if tc.expectedStatus >= 400 {
 				// Error response
-				assertErrorResponse(t, rec.Body.Bytes(), tc.expectedResponse.(dto.ErrorResponse))
+				assertErrorResponse(
+					t,
+					rec.Body.Bytes(),
+					tc.expectedResponse.(dto.ErrorResponse),
+				)
 			} else {
 				// Success response
 				var response dto.LogoutResponse
@@ -880,7 +967,11 @@ func TestAuthHandler_EdgeCases(t *testing.T) {
 		handler, _, _, _ := setupTestAuthHandler()
 
 		// Test with invalid JSON
-		c, rec := createEchoContext(http.MethodPost, "/auth/register", []byte("invalid json"))
+		c, rec := createEchoContext(
+			http.MethodPost,
+			"/auth/register",
+			[]byte("invalid json"),
+		)
 
 		err := handler.Register(c)
 		assert.NoError(t, err)
@@ -897,7 +988,11 @@ func TestAuthHandler_EdgeCases(t *testing.T) {
 		handler, _, _, _ := setupTestAuthHandler()
 
 		// Test with JSON missing required fields
-		c, rec := createEchoContext(http.MethodPost, "/auth/register", []byte(`{"email": "test@example.com"}`))
+		c, rec := createEchoContext(
+			http.MethodPost,
+			"/auth/register",
+			[]byte(`{"email": "test@example.com"}`),
+		)
 
 		err := handler.Register(c)
 		assert.NoError(t, err)
@@ -931,7 +1026,8 @@ func TestAuthHandler_EdgeCases(t *testing.T) {
 	})
 }
 
-// TestJWTMiddlewareVersionCompatibility tests JWT library version compatibility.
+// TestJWTMiddlewareVersionCompatibility tests JWT library version
+// compatibility.
 //
 // CRITICAL TEST: This test verifies that the JWT library version used by
 // echo-jwt matches the version used in our code, preventing type assertion
@@ -961,7 +1057,11 @@ func TestJWTMiddlewareVersionCompatibility(t *testing.T) {
 
 		// Generate real JWT token
 		accessToken, err := jwtService.GenerateAccessToken(user)
-		require.NoError(t, err, "Failed to generate access token for compatibility test")
+		require.NoError(
+			t,
+			err,
+			"Failed to generate access token for compatibility test",
+		)
 
 		// Add protected route that uses JWT type assertions
 		e.GET("/protected", func(c echo.Context) error {
@@ -969,20 +1069,33 @@ func TestJWTMiddlewareVersionCompatibility(t *testing.T) {
 			// This test detects golang-jwt/jwt version mismatches
 			token, ok := c.Get("user").(*jwt.Token)
 			if !ok {
-				t.Fatalf("JWT library version mismatch: token type assertion failed")
-				return echo.NewHTTPError(http.StatusInternalServerError, "JWT type mismatch")
+				t.Fatalf(
+					"JWT library version mismatch: token type assertion failed",
+				)
+				return echo.NewHTTPError(
+					http.StatusInternalServerError,
+					"JWT type mismatch",
+				)
 			}
 
 			claims, ok := token.Claims.(*services.TokenClaims)
 			if !ok {
-				t.Fatalf("JWT library version mismatch: claims type assertion failed")
-				return echo.NewHTTPError(http.StatusInternalServerError, "Claims type mismatch")
+				t.Fatalf(
+					"JWT library version mismatch: claims type assertion failed",
+				)
+				return echo.NewHTTPError(
+					http.StatusInternalServerError,
+					"Claims type mismatch",
+				)
 			}
 
 			// Verify claims are accessible
 			if claims.UserID != user.ID {
 				t.Fatalf("JWT library version mismatch: user ID mismatch")
-				return echo.NewHTTPError(http.StatusInternalServerError, "User ID mismatch")
+				return echo.NewHTTPError(
+					http.StatusInternalServerError,
+					"User ID mismatch",
+				)
 			}
 
 			return c.JSON(http.StatusOK, map[string]interface{}{
@@ -1001,8 +1114,12 @@ func TestJWTMiddlewareVersionCompatibility(t *testing.T) {
 		e.ServeHTTP(rec, req)
 
 		// Verify response
-		assert.Equal(t, http.StatusOK, rec.Code,
-			"JWT middleware compatibility test failed. This may indicate a golang-jwt/jwt version mismatch between echo-jwt and our code.")
+		assert.Equal(
+			t,
+			http.StatusOK,
+			rec.Code,
+			"JWT middleware compatibility test failed. This may indicate a golang-jwt/jwt version mismatch between echo-jwt and our code.",
+		)
 
 		// Verify response body contains expected user data
 		var response map[string]interface{}

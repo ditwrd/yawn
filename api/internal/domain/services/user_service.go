@@ -55,7 +55,8 @@ func (s *userService) Create(user *models.User) error {
 
 	user.Email = strings.ToLower(strings.TrimSpace(user.Email))
 
-	if !strings.Contains(user.Email, "@") || !strings.Contains(user.Email, ".") {
+	if !strings.Contains(user.Email, "@") ||
+		!strings.Contains(user.Email, ".") {
 		return fmt.Errorf("invalid email format")
 	}
 
@@ -126,7 +127,8 @@ func (s *userService) Update(user *models.User) error {
 
 	if user.Email != "" {
 		user.Email = strings.ToLower(strings.TrimSpace(user.Email))
-		if !strings.Contains(user.Email, "@") || !strings.Contains(user.Email, ".") {
+		if !strings.Contains(user.Email, "@") ||
+			!strings.Contains(user.Email, ".") {
 			return fmt.Errorf("invalid email format")
 		}
 	}

@@ -46,7 +46,8 @@ func Migrate(db *gorm.DB) error {
 		return fmt.Errorf("failed to run auto-migration: %w", err)
 	}
 
-	// Create additional constraints and indexes that aren't handled by AutoMigrate
+	// Create additional constraints and indexes that aren't handled by
+	// AutoMigrate
 	if err := createAdditionalConstraints(db); err != nil {
 		return fmt.Errorf("failed to create additional constraints: %w", err)
 	}
@@ -54,7 +55,8 @@ func Migrate(db *gorm.DB) error {
 	return nil
 }
 
-// enableForeignKeysForSQLite enables foreign key constraints for SQLite databases.
+// enableForeignKeysForSQLite enables foreign key constraints for SQLite
+// databases.
 func enableForeignKeysForSQLite(db *gorm.DB) error {
 	var sqlDBDialectorName string
 	if dialector, ok := db.Dialector.(interface{ Name() string }); ok {
@@ -69,14 +71,18 @@ func enableForeignKeysForSQLite(db *gorm.DB) error {
 	return nil
 }
 
-// createAdditionalConstraints creates any additional constraints that need manual setup.
+// createAdditionalConstraints creates any additional constraints that need
+// manual setup.
 func createAdditionalConstraints(db *gorm.DB) error {
 	// Create composite unique index for ProjectUser lookup
 	if err := db.Exec(`
 		CREATE UNIQUE INDEX IF NOT EXISTS idx_project_users_project_user
 		ON project_users (project_id, user_id)
 	`).Error; err != nil {
-		return fmt.Errorf("failed to create unique index for project_users: %w", err)
+		return fmt.Errorf(
+			"failed to create unique index for project_users: %w",
+			err,
+		)
 	}
 
 	// Create index for AssetPipeline ordering
@@ -84,7 +90,10 @@ func createAdditionalConstraints(db *gorm.DB) error {
 		CREATE INDEX IF NOT EXISTS idx_asset_pipelines_pipeline_order
 		ON asset_pipelines (pipeline_id, "order")
 	`).Error; err != nil {
-		return fmt.Errorf("failed to create composite index for asset_pipelines: %w", err)
+		return fmt.Errorf(
+			"failed to create composite index for asset_pipelines: %w",
+			err,
+		)
 	}
 
 	return nil

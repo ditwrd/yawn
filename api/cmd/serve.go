@@ -70,8 +70,10 @@ Once running, access:
 
 func init() {
 	// Add local flags for the serve command
-	serveCmd.Flags().StringP("port", "p", "", "Port to run the Yawn platform server on")
-	serveCmd.Flags().StringP("host", "H", "", "Host to bind the Yawn platform server to")
+	serveCmd.Flags().
+		StringP("port", "p", "", "Port to run the Yawn platform server on")
+	serveCmd.Flags().
+		StringP("host", "H", "", "Host to bind the Yawn platform server to")
 	serveCmd.Flags().
 		Bool("dev", false, "Enable development mode with hot-reload for workflow testing")
 
@@ -119,7 +121,10 @@ func runServe(cmd *cobra.Command, args []string) error {
 	}
 
 	// Create shutdown context with timeout
-	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 30*time.Second)
+	shutdownCtx, shutdownCancel := context.WithTimeout(
+		context.Background(),
+		30*time.Second,
+	)
 	defer shutdownCancel()
 
 	// Stop the application
@@ -131,7 +136,8 @@ func runServe(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// loadCommandConfig loads configuration for commands, reusing the viper from root.go
+// loadCommandConfig loads configuration for commands, reusing the viper from
+// root.go
 func loadCommandConfig() (*config.Config, error) {
 	var cfg config.Config
 	if err := viper.Unmarshal(&cfg); err != nil {
@@ -144,13 +150,27 @@ func loadCommandConfig() (*config.Config, error) {
 // printServerInfo prints server startup information
 func printServerInfo(config *config.Config) {
 	fmt.Printf("🚀 Starting Yawn Platform Server\n")
-	fmt.Printf("📡 Server: http://%s:%s\n", config.Server.Host, config.Server.Port)
+	fmt.Printf(
+		"📡 Server: http://%s:%s\n",
+		config.Server.Host,
+		config.Server.Port,
+	)
 	fmt.Printf("💾 Database: %s\n", config.Database.Type)
 	if viper.GetBool("dev") {
 		fmt.Printf("🔧 Development mode: enabled (hot-reload for workflows)\n")
 	}
-	fmt.Printf("🌐 Web Interface: http://%s:%s\n", config.Server.Host, config.Server.Port)
-	fmt.Printf("📚 API Docs: http://%s:%s/docs\n", config.Server.Host, config.Server.Port)
-	fmt.Println("✨ Yawn (Yet Another Workflow eNgine) - Asset-centric workflows ready!")
+	fmt.Printf(
+		"🌐 Web Interface: http://%s:%s\n",
+		config.Server.Host,
+		config.Server.Port,
+	)
+	fmt.Printf(
+		"📚 API Docs: http://%s:%s/docs\n",
+		config.Server.Host,
+		config.Server.Port,
+	)
+	fmt.Println(
+		"✨ Yawn (Yet Another Workflow eNgine) - Asset-centric workflows ready!",
+	)
 	fmt.Println("Press Ctrl+C to stop the server")
 }

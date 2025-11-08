@@ -43,7 +43,10 @@ func setupTestEcho() (*echo.Echo, *MockUserService, *UserHandler) {
 	return e, mockService, handler
 }
 
-func createTestUserWithParams(id, email string, role models.UserRole) *models.User {
+func createTestUserWithParams(
+	id, email string,
+	role models.UserRole,
+) *models.User {
 	userID, _ := uuid.FromString(id)
 	return &models.User{
 		ID:    userID,
@@ -88,10 +91,19 @@ func TestUserHandler_ListUsers_AdminSuccess(t *testing.T) {
 func TestUserHandler_GetUser_SelfAccessSuccess(t *testing.T) {
 	e, mockService, handler := setupTestEcho()
 
-	testUser := createTestUserWithParams("123e4567-e89b-12d3-a456-426614174000", "user@example.com", models.UserRoleUser)
-	mockService.On("GetByID", "123e4567-e89b-12d3-a456-426614174000").Return(testUser, nil)
+	testUser := createTestUserWithParams(
+		"123e4567-e89b-12d3-a456-426614174000",
+		"user@example.com",
+		models.UserRoleUser,
+	)
+	mockService.On("GetByID", "123e4567-e89b-12d3-a456-426614174000").
+		Return(testUser, nil)
 
-	req := httptest.NewRequest(http.MethodGet, "/users/123e4567-e89b-12d3-a456-426614174000", nil)
+	req := httptest.NewRequest(
+		http.MethodGet,
+		"/users/123e4567-e89b-12d3-a456-426614174000",
+		nil,
+	)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetParamNames("id")
@@ -119,9 +131,14 @@ func TestUserHandler_GetUser_SelfAccessSuccess(t *testing.T) {
 func TestUserHandler_UpdateUser_AdminSuccess(t *testing.T) {
 	e, mockService, handler := setupTestEcho()
 
-	testUser := createTestUserWithParams("123e4567-e89b-12d3-a456-426614174000", "user@example.com", models.UserRoleUser)
+	testUser := createTestUserWithParams(
+		"123e4567-e89b-12d3-a456-426614174000",
+		"user@example.com",
+		models.UserRoleUser,
+	)
 
-	mockService.On("GetByID", "123e4567-e89b-12d3-a456-426614174000").Return(testUser, nil)
+	mockService.On("GetByID", "123e4567-e89b-12d3-a456-426614174000").
+		Return(testUser, nil)
 	mockService.On("Update", mock.AnythingOfType("*models.User")).Return(nil)
 
 	updateReq := dto.UpdateUserRequest{
@@ -130,7 +147,11 @@ func TestUserHandler_UpdateUser_AdminSuccess(t *testing.T) {
 	}
 	reqBody, _ := json.Marshal(updateReq)
 
-	req := httptest.NewRequest(http.MethodPut, "/users/123e4567-e89b-12d3-a456-426614174000", bytes.NewReader(reqBody))
+	req := httptest.NewRequest(
+		http.MethodPut,
+		"/users/123e4567-e89b-12d3-a456-426614174000",
+		bytes.NewReader(reqBody),
+	)
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
@@ -158,11 +179,20 @@ func TestUserHandler_UpdateUser_AdminSuccess(t *testing.T) {
 func TestUserHandler_DeleteUser_AdminSuccess(t *testing.T) {
 	e, mockService, handler := setupTestEcho()
 
-	testUser := createTestUserWithParams("123e4567-e89b-12d3-a456-426614174000", "user@example.com", models.UserRoleUser)
-	mockService.On("GetByID", "123e4567-e89b-12d3-a456-426614174000").Return(testUser, nil)
+	testUser := createTestUserWithParams(
+		"123e4567-e89b-12d3-a456-426614174000",
+		"user@example.com",
+		models.UserRoleUser,
+	)
+	mockService.On("GetByID", "123e4567-e89b-12d3-a456-426614174000").
+		Return(testUser, nil)
 	mockService.On("Delete", "123e4567-e89b-12d3-a456-426614174000").Return(nil)
 
-	req := httptest.NewRequest(http.MethodDelete, "/users/123e4567-e89b-12d3-a456-426614174000", nil)
+	req := httptest.NewRequest(
+		http.MethodDelete,
+		"/users/123e4567-e89b-12d3-a456-426614174000",
+		nil,
+	)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetParamNames("id")

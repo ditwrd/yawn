@@ -30,9 +30,9 @@ import (
 
 // RouterConfig contains dependencies for route setup.
 type RouterConfig struct {
-	AuthHandler    *handlers.AuthHandler
-	UserHandler    *handlers.UserHandler
-	AuthMiddleware *middleware.AuthMiddleware
+	AuthHandler     *handlers.AuthHandler
+	UserHandler     *handlers.UserHandler
+	AuthMiddleware  *middleware.AuthMiddleware
 	AuthzMiddleware *middleware.AuthorizationMiddleware
 }
 
@@ -58,19 +58,28 @@ func SetupRoutes(e *echo.Echo, cfg *RouterConfig) {
 
 	// User management routes (auth required)
 	userGroup := v1.Group("/users")
-	userGroup.Use(cfg.AuthMiddleware.RequireAuth()) // All user routes require authentication
+	userGroup.Use(
+		cfg.AuthMiddleware.RequireAuth(),
+	) // All user routes require authentication
 
 	// Admin-only routes
-	userGroup.Use(cfg.AuthzMiddleware.RequireAdmin()) // GET /users and DELETE /users require admin
+	userGroup.Use(
+		cfg.AuthzMiddleware.RequireAdmin(),
+	) // GET /users and DELETE /users require admin
 	userGroup.GET("", cfg.UserHandler.ListUsers)
 	userGroup.DELETE("/:id", cfg.UserHandler.DeleteUser)
 
 	// Self or admin routes
-	// For these routes, we need to reset the admin requirement and add role or ownership
+	// For these routes, we need to reset the admin requirement and add role or
+	// ownership
 	// So we create separate groups with different middleware
 	userSelfOrAdmin := v1.Group("/users")
-	userSelfOrAdmin.Use(cfg.AuthMiddleware.RequireAuth()) // Require authentication
-	userSelfOrAdmin.Use(cfg.AuthzMiddleware.RequireRoleOrOwnership(models.UserRoleAdmin)) // Admin or owner
+	userSelfOrAdmin.Use(
+		cfg.AuthMiddleware.RequireAuth(),
+	) // Require authentication
+	userSelfOrAdmin.Use(
+		cfg.AuthzMiddleware.RequireRoleOrOwnership(models.UserRoleAdmin),
+	) // Admin or owner
 	userSelfOrAdmin.GET("/:id", cfg.UserHandler.GetUser)
 	userSelfOrAdmin.PUT("/:id", cfg.UserHandler.UpdateUser)
 }

@@ -81,9 +81,17 @@ func (s *passwordService) HashPassword(password string) (string, error) {
 	}
 
 	// Generate Argon2id hash
-	hash := argon2.IDKey([]byte(password), salt, s.config.Iterations, s.config.Memory, s.config.Parallelism, s.config.KeyLength)
+	hash := argon2.IDKey(
+		[]byte(password),
+		salt,
+		s.config.Iterations,
+		s.config.Memory,
+		s.config.Parallelism,
+		s.config.KeyLength,
+	)
 
-	// Format: $argon2id$v=19$m=<memory>,t=<iterations>,p=<parallelism>$<salt>$<hash>
+	// Format:
+	// $argon2id$v=19$m=<memory>,t=<iterations>,p=<parallelism>$<salt>$<hash>
 	// Using PHC (Password Hashing Competition) string format
 	saltBase64 := base64.RawStdEncoding.EncodeToString(salt)
 	hashBase64 := base64.RawStdEncoding.EncodeToString(hash)
@@ -96,16 +104,28 @@ func (s *passwordService) HashPassword(password string) (string, error) {
 	return passwordHash, nil
 }
 
-func (s *passwordService) ValidatePassword(password, hash string) (bool, error) {
+func (s *passwordService) ValidatePassword(
+	password, hash string,
+) (bool, error) {
 	// Parse the PHC string format
-	// Expected format: $argon2id$v=19$m=<memory>,t=<iterations>,p=<parallelism>$<salt>$<hash>
-	memory, iterations, parallelism, salt, decodedHash, err := s.parseArgon2Hash(hash)
+	// Expected format:
+	// $argon2id$v=19$m=<memory>,t=<iterations>,p=<parallelism>$<salt>$<hash>
+	memory, iterations, parallelism, salt, decodedHash, err := s.parseArgon2Hash(
+		hash,
+	)
 	if err != nil {
 		return false, fmt.Errorf("failed to parse hash: %w", err)
 	}
 
 	// Generate hash of the provided password using the same parameters
-	computedHash := argon2.IDKey([]byte(password), salt, iterations, memory, parallelism, uint32(len(decodedHash)))
+	computedHash := argon2.IDKey(
+		[]byte(password),
+		salt,
+		iterations,
+		memory,
+		parallelism,
+		uint32(len(decodedHash)),
+	)
 
 	// Use constant-time comparison to prevent timing attacks
 	if subtle.ConstantTimeCompare(decodedHash, computedHash) == 1 {
@@ -117,7 +137,10 @@ func (s *passwordService) ValidatePassword(password, hash string) (bool, error) 
 
 func (s *passwordService) CheckPasswordStrength(password string) error {
 	if len(password) < s.config.MinLength {
-		return fmt.Errorf("password must be at least %d characters long", s.config.MinLength)
+		return fmt.Errorf(
+			"password must be at least %d characters long",
+			s.config.MinLength,
+		)
 	}
 
 	if s.config.RequireUppercase && !s.hasUppercase(password) {
@@ -133,11 +156,15 @@ func (s *passwordService) CheckPasswordStrength(password string) error {
 	}
 
 	if s.config.RequireSpecialChars && !s.hasSpecialChar(password) {
-		return fmt.Errorf("password must contain at least one special character")
+		return fmt.Errorf(
+			"password must contain at least one special character",
+		)
 	}
 
 	if s.isCommonPassword(password) {
-		return fmt.Errorf("password is too common, please choose a stronger one")
+		return fmt.Errorf(
+			"password is too common, please choose a stronger one",
+		)
 	}
 
 	return nil
@@ -208,24 +235,36 @@ func (s *passwordService) isCommonPassword(password string) bool {
 }
 
 // parseArgon2Hash parses an Argon2id PHC string and returns its components.
-// Expected format: $argon2id$v=19$m=<memory>,t=<iterations>,p=<parallelism>$<salt>$<hash>
-func (s *passwordService) parseArgon2Hash(hash string) (memory uint32, iterations uint32, parallelism uint8, salt []byte, decodedHash []byte, err error) {
+// Expected format:
+// $argon2id$v=19$m=<memory>,t=<iterations>,p=<parallelism>$<salt>$<hash>
+func (s *passwordService) parseArgon2Hash(
+	hash string,
+) (memory, iterations uint32, parallelism uint8, salt, decodedHash []byte, err error) {
 	// Basic validation of hash format
 	if len(hash) < 10 || hash[:10] != "$argon2id$" {
-		return 0, 0, 0, nil, nil, fmt.Errorf("invalid hash format: not an Argon2id hash")
+		return 0, 0, 0, nil, nil, fmt.Errorf(
+			"invalid hash format: not an Argon2id hash",
+		)
 	}
 
 	// Split the hash into components using strings.Split for simplicity
 	parts := strings.Split(hash, "$")
 	if len(parts) != 6 || parts[1] != "argon2id" || parts[2] != "v=19" {
-		return 0, 0, 0, nil, nil, fmt.Errorf("invalid hash format: unexpected structure, got %d parts: %v", len(parts), parts)
+		return 0, 0, 0, nil, nil, fmt.Errorf(
+			"invalid hash format: unexpected structure, got %d parts: %v",
+			len(parts),
+			parts,
+		)
 	}
 
 	// Parse parameters: m=<memory>,t=<iterations>,p=<parallelism>
 	params := parts[3]
 	memory, iterations, parallelism, err = parseArgon2Params(params)
 	if err != nil {
-		return 0, 0, 0, nil, nil, fmt.Errorf("failed to parse parameters: %w", err)
+		return 0, 0, 0, nil, nil, fmt.Errorf(
+			"failed to parse parameters: %w",
+			err,
+		)
 	}
 
 	// Decode salt
@@ -243,9 +282,11 @@ func (s *passwordService) parseArgon2Hash(hash string) (memory uint32, iteration
 	return memory, iterations, parallelism, salt, decodedHash, nil
 }
 
-
-// parseArgon2Params parses the parameters string (m=<memory>,t=<iterations>,p=<parallelism>)
-func parseArgon2Params(params string) (memory uint32, iterations uint32, parallelism uint8, err error) {
+// parseArgon2Params parses the parameters string
+// (m=<memory>,t=<iterations>,p=<parallelism>)
+func parseArgon2Params(
+	params string,
+) (memory, iterations uint32, parallelism uint8, err error) {
 	// Split by comma
 	paramParts := strings.Split(params, ",")
 	if len(paramParts) != 3 {
@@ -288,7 +329,8 @@ func parseArgon2Params(params string) (memory uint32, iterations uint32, paralle
 	return memory, iterations, parallelism, nil
 }
 
-// DefaultPasswordConfig returns default password configuration using Argon2id with OWASP 2024/2025 recommendations.
+// DefaultPasswordConfig returns default password configuration using Argon2id
+// with OWASP 2024/2025 recommendations.
 //
 // Security parameters:
 // - Memory: 19456 KiB (19 MiB) - OWASP minimum recommendation

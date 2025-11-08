@@ -18,15 +18,16 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 // Package dto defines data transfer objects for API requests and responses.
 //
 // This package contains the DTOs used for user management HTTP requests
-// and responses in the YAWN API. All DTOs include proper JSON tags and validation
+// and responses in the YAWN API. All DTOs include proper JSON tags and
+// validation
 // tags for request binding and response formatting.
 package dto
 
 // UserResponse represents user information returned by API endpoints.
 type UserResponse struct {
-	ID        string `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
-	Email     string `json:"email" example:"user@example.com"`
-	Role      string `json:"role" example:"user"`
+	ID        string `json:"id"         example:"123e4567-e89b-12d3-a456-426614174000"`
+	Email     string `json:"email"      example:"user@example.com"`
+	Role      string `json:"role"       example:"user"`
 	CreatedAt string `json:"created_at" example:"2025-01-01T00:00:00Z"`
 	UpdatedAt string `json:"updated_at" example:"2025-01-01T00:00:00Z"`
 }
@@ -42,7 +43,7 @@ type UserListResponse struct {
 // UpdateUserRequest represents a user update request.
 type UpdateUserRequest struct {
 	Email string `json:"email,omitempty" example:"newemail@example.com"`
-	Role  string `json:"role,omitempty" example:"admin"`
+	Role  string `json:"role,omitempty"  example:"admin"`
 }
 
 // UserDeleteResponse represents a successful user deletion response.
