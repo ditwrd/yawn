@@ -10,7 +10,6 @@ require (
 	github.com/spf13/viper v1.15.0
 	github.com/stretchr/testify v1.11.1
 	go.uber.org/fx v1.24.0
-	go.uber.org/zap v1.26.0
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/driver/sqlite v1.6.0
 	gorm.io/gorm v1.31.1
@@ -47,6 +46,7 @@ require (
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	go.uber.org/dig v1.19.0 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
+	go.uber.org/zap v1.26.0 // indirect
 	golang.org/x/crypto v0.38.0 // indirect
 	golang.org/x/net v0.40.0 // indirect
 	golang.org/x/sync v0.17.0 // indirect

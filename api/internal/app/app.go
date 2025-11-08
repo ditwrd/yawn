@@ -46,6 +46,24 @@ func NewFxApp() *fx.App {
 	)
 }
 
+// NewFxAppWithConfig creates a new fx application with provided configuration
+func NewFxAppWithConfig(cfg *config.Config) *fx.App {
+	return fx.New(
+		// Provide configuration
+		fx.Provide(
+			func() (*config.Config, error) { return cfg, nil },
+			logger.NewLogger,
+			database.NewDatabase,
+			web.NewEcho,
+		),
+
+		// Start HTTP server
+		fx.Invoke(startServer),
+
+		// Use default fx logger for now
+	)
+}
+
 // loadConfig loads the application configuration
 func loadConfig() (*config.Config, error) {
 	return config.LoadConfig("")

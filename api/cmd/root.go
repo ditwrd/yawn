@@ -19,6 +19,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -29,16 +30,21 @@ var cfgFile string
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "api",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
+	Short: "Yawn (Yet Another Workflow eNgine) - Unified Workflow Platform",
+	Long: `Yawn (Yet Another Workflow eNgine) is a unified platform that combines the strengths
+of Airflow, Dagster, Windmill, AppSmith, and n8n into one cohesive environment.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+Built with an asset-centric philosophy, Yawn enables both engineers and non-engineers to
+collaboratively build DAG pipelines, automations, and dashboards in a shared workspace.
+
+Key Features:
+• Asset-centric workflow design (focus on outputs, not tasks)
+• Unified platform for pipelines, automations, and dashboards
+• GitOps integration with code-based workflow definitions
+• Collaborative environment for technical and non-technical users
+• Python SDK for custom logic and integrations
+
+This CLI provides commands to manage the Yawn platform server and workflows.`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -53,15 +59,18 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
+	// Global persistent flags
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file for Yawn platform settings (default is $HOME/.yawn.yaml, ./config.yaml, or ./yawn.yaml)")
+	rootCmd.PersistentFlags().Bool("verbose", false, "enable verbose logging for workflow execution and platform operations")
+	rootCmd.PersistentFlags().StringP("log-level", "l", "info", "log level for platform and workflow logging (debug, info, warn, error)")
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.api.yaml)")
+	// Bind flags to viper
+	viper.BindPFlag("verbose", rootCmd.PersistentFlags().Lookup("verbose"))
+	viper.BindPFlag("logger.level", rootCmd.PersistentFlags().Lookup("log-level"))
 
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// Set default values
+	viper.SetDefault("verbose", false)
+	viper.SetDefault("logger.level", "info")
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -70,20 +79,60 @@ func initConfig() {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
-		// Find home directory.
-		home, err := os.UserHomeDir()
-		cobra.CheckErr(err)
-
-		// Search config in home directory with name ".api" (without extension).
-		viper.AddConfigPath(home)
+		// Set config file name and search paths
+		viper.SetConfigName("config")
+		viper.SetConfigName("yawn")
 		viper.SetConfigType("yaml")
-		viper.SetConfigName(".api")
+
+		// Add search paths in order of preference
+		viper.AddConfigPath(".")
+		viper.AddConfigPath("./config")
+		viper.AddConfigPath("/etc/yawn")
+
+		// Add home directory as last resort
+		if home, err := os.UserHomeDir(); err == nil {
+			viper.AddConfigPath(home)
+			viper.SetConfigName(".yawn")
+		}
 	}
 
-	viper.AutomaticEnv() // read in environment variables that match
+	// Set environment variable prefix and replacer
+	viper.SetEnvPrefix("YAWN")
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	viper.AutomaticEnv()
+
+	// Set application defaults
+	setAppDefaults()
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
 	}
+}
+
+// setAppDefaults sets default configuration values
+func setAppDefaults() {
+	// Server defaults
+	viper.SetDefault("server.port", "8080")
+	viper.SetDefault("server.host", "0.0.0.0")
+	viper.SetDefault("server.read_timeout", 30)
+	viper.SetDefault("server.write_timeout", 30)
+
+	// Database defaults
+	viper.SetDefault("database.type", "sqlite")
+	viper.SetDefault("database.path", "./yawn.db")
+	viper.SetDefault("database.host", "localhost")
+	viper.SetDefault("database.port", "5432")
+	viper.SetDefault("database.name", "yawn")
+	viper.SetDefault("database.user", "yawn")
+	viper.SetDefault("database.password", "")
+	viper.SetDefault("database.ssl_mode", "disable")
+
+	// JWT defaults
+	viper.SetDefault("jwt.secret", "change-me-in-production")
+	viper.SetDefault("jwt.ttl", 3600) // 1 hour
+
+	// Logger defaults
+	viper.SetDefault("logger.level", "info")
+	viper.SetDefault("logger.format", "json")
 }

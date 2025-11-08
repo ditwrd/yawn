@@ -14,10 +14,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-package main
+package cmd
 
-import "github.com/ditwrd/yawn/api/cmd"
-
-func main() {
-	cmd.Execute()
+func init() {
+	rootCmd.AddCommand(serveCmd)
+	rootCmd.AddCommand(versionCmd)
 }
