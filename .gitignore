@@ -171,3 +171,4 @@ dist
 .moon/cache
 .moon/docker
 tmp/*
+yawn.db
