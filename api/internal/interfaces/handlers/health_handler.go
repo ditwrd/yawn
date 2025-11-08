@@ -14,12 +14,26 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-package main
+package handlers
 
 import (
-	"github.com/ditwrd/yawn/api/cmd"
+	"net/http"
+
+	"github.com/labstack/echo/v4"
 )
 
-func main() {
-	cmd.Execute()
+// HealthHandler handles health check endpoints
+type HealthHandler struct{}
+
+// NewHealthHandler creates a new HealthHandler
+func NewHealthHandler() *HealthHandler {
+	return &HealthHandler{}
+}
+
+// Health performs a health check
+func (h *HealthHandler) Health(c echo.Context) error {
+	return c.JSON(http.StatusOK, map[string]string{
+		"status": "healthy",
+		"service": "yawn-api",
+	})
 }
