@@ -21,6 +21,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -218,4 +219,456 @@ func TestPasswordService_ParseArgon2Hash(t *testing.T) {
 			)
 		}
 	})
+}
+
+func TestNewPasswordService(t *testing.T) {
+	t.Parallel()
+	type args struct {
+		config *PasswordConfig
+	}
+	tests := []struct {
+		name string
+		args args
+		want PasswordService
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			if got := NewPasswordService(tt.args.config); !cmp.Equal(tt.want, got) {
+				t.Errorf(
+					"NewPasswordService() = %v, want %v\ndiff=%s",
+					got,
+					tt.want,
+					cmp.Diff(tt.want, got),
+				)
+			}
+		})
+	}
+}
+
+func Test_passwordService_HashPassword(t *testing.T) {
+	t.Parallel()
+	type fields struct {
+		config *PasswordConfig
+	}
+	type args struct {
+		password string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    string
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			s := &passwordService{
+				config: tt.fields.config,
+			}
+			got, err := s.HashPassword(tt.args.password)
+			if (err != nil) != tt.wantErr {
+				t.Fatalf(
+					"passwordService.HashPassword() error = %v, wantErr %v",
+					err,
+					tt.wantErr,
+				)
+			}
+			if tt.wantErr {
+				return
+			}
+			if got != tt.want {
+				t.Errorf("passwordService.HashPassword() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_passwordService_ValidatePassword(t *testing.T) {
+	t.Parallel()
+	type fields struct {
+		config *PasswordConfig
+	}
+	type args struct {
+		password string
+		hash     string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    bool
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			s := &passwordService{
+				config: tt.fields.config,
+			}
+			got, err := s.ValidatePassword(tt.args.password, tt.args.hash)
+			if (err != nil) != tt.wantErr {
+				t.Fatalf(
+					"passwordService.ValidatePassword() error = %v, wantErr %v",
+					err,
+					tt.wantErr,
+				)
+			}
+			if tt.wantErr {
+				return
+			}
+			if got != tt.want {
+				t.Errorf(
+					"passwordService.ValidatePassword() = %v, want %v",
+					got,
+					tt.want,
+				)
+			}
+		})
+	}
+}
+
+func Test_passwordService_CheckPasswordStrength(t *testing.T) {
+	t.Parallel()
+	type fields struct {
+		config *PasswordConfig
+	}
+	type args struct {
+		password string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			s := &passwordService{
+				config: tt.fields.config,
+			}
+			if err := s.CheckPasswordStrength(tt.args.password); (err != nil) != tt.wantErr {
+				t.Errorf(
+					"passwordService.CheckPasswordStrength() error = %v, wantErr %v",
+					err,
+					tt.wantErr,
+				)
+			}
+		})
+	}
+}
+
+func Test_passwordService_hasUppercase(t *testing.T) {
+	t.Parallel()
+	type fields struct {
+		config *PasswordConfig
+	}
+	type args struct {
+		password string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			s := &passwordService{
+				config: tt.fields.config,
+			}
+			if got := s.hasUppercase(tt.args.password); got != tt.want {
+				t.Errorf("passwordService.hasUppercase() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_passwordService_hasLowercase(t *testing.T) {
+	t.Parallel()
+	type fields struct {
+		config *PasswordConfig
+	}
+	type args struct {
+		password string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			s := &passwordService{
+				config: tt.fields.config,
+			}
+			if got := s.hasLowercase(tt.args.password); got != tt.want {
+				t.Errorf("passwordService.hasLowercase() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_passwordService_hasNumber(t *testing.T) {
+	t.Parallel()
+	type fields struct {
+		config *PasswordConfig
+	}
+	type args struct {
+		password string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			s := &passwordService{
+				config: tt.fields.config,
+			}
+			if got := s.hasNumber(tt.args.password); got != tt.want {
+				t.Errorf("passwordService.hasNumber() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_passwordService_hasSpecialChar(t *testing.T) {
+	t.Parallel()
+	type fields struct {
+		config *PasswordConfig
+	}
+	type args struct {
+		password string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			s := &passwordService{
+				config: tt.fields.config,
+			}
+			if got := s.hasSpecialChar(tt.args.password); got != tt.want {
+				t.Errorf("passwordService.hasSpecialChar() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_passwordService_isCommonPassword(t *testing.T) {
+	t.Parallel()
+	type fields struct {
+		config *PasswordConfig
+	}
+	type args struct {
+		password string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			s := &passwordService{
+				config: tt.fields.config,
+			}
+			if got := s.isCommonPassword(tt.args.password); got != tt.want {
+				t.Errorf(
+					"passwordService.isCommonPassword() = %v, want %v",
+					got,
+					tt.want,
+				)
+			}
+		})
+	}
+}
+
+func Test_passwordService_parseArgon2Hash(t *testing.T) {
+	t.Parallel()
+	type fields struct {
+		config *PasswordConfig
+	}
+	type args struct {
+		hash string
+	}
+	tests := []struct {
+		name            string
+		fields          fields
+		args            args
+		wantMemory      uint32
+		wantIterations  uint32
+		wantParallelism uint8
+		wantSalt        []byte
+		wantDecodedHash []byte
+		wantErr         bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			s := &passwordService{
+				config: tt.fields.config,
+			}
+			gotMemory, gotIterations, gotParallelism, gotSalt, gotDecodedHash, err := s.parseArgon2Hash(
+				tt.args.hash,
+			)
+			if (err != nil) != tt.wantErr {
+				t.Fatalf(
+					"passwordService.parseArgon2Hash() error = %v, wantErr %v",
+					err,
+					tt.wantErr,
+				)
+			}
+			if tt.wantErr {
+				return
+			}
+			if gotMemory != tt.wantMemory {
+				t.Errorf(
+					"passwordService.parseArgon2Hash() gotMemory = %v, want %v",
+					gotMemory,
+					tt.wantMemory,
+				)
+			}
+			if gotIterations != tt.wantIterations {
+				t.Errorf(
+					"passwordService.parseArgon2Hash() gotIterations = %v, want %v",
+					gotIterations,
+					tt.wantIterations,
+				)
+			}
+			if gotParallelism != tt.wantParallelism {
+				t.Errorf(
+					"passwordService.parseArgon2Hash() gotParallelism = %v, want %v",
+					gotParallelism,
+					tt.wantParallelism,
+				)
+			}
+			if !cmp.Equal(tt.wantSalt, gotSalt) {
+				t.Errorf(
+					"passwordService.parseArgon2Hash() gotSalt = %v, want %v\ndiff=%s",
+					gotSalt,
+					tt.wantSalt,
+					cmp.Diff(tt.wantSalt, gotSalt),
+				)
+			}
+			if !cmp.Equal(tt.wantDecodedHash, gotDecodedHash) {
+				t.Errorf(
+					"passwordService.parseArgon2Hash() gotDecodedHash = %v, want %v\ndiff=%s",
+					gotDecodedHash,
+					tt.wantDecodedHash,
+					cmp.Diff(tt.wantDecodedHash, gotDecodedHash),
+				)
+			}
+		})
+	}
+}
+
+func Test_parseArgon2Params(t *testing.T) {
+	t.Parallel()
+	type args struct {
+		params string
+	}
+	tests := []struct {
+		name            string
+		args            args
+		wantMemory      uint32
+		wantIterations  uint32
+		wantParallelism uint8
+		wantErr         bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			gotMemory, gotIterations, gotParallelism, err := parseArgon2Params(
+				tt.args.params,
+			)
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("parseArgon2Params() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if tt.wantErr {
+				return
+			}
+			if gotMemory != tt.wantMemory {
+				t.Errorf(
+					"parseArgon2Params() gotMemory = %v, want %v",
+					gotMemory,
+					tt.wantMemory,
+				)
+			}
+			if gotIterations != tt.wantIterations {
+				t.Errorf(
+					"parseArgon2Params() gotIterations = %v, want %v",
+					gotIterations,
+					tt.wantIterations,
+				)
+			}
+			if gotParallelism != tt.wantParallelism {
+				t.Errorf(
+					"parseArgon2Params() gotParallelism = %v, want %v",
+					gotParallelism,
+					tt.wantParallelism,
+				)
+			}
+		})
+	}
+}
+
+func TestDefaultPasswordConfig(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name string
+		want *PasswordConfig
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			if got := DefaultPasswordConfig(); !cmp.Equal(tt.want, got) {
+				t.Errorf(
+					"DefaultPasswordConfig() = %v, want %v\ndiff=%s",
+					got,
+					tt.want,
+					cmp.Diff(tt.want, got),
+				)
+			}
+		})
+	}
 }

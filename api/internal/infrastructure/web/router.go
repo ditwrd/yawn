@@ -32,6 +32,7 @@ import (
 type RouterConfig struct {
 	AuthHandler     *handlers.AuthHandler
 	UserHandler     *handlers.UserHandler
+	ProjectHandler  *handlers.ProjectHandler
 	AuthMiddleware  *middleware.AuthMiddleware
 	AuthzMiddleware *middleware.AuthorizationMiddleware
 }
@@ -82,4 +83,33 @@ func SetupRoutes(e *echo.Echo, cfg *RouterConfig) {
 	) // Admin or owner
 	userSelfOrAdmin.GET("/:id", cfg.UserHandler.GetUser)
 	userSelfOrAdmin.PUT("/:id", cfg.UserHandler.UpdateUser)
+
+	// Project management routes (auth required)
+	projectGroup := v1.Group("/projects")
+	projectGroup.Use(
+		cfg.AuthMiddleware.RequireAuth(),
+	) // All project routes require authentication
+
+	// Project CRUD routes
+	projectGroup.POST("", cfg.ProjectHandler.CreateProject)
+	projectGroup.GET("", cfg.ProjectHandler.ListProjects)
+	projectGroup.GET("/:id", cfg.ProjectHandler.GetProject)
+	projectGroup.PUT("/:id", cfg.ProjectHandler.UpdateProject)
+	projectGroup.DELETE("/:id", cfg.ProjectHandler.DeleteProject)
+
+	// Project member management routes
+	projectMemberGroup := v1.Group("/projects/:id/members")
+	projectMemberGroup.Use(
+		cfg.AuthMiddleware.RequireAuth(),
+	) // All project member routes require authentication
+	projectMemberGroup.POST("", cfg.ProjectHandler.AddProjectMember)
+	projectMemberGroup.GET("", cfg.ProjectHandler.ListProjectMembers)
+	projectMemberGroup.PUT(
+		"/:memberId",
+		cfg.ProjectHandler.UpdateProjectMemberRole,
+	)
+	projectMemberGroup.DELETE(
+		"/:memberId",
+		cfg.ProjectHandler.RemoveProjectMember,
+	)
 }

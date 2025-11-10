@@ -69,6 +69,42 @@ func NewUserHandler(
 	}
 }
 
+// checkUserAccess performs access control checks for user operations.
+//
+// Returns true if access is allowed, false otherwise.
+// Access rules:
+//   - Admin users can access any user's data
+//   - Regular users can only access their own data
+func (h *UserHandler) checkUserAccess(
+	c echo.Context,
+	targetUserID string,
+) bool {
+	// Get current user info from context (set by auth middleware)
+	currentUserID, ok := c.Get("user_id").(string)
+	if !ok {
+		h.logger.Warn().
+			Str("target_user_id", targetUserID).
+			Msg("Missing user_id in context")
+		return false
+	}
+
+	currentUserRole, ok := c.Get("user_role").(string)
+	if !ok {
+		h.logger.Warn().
+			Str("target_user_id", targetUserID).
+			Msg("Missing user_role in context")
+		return false
+	}
+
+	// Admin users can access any user's data
+	if currentUserRole == string(models.UserRoleAdmin) {
+		return true
+	}
+
+	// Regular users can only access their own data
+	return currentUserID == targetUserID
+}
+
 // ListUsers handles GET /users endpoint.
 //
 // @Summary List all users (admin only)
@@ -192,6 +228,19 @@ func (h *UserHandler) GetUser(c echo.Context) error {
 		})
 	}
 
+	// Check access control
+	if !h.checkUserAccess(c, userIDStr) {
+		h.logger.Warn().
+			Str("target_user_id", userIDStr).
+			Msg("Access denied: user trying to access another user's data")
+
+		return c.JSON(http.StatusForbidden, dto.ErrorResponse{
+			Error:   "Access denied",
+			Code:    "ACCESS_DENIED",
+			Details: "You can only access your own user data",
+		})
+	}
+
 	// Convert to response DTO
 	userResponse := dto.UserResponse{
 		ID:        user.ID.String(),
@@ -271,6 +320,19 @@ func (h *UserHandler) UpdateUser(c echo.Context) error {
 			Error:   "User not found",
 			Code:    "USER_NOT_FOUND",
 			Details: "The requested user does not exist",
+		})
+	}
+
+	// Check access control
+	if !h.checkUserAccess(c, userIDStr) {
+		h.logger.Warn().
+			Str("target_user_id", userIDStr).
+			Msg("Access denied: user trying to update another user's data")
+
+		return c.JSON(http.StatusForbidden, dto.ErrorResponse{
+			Error:   "Access denied",
+			Code:    "ACCESS_DENIED",
+			Details: "You can only update your own user data",
 		})
 	}
 
@@ -391,6 +453,19 @@ func (h *UserHandler) DeleteUser(c echo.Context) error {
 			Error:   "User not found",
 			Code:    "USER_NOT_FOUND",
 			Details: "The requested user does not exist",
+		})
+	}
+
+	// Check access control
+	if !h.checkUserAccess(c, userIDStr) {
+		h.logger.Warn().
+			Str("target_user_id", userIDStr).
+			Msg("Access denied: user trying to delete another user's data")
+
+		return c.JSON(http.StatusForbidden, dto.ErrorResponse{
+			Error:   "Access denied",
+			Code:    "ACCESS_DENIED",
+			Details: "You can only delete your own user account",
 		})
 	}
 

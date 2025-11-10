@@ -20,6 +20,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -106,4 +107,54 @@ func TestDatabaseConfig_GetDSN(t *testing.T) {
 		expected := "host=localhost user=testuser password=testpass dbname=testdb port=5432 sslmode=disable"
 		assert.Equal(t, expected, dsn)
 	})
+}
+
+func TestLoadConfig(t *testing.T) {
+	t.Parallel()
+	type args struct {
+		configPath string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    *Config
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			got, err := LoadConfig(tt.args.configPath)
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("LoadConfig() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if tt.wantErr {
+				return
+			}
+			if !cmp.Equal(tt.want, got) {
+				t.Errorf(
+					"LoadConfig() = %v, want %v\ndiff=%s",
+					got,
+					tt.want,
+					cmp.Diff(tt.want, got),
+				)
+			}
+		})
+	}
+}
+
+func Test_setDefaults(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name string
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			setDefaults()
+		})
+	}
 }

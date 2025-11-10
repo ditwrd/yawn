@@ -53,6 +53,8 @@ type Project struct {
 	ID          uuid.UUID      `gorm:"type:uuid;primary_key"                          json:"id"`
 	Name        string         `gorm:"not null;size:255"                              json:"name"`
 	Description string         `gorm:"size:1000"                                      json:"description"`
+	Repository  string         `gorm:"size:500"                                       json:"repository,omitempty"`
+	Visibility  string         `gorm:"type:varchar(20);default:'private'"             json:"visibility"`
 	OwnerID     uuid.UUID      `gorm:"type:uuid;not null;index:idx_projects_owner_id" json:"owner_id"`
 	CreatedAt   time.Time      `gorm:"autoCreateTime"                                 json:"created_at"`
 	UpdatedAt   time.Time      `gorm:"autoUpdateTime"                                 json:"updated_at"`

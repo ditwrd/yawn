@@ -19,6 +19,9 @@ package cmd
 import (
 	"testing"
 
+	"github.com/ditwrd/yawn/api/internal/config"
+	"github.com/google/go-cmp/cmp"
+	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
@@ -105,5 +108,78 @@ func TestRootCommandStructure(t *testing.T) {
 
 	if !found {
 		t.Error("Expected 'serve' command to be added to root command")
+	}
+}
+
+func Test_runServe(t *testing.T) {
+	t.Parallel()
+	type args struct {
+		cmd  *cobra.Command
+		args []string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			if err := runServe(tt.args.cmd, tt.args.args); (err != nil) != tt.wantErr {
+				t.Errorf("runServe() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func Test_loadCommandConfig(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name    string
+		want    *config.Config
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			got, err := loadCommandConfig()
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("loadCommandConfig() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if tt.wantErr {
+				return
+			}
+			if !cmp.Equal(tt.want, got) {
+				t.Errorf(
+					"loadCommandConfig() = %v, want %v\ndiff=%s",
+					got,
+					tt.want,
+					cmp.Diff(tt.want, got),
+				)
+			}
+		})
+	}
+}
+
+func Test_printServerInfo(t *testing.T) {
+	t.Parallel()
+	type args struct {
+		config *config.Config
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			printServerInfo(tt.args.config)
+		})
 	}
 }

@@ -25,6 +25,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/ditwrd/yawn/api/internal/domain/models"
+	"github.com/ditwrd/yawn/api/internal/domain/services"
+	"github.com/ditwrd/yawn/api/internal/infrastructure/web/middleware"
+	"github.com/ditwrd/yawn/api/internal/interfaces/dto"
 	"github.com/gofrs/uuid"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
@@ -32,12 +36,13 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-
-	"github.com/ditwrd/yawn/api/internal/domain/models"
-	"github.com/ditwrd/yawn/api/internal/domain/services"
-	"github.com/ditwrd/yawn/api/internal/infrastructure/web/middleware"
-	"github.com/ditwrd/yawn/api/internal/interfaces/dto"
 )
+
+// createAuthTestLogger creates a zerolog logger for testing auth handlers
+func createAuthTestLogger() *zerolog.Logger {
+	logger := zerolog.New(zerolog.NewConsoleWriter())
+	return &logger
+}
 
 // MockUserService is a mock implementation of UserService for testing.
 type MockUserService struct {
@@ -1250,4 +1255,429 @@ func TestAuthMiddleware_Integration(t *testing.T) {
 
 		assert.Equal(t, http.StatusUnauthorized, rec.Code)
 	})
+}
+
+func TestNewAuthHandler(t *testing.T) {
+	t.Parallel()
+	type args struct {
+		userService     services.UserService
+		jwtService      services.JWTService
+		passwordService services.PasswordService
+		logger          *zerolog.Logger
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "successful auth handler creation",
+			args: args{
+				userService:     &MockUserService{},
+				jwtService:      &MockJWTService{},
+				passwordService: &TestPasswordService{},
+				logger:          createAuthTestLogger(),
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			got := NewAuthHandler(
+				tt.args.userService,
+				tt.args.jwtService,
+				tt.args.passwordService,
+				tt.args.logger,
+			)
+
+			// Verify that the handler is not nil
+			assert.NotNil(t, got)
+
+			// Verify that the handler is of the correct type
+			assert.IsType(t, &AuthHandler{}, got)
+		})
+	}
+}
+
+func TestAuthHandler_validateRegisterRequest(t *testing.T) {
+	t.Parallel()
+	type fields struct {
+		userService     services.UserService
+		jwtService      services.JWTService
+		passwordService services.PasswordService
+		logger          *zerolog.Logger
+	}
+	type args struct {
+		req *dto.RegisterRequest
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "valid registration request",
+			fields: fields{
+				passwordService: &TestPasswordService{
+					shouldCheckStrength: true,
+				},
+			},
+			args: args{
+				req: &dto.RegisterRequest{
+					Email:    "test@example.com",
+					Password: "SecurePass123!",
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "empty email",
+			fields: fields{
+				passwordService: &TestPasswordService{},
+			},
+			args: args{
+				req: &dto.RegisterRequest{
+					Email:    "",
+					Password: "SecurePass123!",
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "empty password",
+			fields: fields{
+				passwordService: &TestPasswordService{},
+			},
+			args: args{
+				req: &dto.RegisterRequest{
+					Email:    "test@example.com",
+					Password: "",
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "email too long",
+			fields: fields{
+				passwordService: &TestPasswordService{},
+			},
+			args: args{
+				req: &dto.RegisterRequest{
+					Email:    string(make([]byte, 256)) + "@example.com",
+					Password: "SecurePass123!",
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "password too long",
+			fields: fields{
+				passwordService: &TestPasswordService{},
+			},
+			args: args{
+				req: &dto.RegisterRequest{
+					Email:    "test@example.com",
+					Password: string(make([]byte, 129)),
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "invalid email format",
+			fields: fields{
+				passwordService: &TestPasswordService{},
+			},
+			args: args{
+				req: &dto.RegisterRequest{
+					Email:    "invalid-email",
+					Password: "SecurePass123!",
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "weak password",
+			fields: fields{
+				passwordService: &TestPasswordService{
+					shouldCheckStrength: false,
+				},
+			},
+			args: args{
+				req: &dto.RegisterRequest{
+					Email:    "test@example.com",
+					Password: "weak",
+				},
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			h := &AuthHandler{
+				userService:     tt.fields.userService,
+				jwtService:      tt.fields.jwtService,
+				passwordService: tt.fields.passwordService,
+				logger:          tt.fields.logger,
+			}
+			if err := h.validateRegisterRequest(tt.args.req); (err != nil) != tt.wantErr {
+				t.Errorf(
+					"AuthHandler.validateRegisterRequest() error = %v, wantErr %v",
+					err,
+					tt.wantErr,
+				)
+			}
+		})
+	}
+}
+
+func TestAuthHandler_validateLoginRequest(t *testing.T) {
+	t.Parallel()
+	type fields struct {
+		userService     services.UserService
+		jwtService      services.JWTService
+		passwordService services.PasswordService
+		logger          *zerolog.Logger
+	}
+	type args struct {
+		req *dto.LoginRequest
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "valid login request",
+			fields: fields{
+				passwordService: &TestPasswordService{},
+			},
+			args: args{
+				req: &dto.LoginRequest{
+					Email:    "test@example.com",
+					Password: "SecurePass123!",
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "empty email",
+			fields: fields{
+				passwordService: &TestPasswordService{},
+			},
+			args: args{
+				req: &dto.LoginRequest{
+					Email:    "",
+					Password: "SecurePass123!",
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "empty password",
+			fields: fields{
+				passwordService: &TestPasswordService{},
+			},
+			args: args{
+				req: &dto.LoginRequest{
+					Email:    "test@example.com",
+					Password: "",
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "email too long",
+			fields: fields{
+				passwordService: &TestPasswordService{},
+			},
+			args: args{
+				req: &dto.LoginRequest{
+					Email:    string(make([]byte, 256)) + "@example.com",
+					Password: "SecurePass123!",
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "password too long",
+			fields: fields{
+				passwordService: &TestPasswordService{},
+			},
+			args: args{
+				req: &dto.LoginRequest{
+					Email:    "test@example.com",
+					Password: string(make([]byte, 129)),
+				},
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			h := &AuthHandler{
+				userService:     tt.fields.userService,
+				jwtService:      tt.fields.jwtService,
+				passwordService: tt.fields.passwordService,
+				logger:          tt.fields.logger,
+			}
+			if err := h.validateLoginRequest(tt.args.req); (err != nil) != tt.wantErr {
+				t.Errorf(
+					"AuthHandler.validateLoginRequest() error = %v, wantErr %v",
+					err,
+					tt.wantErr,
+				)
+			}
+		})
+	}
+}
+
+func TestAuthHandler_validateRefreshRequest(t *testing.T) {
+	t.Parallel()
+	type fields struct {
+		userService     services.UserService
+		jwtService      services.JWTService
+		passwordService services.PasswordService
+		logger          *zerolog.Logger
+	}
+	type args struct {
+		req *dto.RefreshRequest
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "valid refresh request",
+			fields: fields{
+				passwordService: &TestPasswordService{},
+			},
+			args: args{
+				req: &dto.RefreshRequest{
+					RefreshToken: "valid_refresh_token",
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "empty refresh token",
+			fields: fields{
+				passwordService: &TestPasswordService{},
+			},
+			args: args{
+				req: &dto.RefreshRequest{
+					RefreshToken: "",
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "refresh token too long",
+			fields: fields{
+				passwordService: &TestPasswordService{},
+			},
+			args: args{
+				req: &dto.RefreshRequest{
+					RefreshToken: string(make([]byte, 2049)),
+				},
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			h := &AuthHandler{
+				userService:     tt.fields.userService,
+				jwtService:      tt.fields.jwtService,
+				passwordService: tt.fields.passwordService,
+				logger:          tt.fields.logger,
+			}
+			if err := h.validateRefreshRequest(tt.args.req); (err != nil) != tt.wantErr {
+				t.Errorf(
+					"AuthHandler.validateRefreshRequest() error = %v, wantErr %v",
+					err,
+					tt.wantErr,
+				)
+			}
+		})
+	}
+}
+
+func TestAuthHandler_validateLogoutRequest(t *testing.T) {
+	t.Parallel()
+	type fields struct {
+		userService     services.UserService
+		jwtService      services.JWTService
+		passwordService services.PasswordService
+		logger          *zerolog.Logger
+	}
+	type args struct {
+		req *dto.LogoutRequest
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "valid logout request",
+			fields: fields{
+				passwordService: &TestPasswordService{},
+			},
+			args: args{
+				req: &dto.LogoutRequest{
+					AccessToken: "valid_access_token",
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "empty access token",
+			fields: fields{
+				passwordService: &TestPasswordService{},
+			},
+			args: args{
+				req: &dto.LogoutRequest{
+					AccessToken: "",
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "access token too long",
+			fields: fields{
+				passwordService: &TestPasswordService{},
+			},
+			args: args{
+				req: &dto.LogoutRequest{
+					AccessToken: string(make([]byte, 2049)),
+				},
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			h := &AuthHandler{
+				userService:     tt.fields.userService,
+				jwtService:      tt.fields.jwtService,
+				passwordService: tt.fields.passwordService,
+				logger:          tt.fields.logger,
+			}
+			if err := h.validateLogoutRequest(tt.args.req); (err != nil) != tt.wantErr {
+				t.Errorf(
+					"AuthHandler.validateLogoutRequest() error = %v, wantErr %v",
+					err,
+					tt.wantErr,
+				)
+			}
+		})
+	}
 }
