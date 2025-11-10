@@ -70,7 +70,9 @@ The `library/` folder contains the **Yawn Python SDK** for defining assets and p
 - **Style Guide**: [Uber Go Style Guide](https://github.com/uber-go/guide)
 - **Architecture**: DDD with clear domain boundaries
 - **Error Handling**: Explicit error returns with structured logging
-- **Testing**: Unit tests + integration tests
+- **Testing**: Unit tests + integration tests. Use `gotests -all -use_go_cmp -w -parallel <file_name>.go` to generate test for each file
+- **MCP**: Use context7, browsermcp and especially mcp-gopls to help with maintaining and fixing code
+- **Test Coverage**: Ensure to have at least test coverage 75% coverage, the main point is to have business tests since this is DDD/Business driven
 
 ---
 
