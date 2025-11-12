@@ -4,7 +4,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Yawn is a GitOps CI/CD platform with a polyglot architecture:
+Yawn is a data workflow platform with a polyglot architecture:
+
 - **Backend**: Go with Domain-Driven Design (DDD) using Echo framework
 - **Frontend**: React + TypeScript with Vite (in `ui/` directory)
 - **Python SDK**: Asset and pipeline definitions (in `library/` directory)
@@ -15,6 +16,7 @@ Yawn is a GitOps CI/CD platform with a polyglot architecture:
 ### Backend (Go API)
 
 **Testing:**
+
 ```bash
 # Run all tests
 go test ./...
@@ -33,6 +35,7 @@ gotests -all -use_go_cmp -w -parallel <file_name>.go
 ```
 
 **Building & Running:**
+
 ```bash
 # Build the application
 go build ./...
@@ -45,6 +48,7 @@ air
 ```
 
 **Code Quality:**
+
 ```bash
 # Format code
 gofmt -s -w .
@@ -58,6 +62,7 @@ golangci-lint run ./internal/domain/services ./internal/interfaces/handlers
 ```
 
 **Dependencies:**
+
 ```bash
 # Tidy modules
 go mod tidy
@@ -69,6 +74,7 @@ go mod download
 ### Frontend (React UI)
 
 **Install UI components (Shadcn):**
+
 ```bash
 pnpx shadcn@latest add <component_name>
 ```
@@ -80,20 +86,24 @@ pnpx shadcn@latest add <component_name>
 The Go backend follows DDD principles with clear layer separation:
 
 **Domain Layer** (`internal/domain/`):
+
 - **Models**: Core entities (User, Project, etc.) with GORM annotations
 - **Services**: Business logic and validation (e.g., ProjectService, UserService)
 - **Repositories**: Data access interfaces implemented by infrastructure layer
 
 **Infrastructure Layer** (`internal/infrastructure/`):
+
 - **Database**: GORM setup with SQLite (dev) / PostgreSQL (prod)
 - **Web**: Echo framework setup and middleware
 - **Logger**: Zerolog structured logging
 
 **Interface Layer** (`internal/interfaces/`):
+
 - **Handlers**: HTTP request handlers using Echo framework
 - **DTOs**: Request/response data transfer objects with validation
 
 **App Layer** (`internal/app/`):
+
 - **Dependency Injection**: Uses uber-go/fx for compile-time DI
 - **Bootstrap**: Application startup and lifecycle management
 
@@ -102,16 +112,19 @@ The Go backend follows DDD principles with clear layer separation:
 **Dependency Injection**: All dependencies are wired through fx providers in `app.go`. New services, repositories, or handlers must be registered as providers.
 
 **Authentication & Authorization**:
+
 - JWT-based authentication with access/refresh tokens
 - Role-based access control (RBAC) for system-level permissions
 - Project-level role system (Owner, Maintainer, Viewer) for resource permissions
 
 **Database**:
+
 - GORM ORM with UUID v7 primary keys
 - Soft deletes using GORM's `DeletedAt` field
 - Multi-environment support (SQLite for dev, PostgreSQL for prod)
 
 **Testing Strategy**:
+
 - Table-driven tests with comprehensive scenarios
 - Mock implementations using testify/mock for repository interfaces
 - Business logic testing focus (75% coverage requirement)
@@ -135,18 +148,20 @@ The Go backend follows DDD principles with clear layer separation:
 ## Development Guidelines
 
 **Code Standards**:
+
 - Follow Uber Go Style Guide
 - Use structured logging with zerolog
 - Implement explicit error returns with proper error wrapping
 - Maintain 75% test coverage with focus on business logic
 
-**MCP Integration**: Use context7, browsermcp, and especially mcp-gopls for code maintenance, documentation lookup, and debugging assistance.
+**MCP Integration**: Use context7, browsermcp, mcp-gopls, and serena for code maintenance, documentation lookup, and debugging assistance.
 
 **Project Structure**: Respect domain boundaries - business logic stays in services, data access in repositories, HTTP concerns in handlers.
 
 ## Common Development Patterns
 
 **Adding New Features**:
+
 1. Define/update models in `internal/domain/models/`
 2. Create repository interface and implementation
 3. Implement service layer with business logic

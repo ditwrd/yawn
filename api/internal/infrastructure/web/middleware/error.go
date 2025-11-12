@@ -61,9 +61,11 @@ func (h *ErrorHandler) HandleError(err error, c echo.Context) {
 		Set(echo.HeaderContentType, echo.MIMEApplicationJSONCharsetUTF8)
 
 	// Handle different error types
-	var appErr *apperrors.AppError
-	var validationErrors validator.ValidationErrors
-	var httpErr *echo.HTTPError
+	var (
+		appErr           *apperrors.AppError
+		validationErrors validator.ValidationErrors
+		httpErr          *echo.HTTPError
+	)
 
 	switch {
 	case errors.As(err, &appErr):
@@ -165,8 +167,10 @@ func (h *ErrorHandler) handleHTTPError(
 		Int("status", httpErr.Code).
 		Msg("HTTP error occurred")
 
-	var message string
-	var details string
+	var (
+		message string
+		details string
+	)
 
 	if httpErr.Message != nil {
 		message = fmt.Sprintf("%v", httpErr.Message)
@@ -272,13 +276,14 @@ func (h *ErrorHandler) getValidationErrorMessage(
 ) string {
 	switch e.Tag() {
 	case "required":
-		return fmt.Sprintf("%s is required", e.Field())
+		return e.Field() + " is required"
 	case "email":
 		return "Please enter a valid email address"
 	case "min":
 		if e.Param() == "1" {
-			return fmt.Sprintf("%s must not be empty", e.Field())
+			return e.Field() + " must not be empty"
 		}
+
 		return fmt.Sprintf(
 			"%s must be at least %s characters",
 			e.Field(),
@@ -291,11 +296,11 @@ func (h *ErrorHandler) getValidationErrorMessage(
 	case "oneof":
 		return fmt.Sprintf("%s must be one of: %s", e.Field(), e.Param())
 	case "uuid":
-		return fmt.Sprintf("%s must be a valid UUID", e.Field())
+		return e.Field() + " must be a valid UUID"
 	case "url":
-		return fmt.Sprintf("%s must be a valid URL", e.Field())
+		return e.Field() + " must be a valid URL"
 	default:
-		return fmt.Sprintf("%s is invalid", e.Field())
+		return e.Field() + " is invalid"
 	}
 }
 
@@ -334,8 +339,10 @@ func ErrorMiddleware(logger *zerolog.Logger) echo.MiddlewareFunc {
 			err := next(c)
 			if err != nil {
 				handler.HandleError(err, c)
+
 				return nil // Don't return the error to avoid double handling
 			}
+
 			return nil
 		}
 	}

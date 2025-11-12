@@ -560,6 +560,7 @@ func (s *authService) RefreshToken(
 	s.LogAuditEvent(ctx, &AuditEvent{
 		UserID: func() *uuid.UUID {
 			id, _ := uuid.FromString(claims.UserID)
+
 			return &id
 		}(),
 		Action:    "token_refresh",
@@ -585,6 +586,7 @@ func (s *authService) Logout(ctx context.Context, refreshToken string) error {
 	s.LogAuditEvent(ctx, &AuditEvent{
 		UserID: func() *uuid.UUID {
 			id, _ := uuid.FromString(claims.UserID)
+
 			return &id
 		}(),
 		Action:    "logout",

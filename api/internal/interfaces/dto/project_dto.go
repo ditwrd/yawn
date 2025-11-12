@@ -41,11 +41,11 @@ type CreateProjectRequest struct {
 
 // UpdateProjectRequest represents a project update request.
 type UpdateProjectRequest struct {
-	ProjectID   uuid.UUID `param:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
-	Name        string    `           example:"Updated Project Name"                 json:"name,omitempty"        validate:"omitempty,min=1,max=255"`
-	Description string    `           example:"Updated project description"          json:"description,omitempty" validate:"omitempty,max=1000"`
-	Repository  string    `           example:"https://github.com/user/new-repo.git" json:"repository,omitempty"  validate:"omitempty,url"`
-	Visibility  string    `           example:"public"                               json:"visibility,omitempty"  validate:"omitempty,oneof=public private"`
+	ProjectID   uuid.UUID `example:"123e4567-e89b-12d3-a456-426614174000" param:"id"`
+	Name        string    `example:"Updated Project Name"                            json:"name,omitempty"        validate:"omitempty,min=1,max=255"`
+	Description string    `example:"Updated project description"                     json:"description,omitempty" validate:"omitempty,max=1000"`
+	Repository  string    `example:"https://github.com/user/new-repo.git"            json:"repository,omitempty"  validate:"omitempty,url"`
+	Visibility  string    `example:"public"                                          json:"visibility,omitempty"  validate:"omitempty,oneof=public private"`
 }
 
 // ProjectResponse represents project information returned by API endpoints.
@@ -79,17 +79,17 @@ type ProjectListResponse struct {
 
 // AddProjectMemberRequest represents a request to add a member to a project.
 type AddProjectMemberRequest struct {
-	ProjectID uuid.UUID `param:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
-	Email     string    `           example:"user@example.com"                     json:"email" validate:"required,email"`
-	Role      string    `           example:"maintainer"                           json:"role"  validate:"required,oneof=owner maintainer viewer"`
+	ProjectID uuid.UUID `example:"123e4567-e89b-12d3-a456-426614174000" param:"id"`
+	Email     string    `example:"user@example.com"                                json:"email" validate:"required,email"`
+	Role      string    `example:"maintainer"                                      json:"role"  validate:"required,oneof=owner maintainer viewer"`
 }
 
 // UpdateProjectMemberRequest represents a request to update a project member
 // role.
 type UpdateProjectMemberRequest struct {
-	ProjectID uuid.UUID `param:"id"       example:"123e4567-e89b-12d3-a456-426614174000"`
-	UserID    uuid.UUID `param:"memberId" example:"456e7890-f12c-34d5-a678-426614174111"`
-	Role      string    `                 example:"viewer"                               json:"role" validate:"required,oneof=owner maintainer viewer"`
+	ProjectID uuid.UUID `example:"123e4567-e89b-12d3-a456-426614174000" param:"id"`
+	UserID    uuid.UUID `example:"456e7890-f12c-34d5-a678-426614174111" param:"memberId"`
+	Role      string    `example:"viewer"                                                json:"role" validate:"required,oneof=owner maintainer viewer"`
 }
 
 // ProjectMemberResponse represents a project member response.
@@ -115,12 +115,12 @@ type ProjectDeleteResponse struct {
 // ProjectRequestsWithID represents a request that needs Project ID as path
 // parameter.
 type ProjectRequestsWithID struct {
-	ProjectID uuid.UUID `param:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	ProjectID uuid.UUID `example:"123e4567-e89b-12d3-a456-426614174000" param:"id"`
 }
 
 // ProjectMembersRequests represents a request that needs Project ID and User ID
 // as path parameters.
 type ProjectMembersRequests struct {
-	ProjectID uuid.UUID `param:"id"       example:"123e4567-e89b-12d3-a456-426614174000"`
-	UserID    uuid.UUID `param:"memberId" example:"456e7890-f12c-34d5-a678-426614174111"`
+	ProjectID uuid.UUID `example:"123e4567-e89b-12d3-a456-426614174000" param:"id"`
+	UserID    uuid.UUID `example:"456e7890-f12c-34d5-a678-426614174111" param:"memberId"`
 }

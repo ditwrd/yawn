@@ -103,10 +103,10 @@ type ValidationResponse struct {
 
 // GitOpsRepositorySyncRequest represents a request to sync a GitOps repository.
 type GitOpsRepositorySyncRequest struct {
-	RepositoryID uuid.UUID `param:"repoId" example:"123e4567-e89b-12d3-a456-426614174000"`
-	Branch       string    `               example:"main"                                 json:"branch,omitempty"  form:"branch"`
-	Force        bool      `                                                              json:"force,omitempty"   form:"force"`
-	DryRun       bool      `                                                              json:"dry_run,omitempty" form:"dry_run"`
+	RepositoryID uuid.UUID `example:"123e4567-e89b-12d3-a456-426614174000" param:"repoId"`
+	Branch       string    `example:"main"                                                form:"branch"  json:"branch,omitempty"`
+	Force        bool      `                                                              form:"force"   json:"force,omitempty"`
+	DryRun       bool      `                                                              form:"dry_run" json:"dry_run,omitempty"`
 }
 
 // SyncRepositoryRequest represents a request to sync a repository.
@@ -119,22 +119,22 @@ type SyncRepositoryRequest struct {
 // GitOpsRepositoryStatusRequest represents a request to get repository sync
 // status.
 type GitOpsRepositoryStatusRequest struct {
-	RepositoryID uuid.UUID `param:"repoId" example:"123e4567-e89b-12d3-a456-426614174000"`
+	RepositoryID uuid.UUID `example:"123e4567-e89b-12d3-a456-426614174000" param:"repoId"`
 }
 
 // GitOpsPendingSyncRequest represents a request to get pending synchronizations
 // for a repository.
 type GitOpsPendingSyncRequest struct {
-	RepositoryID uuid.UUID `param:"repoId" example:"123e4567-e89b-12d3-a456-426614174000"`
-	Limit        int       `               example:"10"                                   json:"limit,omitempty" form:"limit" validate:"omitempty,min=1,max=100"`
+	RepositoryID uuid.UUID `example:"123e4567-e89b-12d3-a456-426614174000" param:"repoId"`
+	Limit        int       `example:"10"                                                  form:"limit" json:"limit,omitempty" validate:"omitempty,min=1,max=100"`
 }
 
 // GitOpsRepositoryValidateRequest represents a request to validate a GitOps
 // repository.
 type GitOpsRepositoryValidateRequest struct {
-	RepositoryID uuid.UUID `param:"repoId" example:"123e4567-e89b-12d3-a456-426614174000"`
-	URL          string    `               example:"https://github.com/user/repo.git"     json:"url"              validate:"required,url"`
-	Branch       string    `               example:"main"                                 json:"branch,omitempty"`
+	RepositoryID uuid.UUID `example:"123e4567-e89b-12d3-a456-426614174000" param:"repoId"`
+	URL          string    `example:"https://github.com/user/repo.git"                    json:"url"              validate:"required,url"`
+	Branch       string    `example:"main"                                                json:"branch,omitempty"`
 }
 
 // ValidateRepositoryRequest represents the request to validate a repository.

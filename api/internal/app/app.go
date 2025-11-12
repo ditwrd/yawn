@@ -190,7 +190,7 @@ func newPasswordService() services.PasswordService {
 	})
 }
 
-// Logger adapter for repositories that expect Info(msg string, fields ...any)
+// Logger adapter for repositories that expect Info(msg string, fields ...any).
 type repoLoggerAdapter struct {
 	logger *zerolog.Logger
 }

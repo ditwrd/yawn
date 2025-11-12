@@ -378,6 +378,7 @@ func Test_passwordService_CheckPasswordStrength(t *testing.T) {
 			s := &passwordService{
 				config: tt.fields.config,
 			}
+
 			err := s.CheckPasswordStrength(tt.args.password)
 			if (err != nil) != tt.wantErr {
 				t.Errorf(

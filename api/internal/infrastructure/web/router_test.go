@@ -105,6 +105,7 @@ func TestOpenAPIAnnotations(t *testing.T) {
 		return func(c echo.Context) error {
 			// Mock auth middleware
 			c.Set("user_id", "test-user")
+
 			return next(c)
 		}
 	})

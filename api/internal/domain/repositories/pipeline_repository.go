@@ -682,6 +682,7 @@ func (r *pipelineRepository) UpdateExecutionStatus(
 		updates["completed_at"] = &now
 		// Calculate duration if started_at is set
 		var execution models.PipelineExecution
+
 		err := r.db.WithContext(ctx).
 			Select("started_at").
 			Where("id = ?", id).

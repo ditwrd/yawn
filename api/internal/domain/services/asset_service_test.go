@@ -797,6 +797,7 @@ func TestAssetService_Update(t *testing.T) {
 				req: &UpdateAssetRequest{
 					Name: func() *string {
 						s := "updated-asset"
+
 						return &s
 					}(),
 				},
@@ -894,6 +895,7 @@ func TestAssetService_Update(t *testing.T) {
 				req: &UpdateAssetRequest{
 					Name: func() *string {
 						s := ""
+
 						return &s
 					}(),
 				},
@@ -912,6 +914,7 @@ func TestAssetService_Update(t *testing.T) {
 				req: &UpdateAssetRequest{
 					Name: func() *string {
 						s := "invalid name"
+
 						return &s
 					}(),
 				},

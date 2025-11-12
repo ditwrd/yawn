@@ -171,7 +171,7 @@ dist
 .moon/cache
 .moon/docker
 tmp/api
-tmp/main
+**/tmp/main
 yawn.db
 specs
 *output.txt

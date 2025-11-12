@@ -734,6 +734,7 @@ func (s *assetService) validateUpdateRequest(req *UpdateAssetRequest) error {
 		if strings.TrimSpace(*req.Name) == "" {
 			return errors.New("asset name cannot be empty")
 		}
+
 		err := s.validateAssetName(*req.Name)
 		if err != nil {
 			return err
@@ -745,6 +746,7 @@ func (s *assetService) validateUpdateRequest(req *UpdateAssetRequest) error {
 		if strings.TrimSpace(*req.Version) == "" {
 			return errors.New("asset version cannot be empty")
 		}
+
 		err := s.validateVersion(*req.Version)
 		if err != nil {
 			return err

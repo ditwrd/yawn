@@ -27,6 +27,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
@@ -1207,15 +1208,7 @@ func (s *pipelineService) validateUpdateRequest(
 			models.PipelineStatusFailed,
 			models.PipelineStatusCancelled,
 		}
-		isValid := false
-
-		for _, status := range validStatuses {
-			if *req.Status == status {
-				isValid = true
-
-				break
-			}
-		}
+		isValid := slices.Contains(validStatuses, *req.Status)
 
 		if !isValid {
 			return fmt.Errorf("invalid pipeline status: %s", *req.Status)
@@ -1310,10 +1303,8 @@ func (s *pipelineService) validateStatusTransition(
 
 	// Check if transition is allowed
 	if allowedStatuses, exists := allowedTransitions[pipeline.Status]; exists {
-		for _, allowed := range allowedStatuses {
-			if allowed == newStatus {
-				return nil
-			}
+		if slices.Contains(allowedStatuses, newStatus) {
+			return nil
 		}
 
 		return fmt.Errorf(

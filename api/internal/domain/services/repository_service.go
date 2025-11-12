@@ -25,6 +25,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/url"
 	"strings"
@@ -260,12 +261,14 @@ func (s *repositoryService) Create(
 			Err(err).
 			Str("project_id", req.ProjectID).
 			Msg("Invalid project ID")
+
 		return nil, fmt.Errorf("invalid project ID: %w", err)
 	}
 
 	// Validate URL format
 	if err := s.validateRepositoryURL(req.URL); err != nil {
 		logger.Error().Err(err).Str("url", req.URL).Msg("Invalid repository URL")
+
 		return nil, fmt.Errorf("invalid repository URL: %w", err)
 	}
 
@@ -276,11 +279,14 @@ func (s *repositoryService) Create(
 			Err(err).
 			Str("project_id", req.ProjectID).
 			Msg("Failed to check project existence")
+
 		return nil, fmt.Errorf("failed to validate project: %w", err)
 	}
+
 	if !exists {
 		logger.Warn().Str("project_id", req.ProjectID).Msg("Project not found")
-		return nil, fmt.Errorf("project not found")
+
+		return nil, errors.New("project not found")
 	}
 
 	// Check for duplicate repository URL within the project
@@ -290,14 +296,17 @@ func (s *repositoryService) Create(
 			Err(err).
 			Str("url", req.URL).
 			Msg("Failed to check repository URL existence")
+
 		return nil, fmt.Errorf("failed to validate repository URL: %w", err)
 	}
+
 	if exists {
 		logger.Warn().
 			Str("url", req.URL).
 			Str("project_id", req.ProjectID).
 			Msg("Repository URL already exists in project")
-		return nil, fmt.Errorf("repository URL already exists in this project")
+
+		return nil, errors.New("repository URL already exists in this project")
 	}
 
 	// Set default branch if not provided
@@ -321,6 +330,7 @@ func (s *repositoryService) Create(
 			Err(err).
 			Str("url", req.URL).
 			Msg("Failed to create repository")
+
 		return nil, fmt.Errorf("failed to create repository: %w", err)
 	}
 
@@ -347,6 +357,7 @@ func (s *repositoryService) GetByID(
 	_, err := uuid.FromString(id)
 	if err != nil {
 		logger.Error().Err(err).Msg("Invalid repository ID format")
+
 		return nil, fmt.Errorf("invalid repository ID: %w", err)
 	}
 
@@ -354,6 +365,7 @@ func (s *repositoryService) GetByID(
 	repo, err := s.repoRepo.GetByID(ctx, id)
 	if err != nil {
 		logger.Error().Err(err).Msg("Failed to retrieve repository")
+
 		return nil, fmt.Errorf("failed to retrieve repository: %w", err)
 	}
 
@@ -377,6 +389,7 @@ func (s *repositoryService) GetByProjectID(
 	_, err := uuid.FromString(projectID)
 	if err != nil {
 		logger.Error().Err(err).Msg("Invalid project ID format")
+
 		return nil, fmt.Errorf("invalid project ID: %w", err)
 	}
 
@@ -384,6 +397,7 @@ func (s *repositoryService) GetByProjectID(
 	if page < 1 {
 		page = 1
 	}
+
 	if limit < 1 || limit > 100 {
 		limit = 20
 	}
@@ -394,6 +408,7 @@ func (s *repositoryService) GetByProjectID(
 	repos, err := s.repoRepo.GetByProjectID(ctx, projectID, limit, offset)
 	if err != nil {
 		logger.Error().Err(err).Msg("Failed to retrieve repositories by project ID")
+
 		return nil, fmt.Errorf("failed to retrieve repositories: %w", err)
 	}
 
@@ -404,6 +419,7 @@ func (s *repositoryService) GetByProjectID(
 	)
 	if err != nil {
 		logger.Error().Err(err).Msg("Failed to count repositories")
+
 		return nil, fmt.Errorf("failed to count repositories: %w", err)
 	}
 
@@ -448,6 +464,7 @@ func (s *repositoryService) List(
 	if page < 1 {
 		page = 1
 	}
+
 	if limit < 1 || limit > 100 {
 		limit = 20
 	}
@@ -467,6 +484,7 @@ func (s *repositoryService) List(
 	repos, err := s.repoRepo.List(ctx, limit, offset, repoFilters)
 	if err != nil {
 		logger.Error().Err(err).Msg("Failed to retrieve repositories")
+
 		return nil, fmt.Errorf("failed to retrieve repositories: %w", err)
 	}
 
@@ -474,6 +492,7 @@ func (s *repositoryService) List(
 	total, err := s.repoRepo.Count(ctx, repoFilters)
 	if err != nil {
 		logger.Error().Err(err).Msg("Failed to count repositories")
+
 		return nil, fmt.Errorf("failed to count repositories: %w", err)
 	}
 
@@ -516,6 +535,7 @@ func (s *repositoryService) Update(
 	_, err := uuid.FromString(id)
 	if err != nil {
 		logger.Error().Err(err).Msg("Invalid repository ID format")
+
 		return nil, fmt.Errorf("invalid repository ID: %w", err)
 	}
 
@@ -523,6 +543,7 @@ func (s *repositoryService) Update(
 	existingRepo, err := s.repoRepo.GetByID(ctx, id)
 	if err != nil {
 		logger.Error().Err(err).Msg("Failed to retrieve existing repository")
+
 		return nil, fmt.Errorf("failed to retrieve repository: %w", err)
 	}
 
@@ -530,6 +551,7 @@ func (s *repositoryService) Update(
 	if req.URL != "" && req.URL != existingRepo.URL {
 		if err := s.validateRepositoryURL(req.URL); err != nil {
 			logger.Error().Err(err).Str("url", req.URL).Msg("Invalid repository URL")
+
 			return nil, fmt.Errorf("invalid repository URL: %w", err)
 		}
 
@@ -544,13 +566,16 @@ func (s *repositoryService) Update(
 				Err(err).
 				Str("url", req.URL).
 				Msg("Failed to check repository URL existence")
+
 			return nil, fmt.Errorf("failed to validate repository URL: %w", err)
 		}
+
 		if exists {
 			logger.Warn().
 				Str("url", req.URL).
 				Msg("Repository URL already exists in project")
-			return nil, fmt.Errorf("repository URL already exists in this project")
+
+			return nil, errors.New("repository URL already exists in this project")
 		}
 
 		existingRepo.URL = req.URL
@@ -564,6 +589,7 @@ func (s *repositoryService) Update(
 	// Update repository
 	if err := s.repoRepo.Update(ctx, existingRepo); err != nil {
 		logger.Error().Err(err).Msg("Failed to update repository")
+
 		return nil, fmt.Errorf("failed to update repository: %w", err)
 	}
 
@@ -584,8 +610,10 @@ func (s *repositoryService) Delete(ctx context.Context, id string) error {
 		Logger()
 
 	// Delete repository
-	if err := s.repoRepo.Delete(ctx, id); err != nil {
+	err := s.repoRepo.Delete(ctx, id)
+	if err != nil {
 		logger.Error().Err(err).Msg("Failed to delete repository")
+
 		return fmt.Errorf("failed to delete repository: %w", err)
 	}
 
@@ -613,6 +641,7 @@ func (s *repositoryService) Search(
 	if page < 1 {
 		page = 1
 	}
+
 	if limit < 1 || limit > 100 {
 		limit = 20
 	}
@@ -623,6 +652,7 @@ func (s *repositoryService) Search(
 	repos, err := s.repoRepo.Search(ctx, query, limit, offset)
 	if err != nil {
 		logger.Error().Err(err).Msg("Failed to search repositories")
+
 		return nil, fmt.Errorf("failed to search repositories: %w", err)
 	}
 
@@ -633,6 +663,7 @@ func (s *repositoryService) Search(
 	)
 	if err != nil {
 		logger.Error().Err(err).Msg("Failed to count search results")
+
 		return nil, fmt.Errorf("failed to count search results: %w", err)
 	}
 
@@ -677,10 +708,12 @@ func (s *repositoryService) ValidateURL(
 	}
 
 	// Validate URL format
-	if err := s.validateRepositoryURL(req.URL); err != nil {
+	err := s.validateRepositoryURL(req.URL)
+	if err != nil {
 		response.Valid = false
 		response.Message = "Invalid URL format"
 		response.Error = err.Error()
+
 		return response, nil
 	}
 
@@ -720,6 +753,7 @@ func (s *repositoryService) SyncRepository(
 	_, err := uuid.FromString(id)
 	if err != nil {
 		logger.Error().Err(err).Msg("Invalid repository ID format")
+
 		return nil, fmt.Errorf("invalid repository ID: %w", err)
 	}
 
@@ -727,12 +761,14 @@ func (s *repositoryService) SyncRepository(
 	repo, err := s.repoRepo.GetByID(ctx, id)
 	if err != nil {
 		logger.Error().Err(err).Msg("Failed to retrieve repository")
+
 		return nil, fmt.Errorf("failed to retrieve repository: %w", err)
 	}
 
 	// Update status to pending
 	if err := s.repoRepo.UpdateStatus(ctx, id, models.RepositoryStatusPending); err != nil {
 		logger.Error().Err(err).Msg("Failed to update repository status")
+
 		return nil, fmt.Errorf("failed to update repository status: %w", err)
 	}
 
@@ -781,6 +817,7 @@ func (s *repositoryService) GetSyncStatus(
 	_, err := uuid.FromString(id)
 	if err != nil {
 		logger.Error().Err(err).Msg("Invalid repository ID format")
+
 		return nil, fmt.Errorf("invalid repository ID: %w", err)
 	}
 
@@ -788,6 +825,7 @@ func (s *repositoryService) GetSyncStatus(
 	repo, err := s.repoRepo.GetByID(ctx, id)
 	if err != nil {
 		logger.Error().Err(err).Msg("Failed to retrieve repository")
+
 		return nil, fmt.Errorf("failed to retrieve repository: %w", err)
 	}
 
@@ -824,12 +862,14 @@ func (s *repositoryService) UpdateStatus(
 	_, err := uuid.FromString(id)
 	if err != nil {
 		logger.Error().Err(err).Msg("Invalid repository ID format")
+
 		return fmt.Errorf("invalid repository ID: %w", err)
 	}
 
 	// Update status
 	if err := s.repoRepo.UpdateStatus(ctx, id, status); err != nil {
 		logger.Error().Err(err).Msg("Failed to update repository status")
+
 		return fmt.Errorf("failed to update repository status: %w", err)
 	}
 
@@ -856,12 +896,14 @@ func (s *repositoryService) UpdateLatestCommit(
 	_, err := uuid.FromString(id)
 	if err != nil {
 		logger.Error().Err(err).Msg("Invalid repository ID format")
+
 		return fmt.Errorf("invalid repository ID: %w", err)
 	}
 
 	// Update latest commit
 	if err := s.repoRepo.UpdateLatestCommit(ctx, id, commitHash); err != nil {
 		logger.Error().Err(err).Msg("Failed to update latest commit")
+
 		return fmt.Errorf("failed to update latest commit: %w", err)
 	}
 
@@ -890,6 +932,7 @@ func (s *repositoryService) GetPendingSync(
 	repos, err := s.repoRepo.GetPendingSync(ctx, limit)
 	if err != nil {
 		logger.Error().Err(err).Msg("Failed to retrieve pending sync repositories")
+
 		return nil, fmt.Errorf(
 			"failed to retrieve pending sync repositories: %w",
 			err,
@@ -917,12 +960,14 @@ func (s *repositoryService) Exists(
 	_, err := uuid.FromString(id)
 	if err != nil {
 		logger.Error().Err(err).Msg("Invalid repository ID format")
+
 		return false, fmt.Errorf("invalid repository ID: %w", err)
 	}
 
 	exists, err := s.repoRepo.Exists(ctx, id)
 	if err != nil {
 		logger.Error().Err(err).Msg("Failed to check repository existence")
+
 		return false, fmt.Errorf("failed to check repository existence: %w", err)
 	}
 
@@ -944,12 +989,14 @@ func (s *repositoryService) ExistsByURL(
 	_, err := uuid.FromString(projectID)
 	if err != nil {
 		logger.Error().Err(err).Msg("Invalid project ID format")
+
 		return false, fmt.Errorf("invalid project ID: %w", err)
 	}
 
 	exists, err := s.repoRepo.ExistsByURL(ctx, projectID, url)
 	if err != nil {
 		logger.Error().Err(err).Msg("Failed to check repository URL existence")
+
 		return false, fmt.Errorf(
 			"failed to check repository URL existence: %w",
 			err,
@@ -969,18 +1016,18 @@ func (s *repositoryService) validateRepositoryURL(repoURL string) error {
 
 	// Check scheme
 	if parsedURL.Scheme != "http" && parsedURL.Scheme != "https" {
-		return fmt.Errorf("URL must use HTTP or HTTPS protocol")
+		return errors.New("URL must use HTTP or HTTPS protocol")
 	}
 
 	// Check host
 	if parsedURL.Host == "" {
-		return fmt.Errorf("URL must have a valid host")
+		return errors.New("URL must have a valid host")
 	}
 
 	// Check if it's a known Git hosting service
 	host := parsedURL.Hostname()
 	if !s.isKnownGitHost(host) {
-		return fmt.Errorf("URL must be from a known Git hosting service")
+		return errors.New("URL must be from a known Git hosting service")
 	}
 
 	return nil

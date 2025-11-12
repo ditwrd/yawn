@@ -64,6 +64,7 @@ func TestErrorHandler_HandleAppError(t *testing.T) {
 	)
 
 	var response dto.ErrorResponse
+
 	err := json.Unmarshal(rec.Body.Bytes(), &response)
 	require.NoError(t, err)
 
@@ -95,6 +96,7 @@ func TestErrorHandler_HandleValidationError(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
 
 	var response dto.ValidationErrorResponse
+
 	err := json.Unmarshal(rec.Body.Bytes(), &response)
 	require.NoError(t, err)
 
@@ -120,6 +122,7 @@ func TestErrorHandler_HandleHTTPError(t *testing.T) {
 	assert.Equal(t, http.StatusNotFound, rec.Code)
 
 	var response dto.ErrorResponse
+
 	err := json.Unmarshal(rec.Body.Bytes(), &response)
 	require.NoError(t, err)
 
@@ -142,6 +145,7 @@ func TestErrorHandler_HandleGORMErrors(t *testing.T) {
 	assert.Equal(t, http.StatusNotFound, rec.Code)
 
 	var response dto.ErrorResponse
+
 	err := json.Unmarshal(rec.Body.Bytes(), &response)
 	require.NoError(t, err)
 
@@ -180,6 +184,7 @@ func TestErrorHandler_HandleGenericError(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, rec.Code)
 
 	var response dto.ErrorResponse
+
 	err := json.Unmarshal(rec.Body.Bytes(), &response)
 	require.NoError(t, err)
 
@@ -347,6 +352,7 @@ func TestErrorMiddleware(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
 
 	var response dto.ErrorResponse
+
 	err := json.Unmarshal(rec.Body.Bytes(), &response)
 	require.NoError(t, err)
 
@@ -354,7 +360,7 @@ func TestErrorMiddleware(t *testing.T) {
 	assert.Equal(t, string(apperrors.CodeMissingField), response.Code)
 }
 
-// Mock field error for testing
+// Mock field error for testing.
 type mockFieldError struct {
 	field string
 	tag   string
@@ -373,7 +379,7 @@ func (m *mockFieldError) Param() string {
 	return m.param
 }
 
-func (m *mockFieldError) Value() interface{} {
+func (m *mockFieldError) Value() any {
 	return ""
 }
 
@@ -406,7 +412,7 @@ func (m *mockFieldError) Kind() reflect.Kind {
 }
 
 func (m *mockFieldError) Type() reflect.Type {
-	return reflect.TypeOf("")
+	return reflect.TypeFor[string]()
 }
 
 func TestErrorHandler_CommittedResponse(t *testing.T) {

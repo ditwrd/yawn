@@ -55,6 +55,7 @@ func (m *MockGitOpsService) CloneRepository(
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
+
 	return args.Get(0).(*git.Repository), args.Error(1)
 }
 
@@ -67,6 +68,7 @@ func (m *MockGitOpsService) ParsePipelinesFromGit(
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
+
 	return args.Get(0).([]*services.PipelineDefinition), args.Error(1)
 }
 
@@ -78,6 +80,7 @@ func (m *MockGitOpsService) SyncRepository(
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
+
 	return args.Get(0).(*services.SyncResult), args.Error(1)
 }
 
@@ -86,6 +89,7 @@ func (m *MockGitOpsService) HandleWebhook(
 	webhookPayload *services.WebhookPayload,
 ) error {
 	args := m.Called(ctx, webhookPayload)
+
 	return args.Error(0)
 }
 
@@ -97,6 +101,7 @@ func (m *MockGitOpsService) GetLatestCommit(
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
+
 	return args.Get(0).(*services.CommitInfo), args.Error(1)
 }
 
@@ -105,21 +110,24 @@ func (m *MockGitOpsService) ValidateGitRepository(
 	repoURL string,
 ) error {
 	args := m.Called(ctx, repoURL)
+
 	return args.Error(0)
 }
 
 // createGitOpsTestLogger creates a zerolog logger for testing GitOps handlers.
 func createGitOpsTestLogger() *zerolog.Logger {
 	logger := zerolog.New(zerolog.NewConsoleWriter())
+
 	return &logger
 }
 
 // createTestContext creates an Echo context for testing.
 func createTestContext(
 	method, path string,
-	body interface{},
+	body any,
 ) (echo.Context, *httptest.ResponseRecorder) {
 	e := echo.New()
+
 	var req *http.Request
 
 	if body != nil {
@@ -138,6 +146,7 @@ func createTestContext(
 
 func TestNewGitOpsHandler(t *testing.T) {
 	t.Parallel()
+
 	logger := createGitOpsTestLogger()
 	mockService := &MockGitOpsService{}
 
@@ -167,6 +176,7 @@ func TestNewGitOpsHandler(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			got := NewGitOpsHandler(tt.args.gitOpsService, tt.args.logger)
 			assert.Equal(t, tt.want.gitOpsService, got.gitOpsService)
 			assert.Equal(t, tt.want.logger, got.logger)
@@ -176,6 +186,7 @@ func TestNewGitOpsHandler(t *testing.T) {
 
 func TestGitOpsHandler_SyncRepository(t *testing.T) {
 	t.Parallel()
+
 	logger := createGitOpsTestLogger()
 
 	tests := []struct {
@@ -191,6 +202,7 @@ func TestGitOpsHandler_SyncRepository(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			mockService := &MockGitOpsService{}
 			h := &GitOpsHandler{
 				gitOpsService: mockService,
@@ -219,6 +231,7 @@ func TestGitOpsHandler_SyncRepository(t *testing.T) {
 
 func TestGitOpsHandler_HandleWebhook(t *testing.T) {
 	t.Parallel()
+
 	logger := createGitOpsTestLogger()
 
 	tests := []struct {
@@ -234,6 +247,7 @@ func TestGitOpsHandler_HandleWebhook(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			mockService := &MockGitOpsService{}
 			h := &GitOpsHandler{
 				gitOpsService: mockService,
@@ -256,6 +270,7 @@ func TestGitOpsHandler_HandleWebhook(t *testing.T) {
 
 func TestGitOpsHandler_ValidateRepository(t *testing.T) {
 	t.Parallel()
+
 	logger := createGitOpsTestLogger()
 	mockService := &MockGitOpsService{}
 	h := &GitOpsHandler{
@@ -275,6 +290,7 @@ func TestGitOpsHandler_ValidateRepository(t *testing.T) {
 
 func TestGitOpsHandler_GetPendingSync(t *testing.T) {
 	t.Parallel()
+
 	logger := createGitOpsTestLogger()
 	mockService := &MockGitOpsService{}
 	h := &GitOpsHandler{
@@ -294,6 +310,7 @@ func TestGitOpsHandler_GetPendingSync(t *testing.T) {
 
 func TestGitOpsHandler_GetSyncStatus(t *testing.T) {
 	t.Parallel()
+
 	logger := createGitOpsTestLogger()
 	mockService := &MockGitOpsService{}
 	h := &GitOpsHandler{

@@ -59,6 +59,7 @@ func (m *MockPipelineService) Create(
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
+
 	return args.Get(0).(*models.Pipeline), args.Error(1)
 }
 
@@ -70,6 +71,7 @@ func (m *MockPipelineService) GetByID(
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
+
 	return args.Get(0).(*models.Pipeline), args.Error(1)
 }
 
@@ -82,6 +84,7 @@ func (m *MockPipelineService) GetByProjectID(
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
+
 	return args.Get(0).(*services.PaginatedPipelinesResponse), args.Error(1)
 }
 
@@ -94,6 +97,7 @@ func (m *MockPipelineService) List(
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
+
 	return args.Get(0).(*services.PaginatedPipelinesResponse), args.Error(1)
 }
 
@@ -106,11 +110,13 @@ func (m *MockPipelineService) Update(
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
+
 	return args.Get(0).(*models.Pipeline), args.Error(1)
 }
 
 func (m *MockPipelineService) Delete(ctx context.Context, id string) error {
 	args := m.Called(ctx, id)
+
 	return args.Error(0)
 }
 
@@ -123,6 +129,7 @@ func (m *MockPipelineService) Search(
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
+
 	return args.Get(0).(*services.PaginatedPipelinesResponse), args.Error(1)
 }
 
@@ -132,6 +139,7 @@ func (m *MockPipelineService) UpdateStatus(
 	status models.PipelineStatus,
 ) error {
 	args := m.Called(ctx, id, status)
+
 	return args.Error(0)
 }
 
@@ -141,6 +149,7 @@ func (m *MockPipelineService) ValidateAccess(
 	requiredRole models.ProjectRole,
 ) error {
 	args := m.Called(ctx, pipelineID, userID, requiredRole)
+
 	return args.Error(0)
 }
 
@@ -149,6 +158,7 @@ func (m *MockPipelineService) CanCreate(
 	projectID, userID string,
 ) error {
 	args := m.Called(ctx, projectID, userID)
+
 	return args.Error(0)
 }
 
@@ -161,6 +171,7 @@ func (m *MockPipelineService) TriggerExecution(
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
+
 	return args.Get(0).(*models.PipelineExecution), args.Error(1)
 }
 
@@ -172,6 +183,7 @@ func (m *MockPipelineService) GetExecutionByID(
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
+
 	return args.Get(0).(*models.PipelineExecution), args.Error(1)
 }
 
@@ -184,6 +196,7 @@ func (m *MockPipelineService) GetExecutionsByPipelineID(
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
+
 	return args.Get(0).(*services.PaginatedExecutionsResponse), args.Error(1)
 }
 
@@ -192,6 +205,7 @@ func (m *MockPipelineService) CancelExecution(
 	executionID, userID string,
 ) error {
 	args := m.Called(ctx, executionID, userID)
+
 	return args.Error(0)
 }
 
@@ -202,6 +216,7 @@ func (m *MockPipelineService) GetRunningExecutions(
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
+
 	return args.Get(0).([]*models.PipelineExecution), args.Error(1)
 }
 
@@ -211,6 +226,7 @@ func (m *MockPipelineService) AddDependency(
 	condition *string,
 ) error {
 	args := m.Called(ctx, pipelineID, dependsOnID, condition)
+
 	return args.Error(0)
 }
 
@@ -219,6 +235,7 @@ func (m *MockPipelineService) RemoveDependency(
 	pipelineID, dependsOnID string,
 ) error {
 	args := m.Called(ctx, pipelineID, dependsOnID)
+
 	return args.Error(0)
 }
 
@@ -230,6 +247,7 @@ func (m *MockPipelineService) GetDependencyGraph(
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
+
 	return args.Get(0).(*services.DependencyGraphResponse), args.Error(1)
 }
 
@@ -238,6 +256,7 @@ func (m *MockPipelineService) ValidateDependencies(
 	pipelineID string,
 ) error {
 	args := m.Called(ctx, pipelineID)
+
 	return args.Error(0)
 }
 
@@ -249,6 +268,7 @@ func (m *MockPipelineService) ResolveDependencies(
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
+
 	return args.Get(0).([]string), args.Error(1)
 }
 
@@ -256,16 +276,18 @@ func (m *MockPipelineService) ResolveDependencies(
 // handlers.
 func createPipelineTestLogger() *zerolog.Logger {
 	logger := zerolog.New(zerolog.NewConsoleWriter())
+
 	return &logger
 }
 
 // createTestEchoContext creates an Echo context for testing.
 func createTestEchoContext(
 	method, path string,
-	body interface{},
+	body any,
 	params map[string]string,
 ) (echo.Context, *httptest.ResponseRecorder) {
 	e := echo.New()
+
 	var req *http.Request
 
 	if body != nil {
@@ -281,11 +303,13 @@ func createTestEchoContext(
 
 	if params != nil {
 		paramNames := make([]string, 0, len(params))
+
 		paramValues := make([]string, 0, len(params))
 		for name, value := range params {
 			paramNames = append(paramNames, name)
 			paramValues = append(paramValues, value)
 		}
+
 		c.SetParamNames(paramNames...)
 		c.SetParamValues(paramValues...)
 	}
@@ -295,6 +319,7 @@ func createTestEchoContext(
 
 func TestNewPipelineHandler(t *testing.T) {
 	t.Parallel()
+
 	logger := createPipelineTestLogger()
 	mockService := &MockPipelineService{}
 
@@ -324,6 +349,7 @@ func TestNewPipelineHandler(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			got := NewPipelineHandler(tt.args.pipelineService, tt.args.logger)
 			assert.Equal(t, tt.want.pipelineService, got.pipelineService)
 			assert.Equal(t, tt.want.logger, got.logger)
@@ -333,6 +359,7 @@ func TestNewPipelineHandler(t *testing.T) {
 
 func TestPipelineHandler_ListPipelines(t *testing.T) {
 	t.Parallel()
+
 	logger := createPipelineTestLogger()
 	mockService := &MockPipelineService{}
 	h := &PipelineHandler{
@@ -352,13 +379,16 @@ func TestPipelineHandler_ListPipelines(t *testing.T) {
 
 func TestPipelineHandler_GetPipeline(t *testing.T) {
 	t.Parallel()
+
 	type fields struct {
 		pipelineService services.PipelineService
 		logger          *zerolog.Logger
 	}
+
 	type args struct {
 		c echo.Context
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
@@ -370,11 +400,13 @@ func TestPipelineHandler_GetPipeline(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			h := &PipelineHandler{
 				pipelineService: tt.fields.pipelineService,
 				logger:          tt.fields.logger,
 			}
-			if err := h.GetPipeline(tt.args.c); (err != nil) != tt.wantErr {
+			err := h.GetPipeline(tt.args.c)
+			if (err != nil) != tt.wantErr {
 				t.Errorf(
 					"PipelineHandler.GetPipeline() error = %v, wantErr %v",
 					err,
@@ -387,6 +419,7 @@ func TestPipelineHandler_GetPipeline(t *testing.T) {
 
 func TestPipelineHandler_CreatePipeline(t *testing.T) {
 	t.Parallel()
+
 	logger := createPipelineTestLogger()
 	mockService := &MockPipelineService{}
 	h := &PipelineHandler{
@@ -406,13 +439,16 @@ func TestPipelineHandler_CreatePipeline(t *testing.T) {
 
 func TestPipelineHandler_UpdatePipeline(t *testing.T) {
 	t.Parallel()
+
 	type fields struct {
 		pipelineService services.PipelineService
 		logger          *zerolog.Logger
 	}
+
 	type args struct {
 		c echo.Context
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
@@ -424,11 +460,13 @@ func TestPipelineHandler_UpdatePipeline(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			h := &PipelineHandler{
 				pipelineService: tt.fields.pipelineService,
 				logger:          tt.fields.logger,
 			}
-			if err := h.UpdatePipeline(tt.args.c); (err != nil) != tt.wantErr {
+			err := h.UpdatePipeline(tt.args.c)
+			if (err != nil) != tt.wantErr {
 				t.Errorf(
 					"PipelineHandler.UpdatePipeline() error = %v, wantErr %v",
 					err,
@@ -441,13 +479,16 @@ func TestPipelineHandler_UpdatePipeline(t *testing.T) {
 
 func TestPipelineHandler_DeletePipeline(t *testing.T) {
 	t.Parallel()
+
 	type fields struct {
 		pipelineService services.PipelineService
 		logger          *zerolog.Logger
 	}
+
 	type args struct {
 		c echo.Context
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
@@ -459,11 +500,13 @@ func TestPipelineHandler_DeletePipeline(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			h := &PipelineHandler{
 				pipelineService: tt.fields.pipelineService,
 				logger:          tt.fields.logger,
 			}
-			if err := h.DeletePipeline(tt.args.c); (err != nil) != tt.wantErr {
+			err := h.DeletePipeline(tt.args.c)
+			if (err != nil) != tt.wantErr {
 				t.Errorf(
 					"PipelineHandler.DeletePipeline() error = %v, wantErr %v",
 					err,
@@ -476,13 +519,16 @@ func TestPipelineHandler_DeletePipeline(t *testing.T) {
 
 func TestPipelineHandler_SearchPipelines(t *testing.T) {
 	t.Parallel()
+
 	type fields struct {
 		pipelineService services.PipelineService
 		logger          *zerolog.Logger
 	}
+
 	type args struct {
 		c echo.Context
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
@@ -494,11 +540,13 @@ func TestPipelineHandler_SearchPipelines(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			h := &PipelineHandler{
 				pipelineService: tt.fields.pipelineService,
 				logger:          tt.fields.logger,
 			}
-			if err := h.SearchPipelines(tt.args.c); (err != nil) != tt.wantErr {
+			err := h.SearchPipelines(tt.args.c)
+			if (err != nil) != tt.wantErr {
 				t.Errorf(
 					"PipelineHandler.SearchPipelines() error = %v, wantErr %v",
 					err,
@@ -511,13 +559,16 @@ func TestPipelineHandler_SearchPipelines(t *testing.T) {
 
 func TestPipelineHandler_UpdatePipelineStatus(t *testing.T) {
 	t.Parallel()
+
 	type fields struct {
 		pipelineService services.PipelineService
 		logger          *zerolog.Logger
 	}
+
 	type args struct {
 		c echo.Context
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
@@ -529,11 +580,13 @@ func TestPipelineHandler_UpdatePipelineStatus(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			h := &PipelineHandler{
 				pipelineService: tt.fields.pipelineService,
 				logger:          tt.fields.logger,
 			}
-			if err := h.UpdatePipelineStatus(tt.args.c); (err != nil) != tt.wantErr {
+			err := h.UpdatePipelineStatus(tt.args.c)
+			if (err != nil) != tt.wantErr {
 				t.Errorf(
 					"PipelineHandler.UpdatePipelineStatus() error = %v, wantErr %v",
 					err,
@@ -546,13 +599,16 @@ func TestPipelineHandler_UpdatePipelineStatus(t *testing.T) {
 
 func TestPipelineHandler_TriggerExecution(t *testing.T) {
 	t.Parallel()
+
 	type fields struct {
 		pipelineService services.PipelineService
 		logger          *zerolog.Logger
 	}
+
 	type args struct {
 		c echo.Context
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
@@ -564,11 +620,13 @@ func TestPipelineHandler_TriggerExecution(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			h := &PipelineHandler{
 				pipelineService: tt.fields.pipelineService,
 				logger:          tt.fields.logger,
 			}
-			if err := h.TriggerExecution(tt.args.c); (err != nil) != tt.wantErr {
+			err := h.TriggerExecution(tt.args.c)
+			if (err != nil) != tt.wantErr {
 				t.Errorf(
 					"PipelineHandler.TriggerExecution() error = %v, wantErr %v",
 					err,
@@ -581,13 +639,16 @@ func TestPipelineHandler_TriggerExecution(t *testing.T) {
 
 func TestPipelineHandler_GetExecutions(t *testing.T) {
 	t.Parallel()
+
 	type fields struct {
 		pipelineService services.PipelineService
 		logger          *zerolog.Logger
 	}
+
 	type args struct {
 		c echo.Context
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
@@ -599,11 +660,13 @@ func TestPipelineHandler_GetExecutions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			h := &PipelineHandler{
 				pipelineService: tt.fields.pipelineService,
 				logger:          tt.fields.logger,
 			}
-			if err := h.GetExecutions(tt.args.c); (err != nil) != tt.wantErr {
+			err := h.GetExecutions(tt.args.c)
+			if (err != nil) != tt.wantErr {
 				t.Errorf(
 					"PipelineHandler.GetExecutions() error = %v, wantErr %v",
 					err,
@@ -616,13 +679,16 @@ func TestPipelineHandler_GetExecutions(t *testing.T) {
 
 func TestPipelineHandler_CancelExecution(t *testing.T) {
 	t.Parallel()
+
 	type fields struct {
 		pipelineService services.PipelineService
 		logger          *zerolog.Logger
 	}
+
 	type args struct {
 		c echo.Context
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
@@ -634,11 +700,13 @@ func TestPipelineHandler_CancelExecution(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			h := &PipelineHandler{
 				pipelineService: tt.fields.pipelineService,
 				logger:          tt.fields.logger,
 			}
-			if err := h.CancelExecution(tt.args.c); (err != nil) != tt.wantErr {
+			err := h.CancelExecution(tt.args.c)
+			if (err != nil) != tt.wantErr {
 				t.Errorf(
 					"PipelineHandler.CancelExecution() error = %v, wantErr %v",
 					err,
@@ -651,13 +719,16 @@ func TestPipelineHandler_CancelExecution(t *testing.T) {
 
 func TestPipelineHandler_GetDependencyGraph(t *testing.T) {
 	t.Parallel()
+
 	type fields struct {
 		pipelineService services.PipelineService
 		logger          *zerolog.Logger
 	}
+
 	type args struct {
 		c echo.Context
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
@@ -669,11 +740,13 @@ func TestPipelineHandler_GetDependencyGraph(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			h := &PipelineHandler{
 				pipelineService: tt.fields.pipelineService,
 				logger:          tt.fields.logger,
 			}
-			if err := h.GetDependencyGraph(tt.args.c); (err != nil) != tt.wantErr {
+			err := h.GetDependencyGraph(tt.args.c)
+			if (err != nil) != tt.wantErr {
 				t.Errorf(
 					"PipelineHandler.GetDependencyGraph() error = %v, wantErr %v",
 					err,
@@ -686,6 +759,7 @@ func TestPipelineHandler_GetDependencyGraph(t *testing.T) {
 
 func TestPipelineHandler_pipelineToResponse(t *testing.T) {
 	t.Parallel()
+
 	logger := createPipelineTestLogger()
 	h := &PipelineHandler{logger: logger}
 
@@ -728,6 +802,7 @@ func TestPipelineHandler_pipelineToResponse(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			got := h.pipelineToResponse(tt.pipeline)
 
 			assert.Equal(t, tt.want.ID, got.ID)
@@ -748,6 +823,7 @@ func TestPipelineHandler_pipelineToResponse(t *testing.T) {
 
 func TestPipelineHandler_executionToResponse(t *testing.T) {
 	t.Parallel()
+
 	logger := createPipelineTestLogger()
 	h := &PipelineHandler{logger: logger}
 
@@ -780,6 +856,7 @@ func TestPipelineHandler_executionToResponse(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			got := h.executionToResponse(tt.execution)
 
 			assert.Equal(t, tt.want.ID, got.ID)
@@ -794,6 +871,7 @@ func TestPipelineHandler_executionToResponse(t *testing.T) {
 
 func TestPipelineHandler_stepToResponse(t *testing.T) {
 	t.Parallel()
+
 	logger := createPipelineTestLogger()
 	h := &PipelineHandler{logger: logger}
 
@@ -830,6 +908,7 @@ func TestPipelineHandler_stepToResponse(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			got := h.stepToResponse(tt.step)
 
 			assert.Equal(t, tt.want.ID, got.ID)
@@ -846,6 +925,7 @@ func TestPipelineHandler_stepToResponse(t *testing.T) {
 
 func TestPipelineHandler_dependencyToResponse(t *testing.T) {
 	t.Parallel()
+
 	logger := createPipelineTestLogger()
 	h := &PipelineHandler{logger: logger}
 
@@ -881,6 +961,7 @@ func TestPipelineHandler_dependencyToResponse(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			got := h.dependencyToResponse(tt.dependency)
 
 			assert.Equal(t, tt.want.ID, got.ID)
@@ -894,7 +975,7 @@ func TestPipelineHandler_dependencyToResponse(t *testing.T) {
 	}
 }
 
-// stringPtr returns a pointer to a string
+// stringPtr returns a pointer to a string.
 func stringPtr(s string) *string {
 	return &s
 }

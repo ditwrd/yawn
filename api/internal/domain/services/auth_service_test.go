@@ -39,7 +39,7 @@ import (
 	"golang.org/x/oauth2"
 )
 
-// createAuthTestLogger creates a zerolog logger for testing
+// createAuthTestLogger creates a zerolog logger for testing.
 func createAuthTestLogger() *zerolog.Logger {
 	return &zerolog.Logger{}
 }
@@ -55,6 +55,7 @@ var _ repositories.UserRepository = (*MockUserRepositoryForAuth)(nil)
 
 func (m *MockUserRepositoryForAuth) Create(user *models.User) error {
 	args := m.Called(user)
+
 	return args.Error(0)
 }
 
@@ -63,6 +64,7 @@ func (m *MockUserRepositoryForAuth) GetByID(id string) (*models.User, error) {
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
+
 	return args.Get(0).(*models.User), args.Error(1)
 }
 
@@ -73,16 +75,19 @@ func (m *MockUserRepositoryForAuth) GetByEmail(
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
+
 	return args.Get(0).(*models.User), args.Error(1)
 }
 
 func (m *MockUserRepositoryForAuth) Update(user *models.User) error {
 	args := m.Called(user)
+
 	return args.Error(0)
 }
 
 func (m *MockUserRepositoryForAuth) Delete(id string) error {
 	args := m.Called(id)
+
 	return args.Error(0)
 }
 
@@ -90,6 +95,7 @@ func (m *MockUserRepositoryForAuth) List(
 	limit, offset int,
 ) ([]models.User, error) {
 	args := m.Called(limit, offset)
+
 	return args.Get(0).([]models.User), args.Error(1)
 }
 
@@ -104,6 +110,7 @@ var _ repositories.ProjectRepository = (*MockProjectRepositoryForAuth)(nil)
 
 func (m *MockProjectRepositoryForAuth) Create(project *models.Project) error {
 	args := m.Called(project)
+
 	return args.Error(0)
 }
 
@@ -114,6 +121,7 @@ func (m *MockProjectRepositoryForAuth) GetByID(
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
+
 	return args.Get(0).(*models.Project), args.Error(1)
 }
 
@@ -124,6 +132,7 @@ func (m *MockProjectRepositoryForAuth) GetByIDWithMembers(
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
+
 	return args.Get(0).(*models.Project), args.Error(1)
 }
 
@@ -132,6 +141,7 @@ func (m *MockProjectRepositoryForAuth) GetByUserID(
 	limit, offset int,
 ) ([]models.Project, error) {
 	args := m.Called(userID, limit, offset)
+
 	return args.Get(0).([]models.Project), args.Error(1)
 }
 
@@ -140,6 +150,7 @@ func (m *MockProjectRepositoryForAuth) GetByOwnerID(
 	limit, offset int,
 ) ([]models.Project, error) {
 	args := m.Called(ownerID, limit, offset)
+
 	return args.Get(0).([]models.Project), args.Error(1)
 }
 
@@ -147,16 +158,19 @@ func (m *MockProjectRepositoryForAuth) List(
 	limit, offset int,
 ) ([]models.Project, error) {
 	args := m.Called(limit, offset)
+
 	return args.Get(0).([]models.Project), args.Error(1)
 }
 
 func (m *MockProjectRepositoryForAuth) Update(project *models.Project) error {
 	args := m.Called(project)
+
 	return args.Error(0)
 }
 
 func (m *MockProjectRepositoryForAuth) Delete(id string) error {
 	args := m.Called(id)
+
 	return args.Error(0)
 }
 
@@ -165,6 +179,7 @@ func (m *MockProjectRepositoryForAuth) AddMember(
 	role models.ProjectRole,
 ) error {
 	args := m.Called(projectID, userID, role)
+
 	return args.Error(0)
 }
 
@@ -172,6 +187,7 @@ func (m *MockProjectRepositoryForAuth) RemoveMember(
 	projectID, userID string,
 ) error {
 	args := m.Called(projectID, userID)
+
 	return args.Error(0)
 }
 
@@ -180,6 +196,7 @@ func (m *MockProjectRepositoryForAuth) UpdateMemberRole(
 	role models.ProjectRole,
 ) error {
 	args := m.Called(projectID, userID, role)
+
 	return args.Error(0)
 }
 
@@ -190,6 +207,7 @@ func (m *MockProjectRepositoryForAuth) GetMember(
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
+
 	return args.Get(0).(*models.ProjectUser), args.Error(1)
 }
 
@@ -197,6 +215,7 @@ func (m *MockProjectRepositoryForAuth) ListMembers(
 	projectID string,
 ) ([]models.ProjectUser, error) {
 	args := m.Called(projectID)
+
 	return args.Get(0).([]models.ProjectUser), args.Error(1)
 }
 
@@ -204,6 +223,7 @@ func (m *MockProjectRepositoryForAuth) GetUserRole(
 	projectID, userID string,
 ) (models.ProjectRole, error) {
 	args := m.Called(projectID, userID)
+
 	return args.Get(0).(models.ProjectRole), args.Error(1)
 }
 
@@ -212,11 +232,13 @@ func (m *MockProjectRepositoryForAuth) Search(
 	limit, offset int,
 ) ([]models.Project, error) {
 	args := m.Called(query, limit, offset)
+
 	return args.Get(0).([]models.Project), args.Error(1)
 }
 
 func (m *MockProjectRepositoryForAuth) Count() (int64, error) {
 	args := m.Called()
+
 	return args.Get(0).(int64), args.Error(1)
 }
 
@@ -224,11 +246,13 @@ func (m *MockProjectRepositoryForAuth) CountByUserID(
 	userID string,
 ) (int64, error) {
 	args := m.Called(userID)
+
 	return args.Get(0).(int64), args.Error(1)
 }
 
 func (m *MockProjectRepositoryForAuth) Exists(id string) (bool, error) {
 	args := m.Called(id)
+
 	return args.Bool(0), args.Error(1)
 }
 
@@ -237,11 +261,13 @@ func (m *MockProjectRepositoryForAuth) HasUserWithRole(
 	role models.ProjectRole,
 ) (bool, error) {
 	args := m.Called(projectID, userID, role)
+
 	return args.Bool(0), args.Error(1)
 }
 
 func TestNewAuthService(t *testing.T) {
 	t.Parallel()
+
 	type args struct {
 		userRepo           repositories.UserRepository
 		projectRepo        repositories.ProjectRepository
@@ -250,6 +276,7 @@ func TestNewAuthService(t *testing.T) {
 		googleClientID     string
 		googleClientSecret string
 	}
+
 	tests := []struct {
 		name string
 		args args
@@ -260,6 +287,7 @@ func TestNewAuthService(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			if got := NewAuthService(tt.args.userRepo, tt.args.projectRepo, tt.args.logger, tt.args.jwtSecret, tt.args.googleClientID, tt.args.googleClientSecret); !cmp.Equal(
 				tt.want,
 				got,
@@ -277,6 +305,7 @@ func TestNewAuthService(t *testing.T) {
 
 func Test_authService_AuthenticateUser(t *testing.T) {
 	t.Parallel()
+
 	type fields struct {
 		userRepo        repositories.UserRepository
 		projectRepo     repositories.ProjectRepository
@@ -287,11 +316,13 @@ func Test_authService_AuthenticateUser(t *testing.T) {
 		googleConfig    *oauth2.Config
 		authStates      map[string]*authState
 	}
+
 	type args struct {
 		ctx      context.Context
 		email    string
 		password string
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
@@ -313,6 +344,7 @@ func Test_authService_AuthenticateUser(t *testing.T) {
 						UpdatedAt:    time.Now(),
 					}
 					m.On("GetByEmail", "test@example.com").Return(user, nil)
+
 					return m
 				}(),
 				projectRepo:     &MockProjectRepositoryForAuth{},
@@ -337,6 +369,7 @@ func Test_authService_AuthenticateUser(t *testing.T) {
 					m := &MockUserRepositoryForAuth{}
 					m.On("GetByEmail", "nonexistent@example.com").
 						Return(nil, errors.New("user not found"))
+
 					return m
 				}(),
 				projectRepo:     &MockProjectRepositoryForAuth{},
@@ -361,6 +394,7 @@ func Test_authService_AuthenticateUser(t *testing.T) {
 					m := &MockUserRepositoryForAuth{}
 					// Mock the GetByEmail call for empty email to return an error
 					m.On("GetByEmail", "").Return(nil, errors.New("user not found"))
+
 					return m
 				}(),
 				projectRepo:     &MockProjectRepositoryForAuth{},
@@ -393,6 +427,7 @@ func Test_authService_AuthenticateUser(t *testing.T) {
 						UpdatedAt:    time.Now(),
 					}
 					m.On("GetByEmail", "test@example.com").Return(user, nil)
+
 					return m
 				}(),
 				projectRepo:     &MockProjectRepositoryForAuth{},
@@ -417,6 +452,7 @@ func Test_authService_AuthenticateUser(t *testing.T) {
 					m := &MockUserRepositoryForAuth{}
 					m.On("GetByEmail", "test@example.com").
 						Return(nil, errors.New("database error"))
+
 					return m
 				}(),
 				projectRepo:     &MockProjectRepositoryForAuth{},
@@ -438,6 +474,7 @@ func Test_authService_AuthenticateUser(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			s := &authService{
 				userRepo:        tt.fields.userRepo,
 				projectRepo:     tt.fields.projectRepo,
@@ -448,6 +485,7 @@ func Test_authService_AuthenticateUser(t *testing.T) {
 				googleConfig:    tt.fields.googleConfig,
 				authStates:      tt.fields.authStates,
 			}
+
 			got, err := s.AuthenticateUser(
 				tt.args.ctx,
 				tt.args.email,
@@ -460,6 +498,7 @@ func Test_authService_AuthenticateUser(t *testing.T) {
 					tt.wantErr,
 				)
 			}
+
 			if tt.wantErr {
 				return
 			}
@@ -477,6 +516,7 @@ func Test_authService_AuthenticateUser(t *testing.T) {
 
 func Test_authService_AuthenticateWithGoogle(t *testing.T) {
 	t.Parallel()
+
 	type fields struct {
 		userRepo        repositories.UserRepository
 		projectRepo     repositories.ProjectRepository
@@ -487,11 +527,13 @@ func Test_authService_AuthenticateWithGoogle(t *testing.T) {
 		googleConfig    *oauth2.Config
 		authStates      map[string]*authState
 	}
+
 	type args struct {
 		ctx   context.Context
 		code  string
 		state string
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
@@ -504,6 +546,7 @@ func Test_authService_AuthenticateWithGoogle(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			s := &authService{
 				userRepo:        tt.fields.userRepo,
 				projectRepo:     tt.fields.projectRepo,
@@ -514,6 +557,7 @@ func Test_authService_AuthenticateWithGoogle(t *testing.T) {
 				googleConfig:    tt.fields.googleConfig,
 				authStates:      tt.fields.authStates,
 			}
+
 			got, err := s.AuthenticateWithGoogle(
 				tt.args.ctx,
 				tt.args.code,
@@ -526,9 +570,11 @@ func Test_authService_AuthenticateWithGoogle(t *testing.T) {
 					tt.wantErr,
 				)
 			}
+
 			if tt.wantErr {
 				return
 			}
+
 			if !cmp.Equal(tt.want, got) {
 				t.Errorf(
 					"authService.AuthenticateWithGoogle() = %v, want %v\ndiff=%s",
@@ -543,6 +589,7 @@ func Test_authService_AuthenticateWithGoogle(t *testing.T) {
 
 func Test_authService_GetGoogleAuthURL(t *testing.T) {
 	t.Parallel()
+
 	type fields struct {
 		userRepo        repositories.UserRepository
 		projectRepo     repositories.ProjectRepository
@@ -553,10 +600,12 @@ func Test_authService_GetGoogleAuthURL(t *testing.T) {
 		googleConfig    *oauth2.Config
 		authStates      map[string]*authState
 	}
+
 	type args struct {
 		ctx         context.Context
 		redirectURI string
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
@@ -570,6 +619,7 @@ func Test_authService_GetGoogleAuthURL(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			s := &authService{
 				userRepo:        tt.fields.userRepo,
 				projectRepo:     tt.fields.projectRepo,
@@ -580,6 +630,7 @@ func Test_authService_GetGoogleAuthURL(t *testing.T) {
 				googleConfig:    tt.fields.googleConfig,
 				authStates:      tt.fields.authStates,
 			}
+
 			got, got1, err := s.GetGoogleAuthURL(tt.args.ctx, tt.args.redirectURI)
 			if (err != nil) != tt.wantErr {
 				t.Fatalf(
@@ -588,9 +639,11 @@ func Test_authService_GetGoogleAuthURL(t *testing.T) {
 					tt.wantErr,
 				)
 			}
+
 			if tt.wantErr {
 				return
 			}
+
 			if got != tt.want {
 				t.Errorf(
 					"authService.GetGoogleAuthURL() got = %v, want %v",
@@ -598,6 +651,7 @@ func Test_authService_GetGoogleAuthURL(t *testing.T) {
 					tt.want,
 				)
 			}
+
 			if got1 != tt.want1 {
 				t.Errorf(
 					"authService.GetGoogleAuthURL() got1 = %v, want %v",
@@ -611,6 +665,7 @@ func Test_authService_GetGoogleAuthURL(t *testing.T) {
 
 func Test_authService_ValidateToken(t *testing.T) {
 	t.Parallel()
+
 	type fields struct {
 		userRepo        repositories.UserRepository
 		projectRepo     repositories.ProjectRepository
@@ -621,10 +676,12 @@ func Test_authService_ValidateToken(t *testing.T) {
 		googleConfig    *oauth2.Config
 		authStates      map[string]*authState
 	}
+
 	type args struct {
 		ctx         context.Context
 		tokenString string
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
@@ -637,6 +694,7 @@ func Test_authService_ValidateToken(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			s := &authService{
 				userRepo:        tt.fields.userRepo,
 				projectRepo:     tt.fields.projectRepo,
@@ -647,6 +705,7 @@ func Test_authService_ValidateToken(t *testing.T) {
 				googleConfig:    tt.fields.googleConfig,
 				authStates:      tt.fields.authStates,
 			}
+
 			got, err := s.ValidateToken(tt.args.ctx, tt.args.tokenString)
 			if (err != nil) != tt.wantErr {
 				t.Fatalf(
@@ -655,9 +714,11 @@ func Test_authService_ValidateToken(t *testing.T) {
 					tt.wantErr,
 				)
 			}
+
 			if tt.wantErr {
 				return
 			}
+
 			if !cmp.Equal(tt.want, got) {
 				t.Errorf(
 					"authService.ValidateToken() = %v, want %v\ndiff=%s",
@@ -672,6 +733,7 @@ func Test_authService_ValidateToken(t *testing.T) {
 
 func Test_authService_RefreshToken(t *testing.T) {
 	t.Parallel()
+
 	type fields struct {
 		userRepo        repositories.UserRepository
 		projectRepo     repositories.ProjectRepository
@@ -682,10 +744,12 @@ func Test_authService_RefreshToken(t *testing.T) {
 		googleConfig    *oauth2.Config
 		authStates      map[string]*authState
 	}
+
 	type args struct {
 		ctx          context.Context
 		refreshToken string
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
@@ -698,6 +762,7 @@ func Test_authService_RefreshToken(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			s := &authService{
 				userRepo:        tt.fields.userRepo,
 				projectRepo:     tt.fields.projectRepo,
@@ -708,6 +773,7 @@ func Test_authService_RefreshToken(t *testing.T) {
 				googleConfig:    tt.fields.googleConfig,
 				authStates:      tt.fields.authStates,
 			}
+
 			got, err := s.RefreshToken(tt.args.ctx, tt.args.refreshToken)
 			if (err != nil) != tt.wantErr {
 				t.Fatalf(
@@ -716,9 +782,11 @@ func Test_authService_RefreshToken(t *testing.T) {
 					tt.wantErr,
 				)
 			}
+
 			if tt.wantErr {
 				return
 			}
+
 			if !cmp.Equal(tt.want, got) {
 				t.Errorf(
 					"authService.RefreshToken() = %v, want %v\ndiff=%s",
@@ -733,6 +801,7 @@ func Test_authService_RefreshToken(t *testing.T) {
 
 func Test_authService_Logout(t *testing.T) {
 	t.Parallel()
+
 	type fields struct {
 		userRepo        repositories.UserRepository
 		projectRepo     repositories.ProjectRepository
@@ -743,10 +812,12 @@ func Test_authService_Logout(t *testing.T) {
 		googleConfig    *oauth2.Config
 		authStates      map[string]*authState
 	}
+
 	type args struct {
 		ctx          context.Context
 		refreshToken string
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
@@ -758,6 +829,7 @@ func Test_authService_Logout(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			s := &authService{
 				userRepo:        tt.fields.userRepo,
 				projectRepo:     tt.fields.projectRepo,
@@ -768,7 +840,8 @@ func Test_authService_Logout(t *testing.T) {
 				googleConfig:    tt.fields.googleConfig,
 				authStates:      tt.fields.authStates,
 			}
-			if err := s.Logout(tt.args.ctx, tt.args.refreshToken); (err != nil) != tt.wantErr {
+			err := s.Logout(tt.args.ctx, tt.args.refreshToken)
+			if (err != nil) != tt.wantErr {
 				t.Errorf("authService.Logout() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -777,6 +850,7 @@ func Test_authService_Logout(t *testing.T) {
 
 func Test_authService_HasPermission(t *testing.T) {
 	t.Parallel()
+
 	type fields struct {
 		userRepo        repositories.UserRepository
 		projectRepo     repositories.ProjectRepository
@@ -787,11 +861,13 @@ func Test_authService_HasPermission(t *testing.T) {
 		googleConfig    *oauth2.Config
 		authStates      map[string]*authState
 	}
+
 	type args struct {
 		ctx        context.Context
 		userID     string
 		permission Permission
 	}
+
 	tests := []struct {
 		name   string
 		fields fields
@@ -803,6 +879,7 @@ func Test_authService_HasPermission(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			s := &authService{
 				userRepo:        tt.fields.userRepo,
 				projectRepo:     tt.fields.projectRepo,
@@ -822,6 +899,7 @@ func Test_authService_HasPermission(t *testing.T) {
 
 func Test_authService_HasRole(t *testing.T) {
 	t.Parallel()
+
 	type fields struct {
 		userRepo        repositories.UserRepository
 		projectRepo     repositories.ProjectRepository
@@ -832,11 +910,13 @@ func Test_authService_HasRole(t *testing.T) {
 		googleConfig    *oauth2.Config
 		authStates      map[string]*authState
 	}
+
 	type args struct {
 		ctx    context.Context
 		userID string
 		role   models.UserRole
 	}
+
 	tests := []struct {
 		name   string
 		fields fields
@@ -848,6 +928,7 @@ func Test_authService_HasRole(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			s := &authService{
 				userRepo:        tt.fields.userRepo,
 				projectRepo:     tt.fields.projectRepo,
@@ -867,6 +948,7 @@ func Test_authService_HasRole(t *testing.T) {
 
 func Test_authService_HasProjectRole(t *testing.T) {
 	t.Parallel()
+
 	type fields struct {
 		userRepo        repositories.UserRepository
 		projectRepo     repositories.ProjectRepository
@@ -877,12 +959,14 @@ func Test_authService_HasProjectRole(t *testing.T) {
 		googleConfig    *oauth2.Config
 		authStates      map[string]*authState
 	}
+
 	type args struct {
 		ctx       context.Context
 		userID    string
 		projectID string
 		role      models.ProjectRole
 	}
+
 	tests := []struct {
 		name   string
 		fields fields
@@ -894,6 +978,7 @@ func Test_authService_HasProjectRole(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			s := &authService{
 				userRepo:        tt.fields.userRepo,
 				projectRepo:     tt.fields.projectRepo,
@@ -913,6 +998,7 @@ func Test_authService_HasProjectRole(t *testing.T) {
 
 func Test_authService_CanAccessResource(t *testing.T) {
 	t.Parallel()
+
 	type fields struct {
 		userRepo        repositories.UserRepository
 		projectRepo     repositories.ProjectRepository
@@ -923,6 +1009,7 @@ func Test_authService_CanAccessResource(t *testing.T) {
 		googleConfig    *oauth2.Config
 		authStates      map[string]*authState
 	}
+
 	type args struct {
 		ctx          context.Context
 		userID       string
@@ -930,6 +1017,7 @@ func Test_authService_CanAccessResource(t *testing.T) {
 		resourceType string
 		action       string
 	}
+
 	tests := []struct {
 		name   string
 		fields fields
@@ -941,6 +1029,7 @@ func Test_authService_CanAccessResource(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			s := &authService{
 				userRepo:        tt.fields.userRepo,
 				projectRepo:     tt.fields.projectRepo,
@@ -960,6 +1049,7 @@ func Test_authService_CanAccessResource(t *testing.T) {
 
 func Test_authService_LogAuditEvent(t *testing.T) {
 	t.Parallel()
+
 	type fields struct {
 		userRepo        repositories.UserRepository
 		projectRepo     repositories.ProjectRepository
@@ -970,10 +1060,12 @@ func Test_authService_LogAuditEvent(t *testing.T) {
 		googleConfig    *oauth2.Config
 		authStates      map[string]*authState
 	}
+
 	type args struct {
 		ctx   context.Context
 		event *AuditEvent
 	}
+
 	tests := []struct {
 		name   string
 		fields fields
@@ -984,6 +1076,7 @@ func Test_authService_LogAuditEvent(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			s := &authService{
 				userRepo:        tt.fields.userRepo,
 				projectRepo:     tt.fields.projectRepo,
@@ -1001,6 +1094,7 @@ func Test_authService_LogAuditEvent(t *testing.T) {
 
 func Test_authService_CreateUser(t *testing.T) {
 	t.Parallel()
+
 	type fields struct {
 		userRepo        repositories.UserRepository
 		projectRepo     repositories.ProjectRepository
@@ -1011,10 +1105,12 @@ func Test_authService_CreateUser(t *testing.T) {
 		googleConfig    *oauth2.Config
 		authStates      map[string]*authState
 	}
+
 	type args struct {
 		ctx context.Context
 		req *CreateUserRequest
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
@@ -1027,6 +1123,7 @@ func Test_authService_CreateUser(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			s := &authService{
 				userRepo:        tt.fields.userRepo,
 				projectRepo:     tt.fields.projectRepo,
@@ -1037,6 +1134,7 @@ func Test_authService_CreateUser(t *testing.T) {
 				googleConfig:    tt.fields.googleConfig,
 				authStates:      tt.fields.authStates,
 			}
+
 			got, err := s.CreateUser(tt.args.ctx, tt.args.req)
 			if (err != nil) != tt.wantErr {
 				t.Fatalf(
@@ -1045,9 +1143,11 @@ func Test_authService_CreateUser(t *testing.T) {
 					tt.wantErr,
 				)
 			}
+
 			if tt.wantErr {
 				return
 			}
+
 			if !cmp.Equal(tt.want, got) {
 				t.Errorf(
 					"authService.CreateUser() = %v, want %v\ndiff=%s",
@@ -1062,6 +1162,7 @@ func Test_authService_CreateUser(t *testing.T) {
 
 func Test_authService_UpdateUserLastLogin(t *testing.T) {
 	t.Parallel()
+
 	type fields struct {
 		userRepo        repositories.UserRepository
 		projectRepo     repositories.ProjectRepository
@@ -1072,10 +1173,12 @@ func Test_authService_UpdateUserLastLogin(t *testing.T) {
 		googleConfig    *oauth2.Config
 		authStates      map[string]*authState
 	}
+
 	type args struct {
 		ctx    context.Context
 		userID string
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
@@ -1087,6 +1190,7 @@ func Test_authService_UpdateUserLastLogin(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			s := &authService{
 				userRepo:        tt.fields.userRepo,
 				projectRepo:     tt.fields.projectRepo,
@@ -1097,7 +1201,8 @@ func Test_authService_UpdateUserLastLogin(t *testing.T) {
 				googleConfig:    tt.fields.googleConfig,
 				authStates:      tt.fields.authStates,
 			}
-			if err := s.UpdateUserLastLogin(tt.args.ctx, tt.args.userID); (err != nil) != tt.wantErr {
+			err := s.UpdateUserLastLogin(tt.args.ctx, tt.args.userID)
+			if (err != nil) != tt.wantErr {
 				t.Errorf(
 					"authService.UpdateUserLastLogin() error = %v, wantErr %v",
 					err,
@@ -1110,6 +1215,7 @@ func Test_authService_UpdateUserLastLogin(t *testing.T) {
 
 func Test_authService_generateTokenPair(t *testing.T) {
 	t.Parallel()
+
 	type fields struct {
 		userRepo        repositories.UserRepository
 		projectRepo     repositories.ProjectRepository
@@ -1120,9 +1226,11 @@ func Test_authService_generateTokenPair(t *testing.T) {
 		googleConfig    *oauth2.Config
 		authStates      map[string]*authState
 	}
+
 	type args struct {
 		userID string
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
@@ -1135,6 +1243,7 @@ func Test_authService_generateTokenPair(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			s := &authService{
 				userRepo:        tt.fields.userRepo,
 				projectRepo:     tt.fields.projectRepo,
@@ -1145,6 +1254,7 @@ func Test_authService_generateTokenPair(t *testing.T) {
 				googleConfig:    tt.fields.googleConfig,
 				authStates:      tt.fields.authStates,
 			}
+
 			got, err := s.generateTokenPair(tt.args.userID)
 			if (err != nil) != tt.wantErr {
 				t.Fatalf(
@@ -1153,9 +1263,11 @@ func Test_authService_generateTokenPair(t *testing.T) {
 					tt.wantErr,
 				)
 			}
+
 			if tt.wantErr {
 				return
 			}
+
 			if !cmp.Equal(tt.want, got) {
 				t.Errorf(
 					"authService.generateTokenPair() = %v, want %v\ndiff=%s",
@@ -1170,6 +1282,7 @@ func Test_authService_generateTokenPair(t *testing.T) {
 
 func Test_authService_getUserPermissions(t *testing.T) {
 	t.Parallel()
+
 	type fields struct {
 		userRepo        repositories.UserRepository
 		projectRepo     repositories.ProjectRepository
@@ -1180,9 +1293,11 @@ func Test_authService_getUserPermissions(t *testing.T) {
 		googleConfig    *oauth2.Config
 		authStates      map[string]*authState
 	}
+
 	type args struct {
 		user *models.User
 	}
+
 	tests := []struct {
 		name   string
 		fields fields
@@ -1194,6 +1309,7 @@ func Test_authService_getUserPermissions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			s := &authService{
 				userRepo:        tt.fields.userRepo,
 				projectRepo:     tt.fields.projectRepo,
@@ -1218,6 +1334,7 @@ func Test_authService_getUserPermissions(t *testing.T) {
 
 func Test_authService_checkRolePermission(t *testing.T) {
 	t.Parallel()
+
 	type fields struct {
 		userRepo        repositories.UserRepository
 		projectRepo     repositories.ProjectRepository
@@ -1228,10 +1345,12 @@ func Test_authService_checkRolePermission(t *testing.T) {
 		googleConfig    *oauth2.Config
 		authStates      map[string]*authState
 	}
+
 	type args struct {
 		role       models.UserRole
 		permission Permission
 	}
+
 	tests := []struct {
 		name   string
 		fields fields
@@ -1243,6 +1362,7 @@ func Test_authService_checkRolePermission(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			s := &authService{
 				userRepo:        tt.fields.userRepo,
 				projectRepo:     tt.fields.projectRepo,
@@ -1266,6 +1386,7 @@ func Test_authService_checkRolePermission(t *testing.T) {
 
 func Test_authService_canAccessProject(t *testing.T) {
 	t.Parallel()
+
 	type fields struct {
 		userRepo        repositories.UserRepository
 		projectRepo     repositories.ProjectRepository
@@ -1276,12 +1397,14 @@ func Test_authService_canAccessProject(t *testing.T) {
 		googleConfig    *oauth2.Config
 		authStates      map[string]*authState
 	}
+
 	type args struct {
 		ctx       context.Context
 		userID    string
 		projectID string
 		action    string
 	}
+
 	tests := []struct {
 		name   string
 		fields fields
@@ -1293,6 +1416,7 @@ func Test_authService_canAccessProject(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			s := &authService{
 				userRepo:        tt.fields.userRepo,
 				projectRepo:     tt.fields.projectRepo,
@@ -1312,6 +1436,7 @@ func Test_authService_canAccessProject(t *testing.T) {
 
 func Test_authService_canAccessAsset(t *testing.T) {
 	t.Parallel()
+
 	type fields struct {
 		userRepo        repositories.UserRepository
 		projectRepo     repositories.ProjectRepository
@@ -1322,12 +1447,14 @@ func Test_authService_canAccessAsset(t *testing.T) {
 		googleConfig    *oauth2.Config
 		authStates      map[string]*authState
 	}
+
 	type args struct {
 		ctx     context.Context
 		userID  string
 		assetID string
 		action  string
 	}
+
 	tests := []struct {
 		name   string
 		fields fields
@@ -1339,6 +1466,7 @@ func Test_authService_canAccessAsset(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			s := &authService{
 				userRepo:        tt.fields.userRepo,
 				projectRepo:     tt.fields.projectRepo,
@@ -1358,6 +1486,7 @@ func Test_authService_canAccessAsset(t *testing.T) {
 
 func Test_authService_canAccessPipeline(t *testing.T) {
 	t.Parallel()
+
 	type fields struct {
 		userRepo        repositories.UserRepository
 		projectRepo     repositories.ProjectRepository
@@ -1368,12 +1497,14 @@ func Test_authService_canAccessPipeline(t *testing.T) {
 		googleConfig    *oauth2.Config
 		authStates      map[string]*authState
 	}
+
 	type args struct {
 		ctx        context.Context
 		userID     string
 		pipelineID string
 		action     string
 	}
+
 	tests := []struct {
 		name   string
 		fields fields
@@ -1385,6 +1516,7 @@ func Test_authService_canAccessPipeline(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			s := &authService{
 				userRepo:        tt.fields.userRepo,
 				projectRepo:     tt.fields.projectRepo,
@@ -1404,6 +1536,7 @@ func Test_authService_canAccessPipeline(t *testing.T) {
 
 func Test_authService_getGoogleUserInfo(t *testing.T) {
 	t.Parallel()
+
 	type fields struct {
 		userRepo        repositories.UserRepository
 		projectRepo     repositories.ProjectRepository
@@ -1414,10 +1547,12 @@ func Test_authService_getGoogleUserInfo(t *testing.T) {
 		googleConfig    *oauth2.Config
 		authStates      map[string]*authState
 	}
+
 	type args struct {
 		ctx   context.Context
 		token *oauth2.Token
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
@@ -1430,6 +1565,7 @@ func Test_authService_getGoogleUserInfo(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			s := &authService{
 				userRepo:        tt.fields.userRepo,
 				projectRepo:     tt.fields.projectRepo,
@@ -1440,6 +1576,7 @@ func Test_authService_getGoogleUserInfo(t *testing.T) {
 				googleConfig:    tt.fields.googleConfig,
 				authStates:      tt.fields.authStates,
 			}
+
 			got, err := s.getGoogleUserInfo(tt.args.ctx, tt.args.token)
 			if (err != nil) != tt.wantErr {
 				t.Fatalf(
@@ -1448,9 +1585,11 @@ func Test_authService_getGoogleUserInfo(t *testing.T) {
 					tt.wantErr,
 				)
 			}
+
 			if tt.wantErr {
 				return
 			}
+
 			if !cmp.Equal(tt.want, got) {
 				t.Errorf(
 					"authService.getGoogleUserInfo() = %v, want %v\ndiff=%s",
@@ -1465,6 +1604,7 @@ func Test_authService_getGoogleUserInfo(t *testing.T) {
 
 func Test_authService_findOrCreateGoogleUser(t *testing.T) {
 	t.Parallel()
+
 	type fields struct {
 		userRepo        repositories.UserRepository
 		projectRepo     repositories.ProjectRepository
@@ -1475,10 +1615,12 @@ func Test_authService_findOrCreateGoogleUser(t *testing.T) {
 		googleConfig    *oauth2.Config
 		authStates      map[string]*authState
 	}
+
 	type args struct {
 		ctx      context.Context
 		userInfo *GoogleUserInfo
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
@@ -1491,6 +1633,7 @@ func Test_authService_findOrCreateGoogleUser(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			s := &authService{
 				userRepo:        tt.fields.userRepo,
 				projectRepo:     tt.fields.projectRepo,
@@ -1501,6 +1644,7 @@ func Test_authService_findOrCreateGoogleUser(t *testing.T) {
 				googleConfig:    tt.fields.googleConfig,
 				authStates:      tt.fields.authStates,
 			}
+
 			got, err := s.findOrCreateGoogleUser(tt.args.ctx, tt.args.userInfo)
 			if (err != nil) != tt.wantErr {
 				t.Fatalf(
@@ -1509,9 +1653,11 @@ func Test_authService_findOrCreateGoogleUser(t *testing.T) {
 					tt.wantErr,
 				)
 			}
+
 			if tt.wantErr {
 				return
 			}
+
 			if !cmp.Equal(tt.want, got) {
 				t.Errorf(
 					"authService.findOrCreateGoogleUser() = %v, want %v\ndiff=%s",
@@ -1526,6 +1672,7 @@ func Test_authService_findOrCreateGoogleUser(t *testing.T) {
 
 func Test_adminPermissions(t *testing.T) {
 	t.Parallel()
+
 	tests := []struct {
 		name string
 		want []Permission
@@ -1535,6 +1682,7 @@ func Test_adminPermissions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			if got := adminPermissions(); !cmp.Equal(tt.want, got) {
 				t.Errorf(
 					"adminPermissions() = %v, want %v\ndiff=%s",
@@ -1549,6 +1697,7 @@ func Test_adminPermissions(t *testing.T) {
 
 func Test_userPermissions(t *testing.T) {
 	t.Parallel()
+
 	tests := []struct {
 		name string
 		want []Permission
@@ -1558,6 +1707,7 @@ func Test_userPermissions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			if got := userPermissions(); !cmp.Equal(tt.want, got) {
 				t.Errorf(
 					"userPermissions() = %v, want %v\ndiff=%s",

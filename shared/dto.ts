@@ -39,6 +39,13 @@ export interface AssetSummaryResponse {
   description: string;
 }
 /**
+ * AssetRequestsWithID represents a request that needs Asset ID as path
+ * parameter.
+ */
+export interface AssetRequestsWithID {
+  AssetID: string;
+}
+/**
  * CreateAssetRequest represents the request to create a new asset.
  */
 export interface CreateAssetRequest {
@@ -52,6 +59,7 @@ export interface CreateAssetRequest {
  * UpdateAssetRequest represents the request to update an asset.
  */
 export interface UpdateAssetRequest {
+  AssetID: string;
   name?: string;
   description?: string;
   version?: string;
@@ -77,6 +85,12 @@ export interface AssetSearchResponse {
   limit: number /* int */;
 }
 /**
+ * AssetVersionHistoryRequest represents a request to get asset version history.
+ */
+export interface AssetVersionHistoryRequest {
+  AssetID: string;
+}
+/**
  * AssetVersionHistoryResponse represents the version history of an asset.
  */
 export interface AssetVersionHistoryResponse {
@@ -91,6 +105,15 @@ export interface AssetVersion {
   version: string;
   created_at: string;
   updated_at: string;
+}
+/**
+ * AssetSearchRequest represents a request to search for assets.
+ */
+export interface AssetSearchRequest {
+  query?: string;
+  project_id?: string;
+  page?: number /* int */;
+  limit?: number /* int */;
 }
 /**
  * AssetDeleteResponse represents the response when an asset is deleted.
@@ -281,6 +304,16 @@ export interface ErrorResponse {
   code: string;
   details?: string;
 }
+/**
+ * ValidationErrorResponse represents a validation error response with
+ * field-level details.
+ */
+export interface ValidationErrorResponse {
+  error: string;
+  code: string;
+  details?: string;
+  fields?: { [key: string]: string};
+}
 
 //////////
 // source: gitops_dto.go
@@ -332,6 +365,87 @@ export interface WebhookResponse {
   success: boolean;
   message: string;
   timestamp: string;
+}
+/**
+ * GitOpsSyncResponse represents a GitOps synchronization response.
+ */
+export interface GitOpsSyncResponse {
+  success: boolean;
+  message: string;
+  commit_hash?: string;
+  duration?: string;
+  changes?: SyncChangesResponse;
+  errors?: string[];
+}
+/**
+ * GitOpsStatusResponse represents the GitOps status response.
+ */
+export interface GitOpsStatusResponse {
+  repository_id: string;
+  status: string;
+  last_sync: string;
+  next_sync?: string;
+  pending_changes: number /* int */;
+  sync_history: SyncStatusEntry[];
+  errors?: string[];
+}
+/**
+ * SyncStatusEntry represents a single sync status entry.
+ */
+export interface SyncStatusEntry {
+  timestamp: string;
+  status: string;
+  commit?: string;
+  message: string;
+}
+/**
+ * ValidationResponse represents a validation response.
+ */
+export interface ValidationResponse {
+  valid: boolean;
+  message: string;
+  errors?: string[];
+}
+/**
+ * GitOpsRepositorySyncRequest represents a request to sync a GitOps repository.
+ */
+export interface GitOpsRepositorySyncRequest {
+  RepositoryID: string;
+  branch?: string;
+  force?: boolean;
+  dry_run?: boolean;
+}
+/**
+ * SyncRepositoryRequest represents a request to sync a repository.
+ */
+export interface SyncRepositoryRequest {
+  branch?: string;
+  force?: boolean;
+  dry_run?: boolean;
+}
+/**
+ * GitOpsRepositoryStatusRequest represents a request to get repository sync
+ * status.
+ */
+export interface GitOpsRepositoryStatusRequest {
+  RepositoryID: string;
+}
+/**
+ * GitOpsPendingSyncRequest represents a request to get pending synchronizations
+ * for a repository.
+ */
+export interface GitOpsPendingSyncRequest {
+  RepositoryID: string;
+  limit?: number /* int */;
+}
+/**
+ * GitOpsRepositoryValidateRequest represents a request to validate a GitOps
+ * repository.
+ */
+export interface GitOpsRepositoryValidateRequest {
+  RepositoryID: string;
+  url: string;
+  branch?: string;
 }
 /**
  * ValidateRepositoryRequest represents the request to validate a repository.
@@ -605,6 +719,24 @@ export interface PipelineSummaryResponse {
   is_enabled: boolean;
 }
 /**
+ * PipelineRequestsWithID represents a request that needs Pipeline ID as path
+ * parameter.
+ */
+export interface PipelineRequestsWithID {
+  PipelineID: string;
+}
+/**
+ * ListPipelinesRequest represents the request to list pipelines with filtering
+ * and pagination.
+ */
+export interface ListPipelinesRequest {
+  Page: number /* int */;
+  Limit: number /* int */;
+  ProjectID: string;
+  Status: string;
+  Name: string;
+}
+/**
  * CreatePipelineRequest represents the request to create a new pipeline.
  */
 export interface CreatePipelineRequest {
@@ -619,6 +751,7 @@ export interface CreatePipelineRequest {
  * UpdatePipelineRequest represents the request to update a pipeline.
  */
 export interface UpdatePipelineRequest {
+  PipelineID: string;
   name?: string;
   description?: string;
   config?: string;
@@ -864,6 +997,69 @@ export interface PipelineStepConfig {
   timeout?: number /* int */; // Timeout in seconds
   continue_on_error?: boolean;
 }
+/**
+ * PipelineSearchRequest represents a request to search for pipelines.
+ */
+export interface PipelineSearchRequest {
+  query?: string;
+  project_id?: string;
+  status?: string;
+  page?: number /* int */;
+  limit?: number /* int */;
+}
+/**
+ * PipelineTriggerRequest represents a request to trigger a pipeline execution.
+ */
+export interface PipelineTriggerRequest {
+  PipelineID: string;
+  branch?: string;
+  commit?: string;
+  params?: { [key: string]: any};
+  dry_run?: boolean;
+  config?: string;
+}
+/**
+ * PipelineExecutionsRequest represents a request to get pipeline executions.
+ */
+export interface PipelineExecutionsRequest {
+  PipelineID: string;
+  page?: number /* int */;
+  limit?: number /* int */;
+  status?: string;
+}
+/**
+ * PipelineExecutionCancelRequest represents a request to cancel a pipeline
+ * execution.
+ */
+export interface PipelineExecutionCancelRequest {
+  PipelineID: string;
+  ExecutionID: string;
+}
+/**
+ * PipelineDependenciesRequest represents a request to get pipeline dependency
+ * graph.
+ */
+export interface PipelineDependenciesRequest {
+  PipelineID: string;
+}
+/**
+ * TriggerPipelineRequest represents a request to trigger a pipeline execution.
+ */
+export interface TriggerPipelineRequest {
+  branch?: string;
+  commit?: string;
+  params?: { [key: string]: any};
+  dry_run?: boolean;
+}
+/**
+ * UpdatePipelineStatusRequest represents a request to update pipeline status.
+ */
+export interface UpdatePipelineStatusRequest {
+  PipelineID: string;
+  status: string;
+  message?: string;
+  config?: { [key: string]: any};
+}
 
 //////////
 // source: project_dto.go
@@ -895,6 +1091,7 @@ export interface CreateProjectRequest {
  * UpdateProjectRequest represents a project update request.
  */
 export interface UpdateProjectRequest {
+  ProjectID: string;
   name?: string;
   description?: string;
   repository?: string;
@@ -936,6 +1133,7 @@ export interface ProjectListResponse {
  * AddProjectMemberRequest represents a request to add a member to a project.
  */
 export interface AddProjectMemberRequest {
+  ProjectID: string;
   email: string;
   role: string;
 }
@@ -944,6 +1142,8 @@ export interface AddProjectMemberRequest {
  * role.
  */
 export interface UpdateProjectMemberRequest {
+  ProjectID: string;
+  UserID: string;
   role: string;
 }
 /**
@@ -968,6 +1168,21 @@ export interface ProjectMemberListResponse {
  */
 export interface ProjectDeleteResponse {
   message: string;
+}
+/**
+ * ProjectRequestsWithID represents a request that needs Project ID as path
+ * parameter.
+ */
+export interface ProjectRequestsWithID {
+  ProjectID: string;
+}
+/**
+ * ProjectMembersRequests represents a request that needs Project ID and User ID
+ * as path parameters.
+ */
+export interface ProjectMembersRequests {
+  ProjectID: string;
+  UserID: string;
 }
 
 //////////
@@ -1004,8 +1219,15 @@ export interface UserListResponse {
  * UpdateUserRequest represents a user update request.
  */
 export interface UpdateUserRequest {
+  UserID: string;
   email?: string;
   role?: string;
+}
+/**
+ * UserRequestsWithID represents a request that needs User ID as path parameter.
+ */
+export interface UserRequestsWithID {
+  UserID: string;
 }
 /**
  * UserDeleteResponse represents a successful user deletion response.

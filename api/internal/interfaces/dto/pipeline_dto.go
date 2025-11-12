@@ -61,17 +61,17 @@ type PipelineSummaryResponse struct {
 // PipelineRequestsWithID represents a request that needs Pipeline ID as path
 // parameter.
 type PipelineRequestsWithID struct {
-	PipelineID uuid.UUID `param:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	PipelineID uuid.UUID `example:"123e4567-e89b-12d3-a456-426614174000" param:"id"`
 }
 
 // ListPipelinesRequest represents the request to list pipelines with filtering
 // and pagination.
 type ListPipelinesRequest struct {
-	Page      int    `query:"page"       example:"1"`
-	Limit     int    `query:"limit"      example:"20"`
-	ProjectID string `query:"project_id" example:"123e4567-e89b-12d3-a456-426614174000"`
-	Status    string `query:"status"     example:"active"`
-	Name      string `query:"name"       example:"build-pipeline"`
+	Page      int    `example:"1"                                    query:"page"`
+	Limit     int    `example:"20"                                   query:"limit"`
+	ProjectID string `example:"123e4567-e89b-12d3-a456-426614174000" query:"project_id"`
+	Status    string `example:"active"                               query:"status"`
+	Name      string `example:"build-pipeline"                       query:"name"`
 }
 
 // CreatePipelineRequest represents the request to create a new pipeline.
@@ -86,7 +86,7 @@ type CreatePipelineRequest struct {
 
 // UpdatePipelineRequest represents the request to update a pipeline.
 type UpdatePipelineRequest struct {
-	PipelineID  uuid.UUID `param:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	PipelineID  uuid.UUID `example:"123e4567-e89b-12d3-a456-426614174000" param:"id"`
 	Name        *string   `                                                          json:"name,omitempty"        validate:"omitempty,min=1,max=255"`
 	Description *string   `                                                          json:"description,omitempty" validate:"omitempty,max=1000"`
 	Config      *string   `                                                          json:"config,omitempty"      validate:"omitempty,max=10000"`
@@ -310,56 +310,56 @@ type PipelineStepConfig struct {
 
 // PipelineSearchRequest represents a request to search for pipelines.
 type PipelineSearchRequest struct {
-	Query     string `json:"query,omitempty"      form:"query"      example:"deployment"`
-	ProjectID string `json:"project_id,omitempty" form:"project_id"                      validate:"omitempty,uuid"`
-	Status    string `json:"status,omitempty"     form:"status"                          validate:"omitempty,oneof=draft active paused running completed failed cancelled"`
-	Page      int    `json:"page,omitempty"       form:"page"       example:"1"          validate:"omitempty,min=1"`
-	Limit     int    `json:"limit,omitempty"      form:"limit"      example:"10"         validate:"omitempty,min=1,max=100"`
+	Query     string `example:"deployment" form:"query"      json:"query,omitempty"`
+	ProjectID string `                     form:"project_id" json:"project_id,omitempty" validate:"omitempty,uuid"`
+	Status    string `                     form:"status"     json:"status,omitempty"     validate:"omitempty,oneof=draft active paused running completed failed cancelled"`
+	Page      int    `example:"1"          form:"page"       json:"page,omitempty"       validate:"omitempty,min=1"`
+	Limit     int    `example:"10"         form:"limit"      json:"limit,omitempty"      validate:"omitempty,min=1,max=100"`
 }
 
 // PipelineTriggerRequest represents a request to trigger a pipeline execution.
 type PipelineTriggerRequest struct {
-	PipelineID uuid.UUID              `param:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
-	Branch     string                 `           example:"main"                                 json:"branch,omitempty"`
-	Commit     string                 `           example:"abc123"                               json:"commit,omitempty"`
-	Params     map[string]interface{} `                                                          json:"params,omitempty"`
-	DryRun     bool                   `                                                          json:"dry_run,omitempty"`
-	Config     *string                `                                                          json:"config,omitempty"  validate:"omitempty,max=10000"`
+	PipelineID uuid.UUID      `example:"123e4567-e89b-12d3-a456-426614174000" param:"id"`
+	Branch     string         `example:"main"                                            json:"branch,omitempty"`
+	Commit     string         `example:"abc123"                                          json:"commit,omitempty"`
+	Params     map[string]any `                                                          json:"params,omitempty"`
+	DryRun     bool           `                                                          json:"dry_run,omitempty"`
+	Config     *string        `                                                          json:"config,omitempty"  validate:"omitempty,max=10000"`
 }
 
 // PipelineExecutionsRequest represents a request to get pipeline executions.
 type PipelineExecutionsRequest struct {
-	PipelineID uuid.UUID `param:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
-	Page       int       `           example:"1"                                    json:"page,omitempty"   form:"page"   validate:"omitempty,min=1"`
-	Limit      int       `           example:"10"                                   json:"limit,omitempty"  form:"limit"  validate:"omitempty,min=1,max=100"`
-	Status     string    `                                                          json:"status,omitempty" form:"status" validate:"omitempty,oneof=pending running completed failed cancelled"`
+	PipelineID uuid.UUID `example:"123e4567-e89b-12d3-a456-426614174000" param:"id"`
+	Page       int       `example:"1"                                               form:"page"   json:"page,omitempty"   validate:"omitempty,min=1"`
+	Limit      int       `example:"10"                                              form:"limit"  json:"limit,omitempty"  validate:"omitempty,min=1,max=100"`
+	Status     string    `                                                          form:"status" json:"status,omitempty" validate:"omitempty,oneof=pending running completed failed cancelled"`
 }
 
 // PipelineExecutionCancelRequest represents a request to cancel a pipeline
 // execution.
 type PipelineExecutionCancelRequest struct {
-	PipelineID  uuid.UUID `param:"id"          example:"123e4567-e89b-12d3-a456-426614174000"`
-	ExecutionID uuid.UUID `param:"executionId" example:"456e7890-f12c-34d5-a678-426614174111"`
+	PipelineID  uuid.UUID `example:"123e4567-e89b-12d3-a456-426614174000" param:"id"`
+	ExecutionID uuid.UUID `example:"456e7890-f12c-34d5-a678-426614174111" param:"executionId"`
 }
 
 // PipelineDependenciesRequest represents a request to get pipeline dependency
 // graph.
 type PipelineDependenciesRequest struct {
-	PipelineID uuid.UUID `param:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	PipelineID uuid.UUID `example:"123e4567-e89b-12d3-a456-426614174000" param:"id"`
 }
 
 // TriggerPipelineRequest represents a request to trigger a pipeline execution.
 type TriggerPipelineRequest struct {
-	Branch string                 `json:"branch,omitempty"`
-	Commit string                 `json:"commit,omitempty"`
-	Params map[string]interface{} `json:"params,omitempty"`
-	DryRun bool                   `json:"dry_run,omitempty"`
+	Branch string         `json:"branch,omitempty"`
+	Commit string         `json:"commit,omitempty"`
+	Params map[string]any `json:"params,omitempty"`
+	DryRun bool           `json:"dry_run,omitempty"`
 }
 
 // UpdatePipelineStatusRequest represents a request to update pipeline status.
 type UpdatePipelineStatusRequest struct {
-	PipelineID uuid.UUID              `param:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
-	Status     string                 `                                                          json:"status"            validate:"required,oneof=active inactive paused"`
-	Message    string                 `                                                          json:"message,omitempty"`
-	Config     map[string]interface{} `                                                          json:"config,omitempty"`
+	PipelineID uuid.UUID      `example:"123e4567-e89b-12d3-a456-426614174000" param:"id"`
+	Status     string         `                                                          json:"status"            validate:"required,oneof=active inactive paused"`
+	Message    string         `                                                          json:"message,omitempty"`
+	Config     map[string]any `                                                          json:"config,omitempty"`
 }

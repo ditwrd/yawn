@@ -347,10 +347,12 @@ func TestAssetHandler_ListAssets(t *testing.T) {
 			path := "/assets"
 			if len(tt.args.queryParams) > 0 {
 				path += "?"
+
 				var pathSb329 strings.Builder
 				for k, v := range tt.args.queryParams {
 					pathSb329.WriteString(k + "=" + v + "&")
 				}
+
 				path += pathSb329.String()
 
 				path = path[:len(path)-1] // Remove trailing &
@@ -724,6 +726,7 @@ func TestAssetHandler_UpdateAsset(t *testing.T) {
 					updateReq := &services.UpdateAssetRequest{
 						Name: func() *string {
 							s := "updated-asset"
+
 							return &s
 						}(),
 					}
@@ -737,6 +740,7 @@ func TestAssetHandler_UpdateAsset(t *testing.T) {
 				request: dto.UpdateAssetRequest{
 					Name: func() *string {
 						s := "updated-asset"
+
 						return &s
 					}(),
 				},
@@ -762,6 +766,7 @@ func TestAssetHandler_UpdateAsset(t *testing.T) {
 				request: dto.UpdateAssetRequest{
 					Name: func() *string {
 						s := "updated-asset"
+
 						return &s
 					}(),
 				},
@@ -781,6 +786,7 @@ func TestAssetHandler_UpdateAsset(t *testing.T) {
 				request: dto.UpdateAssetRequest{
 					Name: func() *string {
 						s := "updated-asset"
+
 						return &s
 					}(),
 				},

@@ -129,6 +129,7 @@ func Test_runServe(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			err := runServe(tt.args.cmd, tt.args.args)
 
 			if (err != nil) != tt.wantErr {

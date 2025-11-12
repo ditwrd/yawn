@@ -44,14 +44,14 @@ type UserListResponse struct {
 
 // UpdateUserRequest represents a user update request.
 type UpdateUserRequest struct {
-	UserID uuid.UUID `param:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
-	Email  string    `           example:"newemail@example.com"                 json:"email,omitempty"`
-	Role   string    `           example:"admin"                                json:"role,omitempty"`
+	UserID uuid.UUID `example:"123e4567-e89b-12d3-a456-426614174000" param:"id"`
+	Email  string    `example:"newemail@example.com"                            json:"email,omitempty"`
+	Role   string    `example:"admin"                                           json:"role,omitempty"`
 }
 
 // UserRequestsWithID represents a request that needs User ID as path parameter.
 type UserRequestsWithID struct {
-	UserID uuid.UUID `param:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	UserID uuid.UUID `example:"123e4567-e89b-12d3-a456-426614174000" param:"id"`
 }
 
 // UserDeleteResponse represents a successful user deletion response.

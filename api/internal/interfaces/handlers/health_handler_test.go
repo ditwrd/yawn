@@ -46,7 +46,7 @@ func TestHealthHandler_Success(t *testing.T) {
 	// Assert
 	require.NoError(t, err)
 	assert.Equal(t, http.StatusOK, rec.Code)
-	assert.Equal(t, `{"status":"ok"}`+"\n", rec.Body.String())
+	assert.JSONEq(t, `{"status":"ok"}`+"\n", rec.Body.String())
 }
 
 // TestHealthHandler_Integration tests the health check with full Echo setup.
@@ -95,6 +95,7 @@ func TestHealthHandler_IntegrationHeaders(t *testing.T) {
 	e := echo.New()
 	e.GET("/health", func(c echo.Context) error {
 		c.Response().Header().Set("Cache-Control", "no-cache")
+
 		return c.JSON(200, map[string]string{"status": "ok"})
 	})
 

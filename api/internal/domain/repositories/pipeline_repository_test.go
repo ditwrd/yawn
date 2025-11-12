@@ -333,6 +333,7 @@ func TestPipelineRepository_List(t *testing.T) {
 			filters: PipelineFilters{
 				IsEnabled: func() *bool {
 					b := true
+
 					return &b
 				}(),
 			},

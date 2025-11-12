@@ -56,7 +56,7 @@ type AssetSummaryResponse struct {
 // AssetRequestsWithID represents a request that needs Asset ID as path
 // parameter.
 type AssetRequestsWithID struct {
-	AssetID uuid.UUID `param:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	AssetID uuid.UUID `example:"123e4567-e89b-12d3-a456-426614174000" param:"id"`
 }
 
 // CreateAssetRequest represents the request to create a new asset.
@@ -70,7 +70,7 @@ type CreateAssetRequest struct {
 
 // UpdateAssetRequest represents the request to update an asset.
 type UpdateAssetRequest struct {
-	AssetID      uuid.UUID `param:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	AssetID      uuid.UUID `example:"123e4567-e89b-12d3-a456-426614174000" param:"id"`
 	Name         *string   `                                                          json:"name,omitempty"          validate:"omitempty,min=1,max=255"`
 	Description  *string   `                                                          json:"description,omitempty"   validate:"omitempty,max=1000"`
 	Version      *string   `                                                          json:"version,omitempty"       validate:"omitempty,min=1,max=50"`
@@ -96,7 +96,7 @@ type AssetSearchResponse struct {
 
 // AssetVersionHistoryRequest represents a request to get asset version history.
 type AssetVersionHistoryRequest struct {
-	AssetID uuid.UUID `param:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	AssetID uuid.UUID `example:"123e4567-e89b-12d3-a456-426614174000" param:"id"`
 }
 
 // AssetVersionHistoryResponse represents the version history of an asset.
@@ -115,10 +115,10 @@ type AssetVersion struct {
 
 // AssetSearchRequest represents a request to search for assets.
 type AssetSearchRequest struct {
-	Query     string `json:"query,omitempty"      form:"query"      example:"web-app"`
-	ProjectID string `json:"project_id,omitempty" form:"project_id"                   validate:"omitempty,uuid"`
-	Page      int    `json:"page,omitempty"       form:"page"       example:"1"       validate:"omitempty,min=1"`
-	Limit     int    `json:"limit,omitempty"      form:"limit"      example:"10"      validate:"omitempty,min=1,max=100"`
+	Query     string `example:"web-app" form:"query"      json:"query,omitempty"`
+	ProjectID string `                  form:"project_id" json:"project_id,omitempty" validate:"omitempty,uuid"`
+	Page      int    `example:"1"       form:"page"       json:"page,omitempty"       validate:"omitempty,min=1"`
+	Limit     int    `example:"10"      form:"limit"      json:"limit,omitempty"      validate:"omitempty,min=1,max=100"`
 }
 
 // AssetDeleteResponse represents the response when an asset is deleted.

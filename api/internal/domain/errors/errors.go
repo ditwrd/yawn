@@ -32,6 +32,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package errors
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 )
@@ -45,33 +46,33 @@ type ErrorCategory string
 // ServiceOrigin represents the service/module where the error originated.
 type ServiceOrigin string
 
-// Common error codes
+// Common error codes.
 const (
-	// Validation errors
+	// Validation errors.
 	CodeInvalidRequest     ErrorCode = "INVALID_REQUEST"
 	CodeValidationFailed   ErrorCode = "VALIDATION_FAILED"
 	CodeMissingField       ErrorCode = "MISSING_FIELD"
 	CodeInvalidFormat      ErrorCode = "INVALID_FORMAT"
 	CodeInvalidCredentials ErrorCode = "INVALID_CREDENTIALS"
 
-	// Authentication & Authorization errors
+	// Authentication & Authorization errors.
 	CodeUnauthorized ErrorCode = "UNAUTHORIZED"
 	CodeForbidden    ErrorCode = "FORBIDDEN"
 	CodeTokenExpired ErrorCode = "TOKEN_EXPIRED"
 	CodeTokenInvalid ErrorCode = "TOKEN_INVALID"
 
-	// Resource errors
+	// Resource errors.
 	CodeNotFound       ErrorCode = "NOT_FOUND"
 	CodeAlreadyExists  ErrorCode = "ALREADY_EXISTS"
 	CodeConflict       ErrorCode = "CONFLICT"
 	CodeResourceLocked ErrorCode = "RESOURCE_LOCKED"
 
-	// Business logic errors
+	// Business logic errors.
 	CodeBusinessRuleViolation ErrorCode = "BUSINESS_RULE_VIOLATION"
 	CodeQuotaExceeded         ErrorCode = "QUOTA_EXCEEDED"
 	CodeInvalidState          ErrorCode = "INVALID_STATE"
 
-	// System errors
+	// System errors.
 	CodeInternalError   ErrorCode = "INTERNAL_ERROR"
 	CodeDatabaseError   ErrorCode = "DATABASE_ERROR"
 	CodeNetworkError    ErrorCode = "NETWORK_ERROR"
@@ -79,7 +80,7 @@ const (
 	CodeDependencyError ErrorCode = "DEPENDENCY_ERROR"
 )
 
-// Error categories
+// Error categories.
 const (
 	CategoryValidation    ErrorCategory = "VALIDATION"
 	CategoryAuth          ErrorCategory = "AUTHENTICATION"
@@ -91,7 +92,7 @@ const (
 	CategoryExternal      ErrorCategory = "EXTERNAL"
 )
 
-// Service origins
+// Service origins.
 const (
 	OriginAuthService       ServiceOrigin = "auth_service"
 	OriginUserService       ServiceOrigin = "user_service"
@@ -124,6 +125,7 @@ func (e *AppError) Error() string {
 	if e.Details != "" {
 		return fmt.Sprintf("%s: %s (%s)", e.Message, e.Details, e.Code)
 	}
+
 	return fmt.Sprintf("%s (%s)", e.Message, e.Code)
 }
 
@@ -135,6 +137,7 @@ func (e *AppError) Unwrap() error {
 // WithCause adds an underlying cause to the error.
 func (e *AppError) WithCause(cause error) *AppError {
 	e.Cause = cause
+
 	return e
 }
 
@@ -143,13 +146,16 @@ func (e *AppError) WithContext(key string, value any) *AppError {
 	if e.Context == nil {
 		e.Context = make(map[string]any)
 	}
+
 	e.Context[key] = value
+
 	return e
 }
 
 // WithDetails adds detailed information to the error.
 func (e *AppError) WithDetails(details string) *AppError {
 	e.Details = details
+
 	return e
 }
 
@@ -193,7 +199,7 @@ func NewNotFoundError(resource string, origin ServiceOrigin) *AppError {
 	return &AppError{
 		Code:       CodeNotFound,
 		Category:   CategoryNotFound,
-		Message:    fmt.Sprintf("%s not found", resource),
+		Message:    resource + " not found",
 		Details:    fmt.Sprintf("The requested %s could not be found", resource),
 		Origin:     origin,
 		HTTPStatus: http.StatusNotFound,
@@ -258,9 +264,11 @@ func NewExternalServiceError(
 
 // IsAppError checks if an error is an AppError.
 func IsAppError(err error) (*AppError, bool) {
-	if appErr, ok := err.(*AppError); ok {
+	appErr := &AppError{}
+	if errors.As(err, &appErr) {
 		return appErr, true
 	}
+
 	return nil, false
 }
 
