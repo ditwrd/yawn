@@ -13,16 +13,29 @@
     "verbatimModuleSyntax": true,
     "noEmit": true,
 
-    /* Linting */
+    /* Linting - Enhanced Strict Mode */
     "skipLibCheck": true,
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
+    "noImplicitReturns": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": false,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
+      "@shared/*": ["../shared/*"],
     }
   }
 }

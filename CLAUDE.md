@@ -174,3 +174,6 @@ The Go backend follows DDD principles with clear layer separation:
 **Error Handling**: Use structured error returns with proper context. Service layer returns business errors, handlers translate to HTTP status codes.
 
 **Testing Approach**: Write table-driven tests covering success cases, validation errors, and edge cases. Use deterministic UUIDs and proper mock setup for reliable tests.
+- Always use context7 to search for library docs, use serena to find file/code, browsermcp to use the browser for either testing or searching things
+- only use bun and bunx, no pnpm, pnpx, npm, npx or even yarn, we're only using bun, nothing else
+- never run dev mode for api or ui by yourself, ask for user to turn it on
