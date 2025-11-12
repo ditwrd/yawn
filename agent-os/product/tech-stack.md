@@ -73,6 +73,8 @@ The `library/` folder contains the **Yawn Python SDK** for defining assets and p
 - **Testing**: Unit tests + integration tests. Use `gotests -all -use_go_cmp -w -parallel <file_name>.go` to generate test for each file. Use "github.com/stretchr/testify/mock" to mock stuff
 - **MCP**: Use context7, browsermcp and especially mcp-gopls to help with maintaining and fixing code
 - **Test Coverage**: Ensure to have at least test coverage 75% coverage, the main point is to have business tests since this is DDD/Business driven
+- **Package Management**: Only use bun and bunx commands - no pnpm, pnpx, npm, npx or yarn
+- **Development Servers**: Never run dev mode for API or UI by yourself - always ask user to turn on
 
 ---
 
@@ -102,7 +104,9 @@ The `library/` folder contains the **Yawn Python SDK** for defining assets and p
 - **Development**: Standard frontend dev server with hot reload
 - **Production**: Frontend embedded in Go binary via `embed` directive
 - **Type Safety**: Generated TypeScript interfaces from Go structs
-- **Testing** : Use mcp to aid with the work, use browsermcp to interact with a browser and use serena to make finding component easier, use context7 to find libraries docs
+- **Testing**: Use mcp to aid with the work, use browsermcp to interact with a browser and use serena to make finding component easier, use context7 to find libraries docs
+- **Package Management**: Only use bun and bunx commands - no pnpm, pnpx, npm, npx or yarn
+- **Development Servers**: Never run dev mode for API or UI by yourself - always ask user to turn on
 
 ### UI/UX Approach
 

@@ -25,6 +25,8 @@ package web
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/ditwrd/yawn/api/internal/config"
@@ -69,22 +71,13 @@ func NewEcho(cfg *config.Config, logger *zerolog.Logger) *echo.Echo {
 	// Recovery middleware
 	e.Use(echomiddleware.Recover())
 
-	// CORS middleware
+	// CORS middleware with configurable settings
 	e.Use(echomiddleware.CORSWithConfig(echomiddleware.CORSConfig{
-		AllowOrigins: []string{"*"}, // Configure appropriately for production
-		AllowMethods: []string{
-			echo.GET,
-			echo.PUT,
-			echo.POST,
-			echo.DELETE,
-			echo.OPTIONS,
-		},
-		AllowHeaders: []string{
-			echo.HeaderOrigin,
-			echo.HeaderContentType,
-			echo.HeaderAccept,
-			echo.HeaderAuthorization,
-		},
+		AllowOrigins:     processAllowedOrigins(cfg.CORS.AllowedOrigins, cfg.CORS.EnableWildcardPort),
+		AllowCredentials: cfg.CORS.AllowCredentials,
+		AllowMethods:     cfg.CORS.AllowedMethods,
+		AllowHeaders:     cfg.CORS.AllowedHeaders,
+		MaxAge:           cfg.CORS.MaxAge,
 	}))
 
 	// Request ID middleware
@@ -99,4 +92,32 @@ func NewEcho(cfg *config.Config, logger *zerolog.Logger) *echo.Echo {
 	e.Server.Addr = fmt.Sprintf("%s:%s", cfg.Server.Host, cfg.Server.Port)
 
 	return e
+}
+
+// processAllowedOrigins expands wildcard patterns in allowed origins for development.
+// When enableWildcardPort is true, it expands origins like "http://localhost:*" to
+// include common development ports. This provides flexibility during development
+// while maintaining security in production.
+func processAllowedOrigins(origins []string, enableWildcardPort bool) []string {
+	var result []string
+	commonPorts := []string{"3000", "3001", "5173", "8000", "8080", "9000"}
+
+	for _, origin := range origins {
+		if enableWildcardPort && strings.Contains(origin, "*") {
+			// Handle wildcard patterns like "http://localhost:*"
+			wildcardRegex := regexp.MustCompile(`^(https?://[^:]+):.*$`)
+			matches := wildcardRegex.FindStringSubmatch(origin)
+			if len(matches) == 2 {
+				base := matches[1]
+				for _, port := range commonPorts {
+					result = append(result, fmt.Sprintf("%s:%s", base, port))
+				}
+				continue
+			}
+		}
+		// If no wildcard pattern or wildcard processing disabled, use as-is
+		result = append(result, origin)
+	}
+
+	return result
 }

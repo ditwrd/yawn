@@ -44,6 +44,14 @@ func TestLoadConfig_Defaults(t *testing.T) {
 	assert.Equal(t, 3600, config.JWT.TTL)
 	assert.Equal(t, "info", config.Logger.Level)
 	assert.Equal(t, "json", config.Logger.Format)
+
+	// Test default CORS values
+	assert.Equal(t, []string{"http://localhost:3000"}, config.CORS.AllowedOrigins)
+	assert.True(t, config.CORS.AllowCredentials)
+	assert.Equal(t, []string{"GET", "PUT", "POST", "DELETE", "OPTIONS"}, config.CORS.AllowedMethods)
+	assert.Equal(t, []string{"Origin", "Content-Type", "Accept", "Authorization"}, config.CORS.AllowedHeaders)
+	assert.Equal(t, 3600, config.CORS.MaxAge)
+	assert.True(t, config.CORS.EnableWildcardPort)
 }
 
 func TestLoadConfig_EnvironmentVariables(t *testing.T) {
@@ -81,6 +89,37 @@ func TestLoadConfig_EnvironmentVariables(t *testing.T) {
 	assert.Equal(t, "testdb", config.Database.Name)
 	assert.Equal(t, "5432", config.Database.Port)
 	assert.Equal(t, "test-secret", config.JWT.Secret)
+}
+
+func TestLoadConfig_CORS_EnvironmentVariables(t *testing.T) {
+	// Set CORS environment variables
+	os.Setenv("YAWN_CORS_ALLOWED_ORIGINS", "https://example.com,https://app.example.com")
+	os.Setenv("YAWN_CORS_ALLOW_CREDENTIALS", "false")
+	os.Setenv("YAWN_CORS_ALLOWED_METHODS", "GET,POST")
+	os.Setenv("YAWN_CORS_ALLOWED_HEADERS", "Content-Type,Authorization")
+	os.Setenv("YAWN_CORS_MAX_AGE", "7200")
+	os.Setenv("YAWN_CORS_ENABLE_WILDCARD_PORT", "false")
+
+	defer func() {
+		// Clean up environment variables
+		os.Unsetenv("YAWN_CORS_ALLOWED_ORIGINS")
+		os.Unsetenv("YAWN_CORS_ALLOW_CREDENTIALS")
+		os.Unsetenv("YAWN_CORS_ALLOWED_METHODS")
+		os.Unsetenv("YAWN_CORS_ALLOWED_HEADERS")
+		os.Unsetenv("YAWN_CORS_MAX_AGE")
+		os.Unsetenv("YAWN_CORS_ENABLE_WILDCARD_PORT")
+	}()
+
+	config, err := LoadConfig("")
+	require.NoError(t, err)
+
+	// Test that CORS environment variables override defaults
+	assert.Equal(t, []string{"https://example.com", "https://app.example.com"}, config.CORS.AllowedOrigins)
+	assert.False(t, config.CORS.AllowCredentials)
+	assert.Equal(t, []string{"GET", "POST"}, config.CORS.AllowedMethods)
+	assert.Equal(t, []string{"Content-Type", "Authorization"}, config.CORS.AllowedHeaders)
+	assert.Equal(t, 7200, config.CORS.MaxAge)
+	assert.False(t, config.CORS.EnableWildcardPort)
 }
 
 func TestDatabaseConfig_GetDSN(t *testing.T) {

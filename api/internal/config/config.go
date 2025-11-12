@@ -34,6 +34,7 @@ type Config struct {
 	Database DatabaseConfig `mapstructure:"database"`
 	JWT      JWTConfig      `mapstructure:"jwt"`
 	Logger   LoggerConfig   `mapstructure:"logger"`
+	CORS     CORSConfig     `mapstructure:"cors"`
 }
 
 // ServerConfig holds HTTP server configuration settings.
@@ -66,6 +67,16 @@ type JWTConfig struct {
 type LoggerConfig struct {
 	Level  string `mapstructure:"level"`
 	Format string `mapstructure:"format"`
+}
+
+// CORSConfig holds CORS configuration settings for cross-origin requests.
+type CORSConfig struct {
+	AllowedOrigins     []string `mapstructure:"allowed_origins"`
+	AllowCredentials   bool     `mapstructure:"allow_credentials"`
+	AllowedMethods     []string `mapstructure:"allowed_methods"`
+	AllowedHeaders     []string `mapstructure:"allowed_headers"`
+	MaxAge             int      `mapstructure:"max_age"`
+	EnableWildcardPort bool     `mapstructure:"enable_wildcard_port"`
 }
 
 // LoadConfig loads configuration from YAML files and environment variables.
@@ -149,6 +160,14 @@ func setDefaults() {
 	// Logger defaults
 	viper.SetDefault("logger.level", "info")
 	viper.SetDefault("logger.format", "json")
+
+	// CORS defaults
+	viper.SetDefault("cors.allowed_origins", []string{"http://localhost:3000"})
+	viper.SetDefault("cors.allow_credentials", true)
+	viper.SetDefault("cors.allowed_methods", []string{"GET", "PUT", "POST", "DELETE", "OPTIONS"})
+	viper.SetDefault("cors.allowed_headers", []string{"Origin", "Content-Type", "Accept", "Authorization"})
+	viper.SetDefault("cors.max_age", 3600) // 1 hour
+	viper.SetDefault("cors.enable_wildcard_port", true) // Enable wildcard port for development
 }
 
 // GetDSN returns the database connection string for PostgreSQL/SQLite.
