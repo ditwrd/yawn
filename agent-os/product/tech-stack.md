@@ -102,6 +102,7 @@ The `library/` folder contains the **Yawn Python SDK** for defining assets and p
 - **Development**: Standard frontend dev server with hot reload
 - **Production**: Frontend embedded in Go binary via `embed` directive
 - **Type Safety**: Generated TypeScript interfaces from Go structs
+- **Testing** : Use mcp to aid with the work, use browsermcp to interact with a browser and use serena to make finding component easier, use context7 to find libraries docs
 
 ### UI/UX Approach
 
