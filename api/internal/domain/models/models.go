@@ -117,13 +117,112 @@ type Pipeline struct {
 	Name        string         `gorm:"not null;size:255;index:idx_pipelines_name"        json:"name"`
 	Description string         `gorm:"size:1000"                                         json:"description"`
 	ProjectID   uuid.UUID      `gorm:"type:uuid;not null;index:idx_pipelines_project_id" json:"project_id"`
+	Status      PipelineStatus `gorm:"type:varchar(20);default:'draft'"                  json:"status"`
+	Config      string         `gorm:"type:text"                                         json:"config,omitempty"`
+	Schedule    string         `gorm:"size:255"                                          json:"schedule,omitempty"`
+	IsEnabled   bool           `gorm:"default:true"                                      json:"is_enabled"`
 	CreatedAt   time.Time      `gorm:"autoCreateTime"                                    json:"created_at"`
 	UpdatedAt   time.Time      `gorm:"autoUpdateTime"                                    json:"updated_at"`
 	DeletedAt   gorm.DeletedAt `gorm:"index"                                             json:"-"`
 
 	// Relationships with proper constraints
-	Project Project `gorm:"foreignKey:ProjectID"      json:"project,omitempty"`
-	Assets  []Asset `gorm:"many2many:asset_pipelines" json:"assets,omitempty"`
+	Project      Project              `gorm:"foreignKey:ProjectID"           json:"project,omitempty"`
+	Assets       []Asset              `gorm:"many2many:asset_pipelines"      json:"assets,omitempty"`
+	Executions   []PipelineExecution  `gorm:"foreignKey:PipelineID"          json:"executions,omitempty"`
+	Dependencies []PipelineDependency `gorm:"foreignKey:PipelineID"          json:"dependencies,omitempty"`
+	Dependents   []PipelineDependency `gorm:"foreignKey:DependsOnPipelineID" json:"dependents,omitempty"`
+}
+
+// PipelineStatus represents the current status of a pipeline.
+type PipelineStatus string
+
+const (
+	PipelineStatusDraft     PipelineStatus = "draft"
+	PipelineStatusActive    PipelineStatus = "active"
+	PipelineStatusPaused    PipelineStatus = "paused"
+	PipelineStatusRunning   PipelineStatus = "running"
+	PipelineStatusCompleted PipelineStatus = "completed"
+	PipelineStatusFailed    PipelineStatus = "failed"
+	PipelineStatusCancelled PipelineStatus = "cancelled"
+)
+
+// PipelineExecution represents a specific execution of a pipeline.
+type PipelineExecution struct {
+	ID          uuid.UUID       `gorm:"type:uuid;primary_key"                                        json:"id"`
+	PipelineID  uuid.UUID       `gorm:"type:uuid;not null;index:idx_pipeline_executions_pipeline_id" json:"pipeline_id"`
+	Status      ExecutionStatus `gorm:"type:varchar(20);default:'pending'"                           json:"status"`
+	TriggerType string          `gorm:"size:50;default:'manual'"                                     json:"trigger_type"`
+	TriggeredBy *uuid.UUID      `gorm:"type:uuid;index:idx_pipeline_executions_triggered_by"         json:"triggered_by,omitempty"`
+	StartedAt   *time.Time      `gorm:"index:idx_pipeline_executions_started_at"                     json:"started_at,omitempty"`
+	CompletedAt *time.Time      `gorm:"index:idx_pipeline_executions_completed_at"                   json:"completed_at,omitempty"`
+	Duration    int             `gorm:"default:0"                                                    json:"duration"` // Duration in seconds
+	Config      string          `gorm:"type:text"                                                    json:"config,omitempty"`
+	Logs        string          `gorm:"type:text"                                                    json:"logs,omitempty"`
+	ErrorMsg    string          `gorm:"size:1000"                                                    json:"error_msg,omitempty"`
+	CreatedAt   time.Time       `gorm:"autoCreateTime"                                               json:"created_at"`
+	UpdatedAt   time.Time       `gorm:"autoUpdateTime"                                               json:"updated_at"`
+	DeletedAt   gorm.DeletedAt  `gorm:"index"                                                        json:"-"`
+
+	// Relationships with proper constraints
+	Pipeline    Pipeline        `gorm:"foreignKey:PipelineID"  json:"pipeline,omitempty"`
+	TriggerUser *User           `gorm:"foreignKey:TriggeredBy" json:"trigger_user,omitempty"`
+	Steps       []ExecutionStep `gorm:"foreignKey:ExecutionID" json:"steps,omitempty"`
+}
+
+// ExecutionStatus represents the status of a pipeline execution.
+type ExecutionStatus string
+
+const (
+	ExecutionStatusPending   ExecutionStatus = "pending"
+	ExecutionStatusRunning   ExecutionStatus = "running"
+	ExecutionStatusCompleted ExecutionStatus = "completed"
+	ExecutionStatusFailed    ExecutionStatus = "failed"
+	ExecutionStatusCancelled ExecutionStatus = "cancelled"
+	ExecutionStatusTimeout   ExecutionStatus = "timeout"
+)
+
+// ExecutionStep represents a step within a pipeline execution.
+type ExecutionStep struct {
+	ID          uuid.UUID       `gorm:"type:uuid;primary_key"                                     json:"id"`
+	ExecutionID uuid.UUID       `gorm:"type:uuid;not null;index:idx_execution_steps_execution_id" json:"execution_id"`
+	Name        string          `gorm:"not null;size:255"                                         json:"name"`
+	Type        StepType        `gorm:"type:varchar(50);not null"                                 json:"type"`
+	Status      ExecutionStatus `gorm:"type:varchar(20);default:'pending'"                        json:"status"`
+	Config      string          `gorm:"type:text"                                                 json:"config,omitempty"`
+	Result      string          `gorm:"type:text"                                                 json:"result,omitempty"`
+	ErrorMsg    string          `gorm:"size:1000"                                                 json:"error_msg,omitempty"`
+	StartedAt   *time.Time      `gorm:"index:idx_execution_steps_started_at"                      json:"started_at,omitempty"`
+	CompletedAt *time.Time      `gorm:"index:idx_execution_steps_completed_at"                    json:"completed_at,omitempty"`
+	Duration    int             `gorm:"default:0"                                                 json:"duration"` // Duration in seconds
+	Order       int             `gorm:"not null"                                                  json:"order"`
+	CreatedAt   time.Time       `gorm:"autoCreateTime"                                            json:"created_at"`
+	UpdatedAt   time.Time       `gorm:"autoUpdateTime"                                            json:"updated_at"`
+
+	// Relationships with proper constraints
+	Execution PipelineExecution `gorm:"foreignKey:ExecutionID" json:"execution,omitempty"`
+}
+
+// StepType represents the type of execution step.
+type StepType string
+
+const (
+	StepTypeTask         StepType = "task"
+	StepTypeCondition    StepType = "condition"
+	StepTypeNotification StepType = "notification"
+	StepTypeApproval     StepType = "approval"
+)
+
+// PipelineDependency represents a dependency relationship between pipelines.
+type PipelineDependency struct {
+	ID                  uuid.UUID `gorm:"type:uuid;primary_key"                                          json:"id"`
+	PipelineID          uuid.UUID `gorm:"type:uuid;not null;index:idx_pipeline_dependencies_pipeline_id" json:"pipeline_id"`
+	DependsOnPipelineID uuid.UUID `gorm:"type:uuid;not null;index:idx_pipeline_dependencies_depends_on"  json:"depends_on_pipeline_id"`
+	Condition           string    `gorm:"size:500"                                                       json:"condition,omitempty"` // Dependency condition
+	CreatedAt           time.Time `gorm:"autoCreateTime"                                                 json:"created_at"`
+
+	// Relationships with proper constraints
+	Pipeline  Pipeline `gorm:"foreignKey:PipelineID"          json:"pipeline,omitempty"`
+	DependsOn Pipeline `gorm:"foreignKey:DependsOnPipelineID" json:"depends_on,omitempty"`
 }
 
 // ProjectUser represents the many-to-many relationship between projects and

@@ -130,6 +130,7 @@ func (s *projectService) Create(project *models.Project, ownerID string) error {
 	} else {
 		// Validate visibility
 		validVisibilities := []ProjectVisibility{ProjectVisibilityPublic, ProjectVisibilityPrivate}
+
 		visibility := ProjectVisibility(project.Visibility)
 		if !slices.Contains(validVisibilities, visibility) {
 			return fmt.Errorf("invalid project visibility: %s", project.Visibility)
@@ -141,6 +142,7 @@ func (s *projectService) Create(project *models.Project, ownerID string) error {
 	if err != nil {
 		return fmt.Errorf("invalid owner ID format: %w", err)
 	}
+
 	project.OwnerID = ownerUUID
 
 	return s.projectRepo.Create(project)
@@ -231,6 +233,7 @@ func (s *projectService) Search(
 
 	// Filter projects accessible to the user
 	var accessibleProjects []models.Project
+
 	for _, project := range projects {
 		if s.checkProjectAccess(&project, userID) {
 			accessibleProjects = append(accessibleProjects, project)
@@ -261,7 +264,7 @@ func (s *projectService) Update(project *models.Project, userID string) error {
 
 	// Check access (only owner or maintainer can update)
 	if !s.CheckAccess(project.ID.String(), userID, models.ProjectRoleMaintainer) {
-		return fmt.Errorf(
+		return errors.New(
 			"access denied: insufficient permissions to update project",
 		)
 	}
@@ -272,9 +275,11 @@ func (s *projectService) Update(project *models.Project, userID string) error {
 		if project.Name == "" {
 			return errors.New("project name cannot be empty")
 		}
+
 		if len(project.Name) > 255 {
 			return errors.New("project name too long (max 255 characters)")
 		}
+
 		existingProject.Name = project.Name
 	}
 
@@ -283,6 +288,7 @@ func (s *projectService) Update(project *models.Project, userID string) error {
 		if len(project.Description) > 1000 {
 			return errors.New("project description too long (max 1000 characters)")
 		}
+
 		existingProject.Description = project.Description
 	}
 
@@ -291,10 +297,12 @@ func (s *projectService) Update(project *models.Project, userID string) error {
 			ProjectVisibilityPublic,
 			ProjectVisibilityPrivate,
 		}
+
 		visibility := ProjectVisibility(project.Visibility)
 		if !slices.Contains(validVisibilities, visibility) {
 			return fmt.Errorf("invalid project visibility: %s", project.Visibility)
 		}
+
 		existingProject.Visibility = string(visibility)
 	}
 
@@ -312,7 +320,7 @@ func (s *projectService) Delete(id, userID string) error {
 
 	// Check access (only owner can delete)
 	if !s.CheckAccess(id, userID, models.ProjectRoleOwner) {
-		return fmt.Errorf("access denied: only project owners can delete projects")
+		return errors.New("access denied: only project owners can delete projects")
 	}
 
 	return s.projectRepo.Delete(id)
@@ -335,6 +343,7 @@ func (s *projectService) AddMember(
 
 	// Validate role
 	projectRole := models.ProjectRole(role)
+
 	validRoles := []models.ProjectRole{
 		models.ProjectRoleOwner,
 		models.ProjectRoleMaintainer,
@@ -346,7 +355,7 @@ func (s *projectService) AddMember(
 
 	// Check access (only owner can add members)
 	if !s.CheckAccess(projectID, userID, models.ProjectRoleOwner) {
-		return nil, fmt.Errorf("access denied: only project owners can add members")
+		return nil, errors.New("access denied: only project owners can add members")
 	}
 
 	// Get the user to add
@@ -361,7 +370,7 @@ func (s *projectService) AddMember(
 		memberUser.ID.String(),
 	)
 	if err == nil && existingMember != nil {
-		return nil, fmt.Errorf("user is already a member of this project")
+		return nil, errors.New("user is already a member of this project")
 	}
 
 	// Add the member
@@ -391,7 +400,7 @@ func (s *projectService) RemoveMember(
 
 	// Check access (only owner can remove members)
 	if !s.CheckAccess(projectID, userID, models.ProjectRoleOwner) {
-		return fmt.Errorf("access denied: only project owners can remove members")
+		return errors.New("access denied: only project owners can remove members")
 	}
 
 	// Check if member exists
@@ -425,6 +434,7 @@ func (s *projectService) UpdateMemberRole(
 
 	// Validate role
 	projectRole := models.ProjectRole(role)
+
 	validRoles := []models.ProjectRole{
 		models.ProjectRoleOwner,
 		models.ProjectRoleMaintainer,
@@ -436,7 +446,7 @@ func (s *projectService) UpdateMemberRole(
 
 	// Check access (only owner can update member roles)
 	if !s.CheckAccess(projectID, userID, models.ProjectRoleOwner) {
-		return nil, fmt.Errorf(
+		return nil, errors.New(
 			"access denied: only project owners can update member roles",
 		)
 	}
@@ -455,6 +465,7 @@ func (s *projectService) UpdateMemberRole(
 
 	// Return updated member
 	member.Role = projectRole
+
 	return member, nil
 }
 
@@ -471,7 +482,7 @@ func (s *projectService) ListMembers(
 
 	// Check access
 	if !s.CheckAccess(projectID, userID, models.ProjectRoleViewer) {
-		return nil, fmt.Errorf(
+		return nil, errors.New(
 			"access denied: insufficient permissions to list members",
 		)
 	}

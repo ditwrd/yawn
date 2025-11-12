@@ -23,6 +23,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 // tags for request binding and response formatting.
 package dto
 
+import "github.com/gofrs/uuid"
+
 // UserResponse represents user information returned by API endpoints.
 type UserResponse struct {
 	ID        string `example:"123e4567-e89b-12d3-a456-426614174000" json:"id"`
@@ -42,8 +44,14 @@ type UserListResponse struct {
 
 // UpdateUserRequest represents a user update request.
 type UpdateUserRequest struct {
-	Email string `example:"newemail@example.com" json:"email,omitempty"`
-	Role  string `example:"admin"                json:"role,omitempty"`
+	UserID uuid.UUID `param:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	Email  string    `           example:"newemail@example.com"                 json:"email,omitempty"`
+	Role   string    `           example:"admin"                                json:"role,omitempty"`
+}
+
+// UserRequestsWithID represents a request that needs User ID as path parameter.
+type UserRequestsWithID struct {
+	UserID uuid.UUID `param:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
 }
 
 // UserDeleteResponse represents a successful user deletion response.

@@ -170,6 +170,8 @@ dist
 # moon
 .moon/cache
 .moon/docker
-tmp/*
+tmp/api
+tmp/main
 yawn.db
 specs
+*output.txt

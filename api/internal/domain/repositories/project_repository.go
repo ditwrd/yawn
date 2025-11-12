@@ -85,6 +85,15 @@ type ProjectRepository interface {
 
 	// CountByUserID returns the count of projects accessible by a user.
 	CountByUserID(userID string) (int64, error)
+
+	// Exists checks if a project exists by ID.
+	Exists(id string) (bool, error)
+
+	// HasUserWithRole checks if a user has a specific role in a project.
+	HasUserWithRole(
+		projectID, userID string,
+		role models.ProjectRole,
+	) (bool, error)
 }
 
 // projectRepository provides GORM-based implementation of ProjectRepository
@@ -300,4 +309,40 @@ func (r *projectRepository) CountByUserID(userID string) (int64, error) {
 		Count(&count).Error
 
 	return count, err
+}
+
+func (r *projectRepository) Exists(id string) (bool, error) {
+	var count int64
+
+	err := r.db.Model(&models.Project{}).Where("id = ?", id).Count(&count).Error
+
+	return count > 0, err
+}
+
+func (r *projectRepository) HasUserWithRole(
+	projectID, userID string,
+	role models.ProjectRole,
+) (bool, error) {
+	var count int64
+
+	// Check if user is owner with owner role
+	if role == models.ProjectRoleOwner {
+		err := r.db.Model(&models.Project{}).
+			Where("id = ? AND owner_id = ?", projectID, userID).
+			Count(&count).Error
+		if err != nil {
+			return false, err
+		}
+
+		if count > 0 {
+			return true, nil
+		}
+	}
+
+	// Check project membership
+	err := r.db.Model(&models.ProjectUser{}).
+		Where("project_id = ? AND user_id = ? AND role = ?", projectID, userID, role).
+		Count(&count).Error
+
+	return count > 0, err
 }

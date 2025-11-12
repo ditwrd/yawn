@@ -93,3 +93,12 @@ type ErrorResponse struct {
 	Code    string `example:"VALIDATION_ERROR"                      json:"code"`
 	Details string `example:"Please check your input and try again" json:"details,omitempty"`
 }
+
+// ValidationErrorResponse represents a validation error response with
+// field-level details.
+type ValidationErrorResponse struct {
+	Error   string            `example:"Validation failed"                     json:"error"`
+	Code    string            `example:"VALIDATION_ERROR"                      json:"code"`
+	Details string            `example:"Please check your input and try again" json:"details,omitempty"`
+	Fields  map[string]string `                                                json:"fields,omitempty"`
+}

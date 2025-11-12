@@ -85,6 +85,7 @@ func (h *UserHandler) checkUserAccess(
 		h.logger.Warn().
 			Str("target_user_id", targetUserID).
 			Msg("Missing user_id in context")
+
 		return false
 	}
 
@@ -93,6 +94,7 @@ func (h *UserHandler) checkUserAccess(
 		h.logger.Warn().
 			Str("target_user_id", targetUserID).
 			Msg("Missing user_role in context")
+
 		return false
 	}
 

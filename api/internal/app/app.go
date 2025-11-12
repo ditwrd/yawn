@@ -55,9 +55,18 @@ func NewFxApp() *fx.App {
 
 			// Repository providers
 			newUserRepository,
+			newProjectRepository,
+			newAssetRepository,
+			newPipelineRepository,
+			newRepositoryRepository,
 
 			// Service providers
 			newUserService,
+			newAuthService,
+			newProjectService,
+			newAssetService,
+			newPipelineService,
+			newGitOpsService,
 
 			// Middleware providers
 			newAuthMiddleware,
@@ -66,6 +75,10 @@ func NewFxApp() *fx.App {
 			// Handler providers
 			newAuthHandler,
 			newUserHandler,
+			newProjectHandler,
+			newAssetHandler,
+			newPipelineHandler,
+			newGitOpsHandler,
 		),
 
 		// Start HTTP server
@@ -91,9 +104,18 @@ func NewFxAppWithConfig(cfg *config.Config) *fx.App {
 
 			// Repository providers
 			newUserRepository,
+			newProjectRepository,
+			newAssetRepository,
+			newPipelineRepository,
+			newRepositoryRepository,
 
 			// Service providers
 			newUserService,
+			newAuthService,
+			newProjectService,
+			newAssetService,
+			newPipelineService,
+			newGitOpsService,
 
 			// Middleware providers
 			newAuthMiddleware,
@@ -102,10 +124,14 @@ func NewFxAppWithConfig(cfg *config.Config) *fx.App {
 			// Handler providers
 			newAuthHandler,
 			newUserHandler,
+			newProjectHandler,
+			newAssetHandler,
+			newPipelineHandler,
+			newGitOpsHandler,
 		),
 
 		// Start HTTP server
-		fx.Invoke(startServer, setupRoutes),
+		fx.Invoke(setupRoutes, startServer),
 
 		// Use default fx logger for now
 	)
@@ -164,16 +190,119 @@ func newPasswordService() services.PasswordService {
 	})
 }
 
+// Logger adapter for repositories that expect Info(msg string, fields ...any)
+type repoLoggerAdapter struct {
+	logger *zerolog.Logger
+}
+
+func (r *repoLoggerAdapter) Info(msg string, fields ...any) {
+	r.logger.Info().Fields(fields).Msg(msg)
+}
+
 // Repository providers
 
 func newUserRepository(db *gorm.DB) repositories.UserRepository {
 	return repositories.NewUserRepository(db)
 }
 
+func newProjectRepository(db *gorm.DB) repositories.ProjectRepository {
+	return repositories.NewProjectRepository(db)
+}
+
+func newAssetRepository(
+	db *gorm.DB,
+	logger *zerolog.Logger,
+) repositories.AssetRepository {
+	return repositories.NewAssetRepository(db, &repoLoggerAdapter{logger: logger})
+}
+
+func newPipelineRepository(
+	db *gorm.DB,
+	logger *zerolog.Logger,
+) repositories.PipelineRepository {
+	return repositories.NewPipelineRepository(
+		db,
+		&repoLoggerAdapter{logger: logger},
+	)
+}
+
+func newRepositoryRepository(
+	db *gorm.DB,
+	logger *zerolog.Logger,
+) repositories.RepositoryRepository {
+	return repositories.NewRepositoryRepository(
+		db,
+		&repoLoggerAdapter{logger: logger},
+	)
+}
+
 // Service providers
 
 func newUserService(userRepo repositories.UserRepository) services.UserService {
 	return services.NewUserService(userRepo)
+}
+
+func newAuthService(
+	userRepo repositories.UserRepository,
+	projectRepo repositories.ProjectRepository,
+	logger *zerolog.Logger,
+	jwtService services.JWTService,
+	passwordService services.PasswordService,
+) services.AuthService {
+	return services.NewAuthService(
+		userRepo,
+		projectRepo,
+		logger,
+		[]byte("your-jwt-secret-key"),
+		"",
+		"",
+	)
+}
+
+func newProjectService(
+	projectRepo repositories.ProjectRepository,
+	userRepo repositories.UserRepository,
+) services.ProjectService {
+	return services.NewProjectService(projectRepo, userRepo)
+}
+
+func newAssetService(
+	assetRepo repositories.AssetRepository,
+	projectRepo repositories.ProjectRepository,
+	userRepo repositories.UserRepository,
+	logger *zerolog.Logger,
+) services.AssetService {
+	return services.NewAssetService(assetRepo, projectRepo, userRepo, logger)
+}
+
+func newPipelineService(
+	pipelineRepo repositories.PipelineRepository,
+	projectRepo repositories.ProjectRepository,
+	assetRepo repositories.AssetRepository,
+	userRepo repositories.UserRepository,
+	logger *zerolog.Logger,
+) services.PipelineService {
+	return services.NewPipelineService(
+		pipelineRepo,
+		projectRepo,
+		assetRepo,
+		userRepo,
+		logger,
+	)
+}
+
+func newGitOpsService(
+	repositoryRepo repositories.RepositoryRepository,
+	pipelineRepo repositories.PipelineRepository,
+	projectRepo repositories.ProjectRepository,
+	logger *zerolog.Logger,
+) services.GitOpsService {
+	return services.NewGitOpsService(
+		repositoryRepo,
+		pipelineRepo,
+		projectRepo,
+		logger,
+	)
 }
 
 // Middleware providers
@@ -214,17 +343,54 @@ func newUserHandler(
 	return handlers.NewUserHandler(userService, logger)
 }
 
+func newProjectHandler(
+	projectService services.ProjectService,
+	userService services.UserService,
+	logger *zerolog.Logger,
+) *handlers.ProjectHandler {
+	return handlers.NewProjectHandler(projectService, userService, logger)
+}
+
+func newAssetHandler(
+	assetService services.AssetService,
+	logger *zerolog.Logger,
+) *handlers.AssetHandler {
+	return handlers.NewAssetHandler(assetService, logger)
+}
+
+func newPipelineHandler(
+	pipelineService services.PipelineService,
+	logger *zerolog.Logger,
+) *handlers.PipelineHandler {
+	return handlers.NewPipelineHandler(pipelineService, logger)
+}
+
+func newGitOpsHandler(
+	gitOpsService services.GitOpsService,
+	logger *zerolog.Logger,
+) *handlers.GitOpsHandler {
+	return handlers.NewGitOpsHandler(gitOpsService, logger)
+}
+
 // setupRoutes configures all application routes.
 func setupRoutes(
 	e *echo.Echo,
 	authHandler *handlers.AuthHandler,
 	userHandler *handlers.UserHandler,
+	projectHandler *handlers.ProjectHandler,
+	assetHandler *handlers.AssetHandler,
+	pipelineHandler *handlers.PipelineHandler,
+	gitOpsHandler *handlers.GitOpsHandler,
 	authMiddleware *middleware.AuthMiddleware,
 	authzMiddleware *middleware.AuthorizationMiddleware,
 ) {
 	web.SetupRoutes(e, &web.RouterConfig{
 		AuthHandler:     authHandler,
 		UserHandler:     userHandler,
+		ProjectHandler:  projectHandler,
+		AssetHandler:    assetHandler,
+		PipelineHandler: pipelineHandler,
+		GitOpsHandler:   gitOpsHandler,
 		AuthMiddleware:  authMiddleware,
 		AuthzMiddleware: authzMiddleware,
 	})

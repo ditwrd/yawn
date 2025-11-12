@@ -29,184 +29,239 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-// MockProjectRepository is a mock implementation of
-// repositories.ProjectRepository
-type MockProjectRepository struct {
+// MockProjectRepositoryForProject is a mock implementation of
+// repositories.ProjectRepository for project service tests.
+type MockProjectRepositoryForProject struct {
 	mock.Mock
 }
 
-// Ensure MockProjectRepository implements the interface
-var _ repositories.ProjectRepository = (*MockProjectRepository)(nil)
+// Ensure MockProjectRepositoryForProject implements the interface.
+var _ repositories.ProjectRepository = (*MockProjectRepositoryForProject)(nil)
 
-// MockUserRepository is a mock implementation of repositories.UserRepository
-type MockUserRepository struct {
+// MockUserRepositoryForProject is a mock implementation of
+// repositories.UserRepository for project service tests.
+type MockUserRepositoryForProject struct {
 	mock.Mock
 }
 
-// Ensure MockUserRepository implements the interface
-var _ repositories.UserRepository = (*MockUserRepository)(nil)
+// Ensure MockUserRepositoryForProject implements the interface.
+var _ repositories.UserRepository = (*MockUserRepositoryForProject)(nil)
 
-func (m *MockProjectRepository) Create(project *models.Project) error {
+func (m *MockProjectRepositoryForProject) Create(
+	project *models.Project,
+) error {
 	args := m.Called(project)
+
 	return args.Error(0)
 }
 
-func (m *MockProjectRepository) GetByID(id string) (*models.Project, error) {
-	args := m.Called(id)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*models.Project), args.Error(1)
-}
-
-func (m *MockProjectRepository) GetByIDWithMembers(
+func (m *MockProjectRepositoryForProject) GetByID(
 	id string,
 ) (*models.Project, error) {
 	args := m.Called(id)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
+
 	return args.Get(0).(*models.Project), args.Error(1)
 }
 
-func (m *MockProjectRepository) GetByUserID(
+func (m *MockProjectRepositoryForProject) GetByIDWithMembers(
+	id string,
+) (*models.Project, error) {
+	args := m.Called(id)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+
+	return args.Get(0).(*models.Project), args.Error(1)
+}
+
+func (m *MockProjectRepositoryForProject) GetByUserID(
 	userID string,
 	limit, offset int,
 ) ([]models.Project, error) {
 	args := m.Called(userID, limit, offset)
+
 	return args.Get(0).([]models.Project), args.Error(1)
 }
 
-func (m *MockProjectRepository) GetByOwnerID(
+func (m *MockProjectRepositoryForProject) GetByOwnerID(
 	ownerID string,
 	limit, offset int,
 ) ([]models.Project, error) {
 	args := m.Called(ownerID, limit, offset)
+
 	return args.Get(0).([]models.Project), args.Error(1)
 }
 
-func (m *MockProjectRepository) List(
+func (m *MockProjectRepositoryForProject) List(
 	limit, offset int,
 ) ([]models.Project, error) {
 	args := m.Called(limit, offset)
+
 	return args.Get(0).([]models.Project), args.Error(1)
 }
 
-func (m *MockProjectRepository) Update(project *models.Project) error {
+func (m *MockProjectRepositoryForProject) Update(
+	project *models.Project,
+) error {
 	args := m.Called(project)
+
 	return args.Error(0)
 }
 
-func (m *MockProjectRepository) Delete(id string) error {
+func (m *MockProjectRepositoryForProject) Delete(id string) error {
 	args := m.Called(id)
+
 	return args.Error(0)
 }
 
-func (m *MockProjectRepository) AddMember(
+func (m *MockProjectRepositoryForProject) AddMember(
 	projectID, userID string,
 	role models.ProjectRole,
 ) error {
 	args := m.Called(projectID, userID, role)
+
 	return args.Error(0)
 }
 
-func (m *MockProjectRepository) RemoveMember(projectID, userID string) error {
+func (m *MockProjectRepositoryForProject) RemoveMember(
+	projectID, userID string,
+) error {
 	args := m.Called(projectID, userID)
+
 	return args.Error(0)
 }
 
-func (m *MockProjectRepository) UpdateMemberRole(
+func (m *MockProjectRepositoryForProject) UpdateMemberRole(
 	projectID, userID string,
 	role models.ProjectRole,
 ) error {
 	args := m.Called(projectID, userID, role)
+
 	return args.Error(0)
 }
 
-func (m *MockProjectRepository) GetMember(
+func (m *MockProjectRepositoryForProject) GetMember(
 	projectID, userID string,
 ) (*models.ProjectUser, error) {
 	args := m.Called(projectID, userID)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
+
 	return args.Get(0).(*models.ProjectUser), args.Error(1)
 }
 
-func (m *MockProjectRepository) ListMembers(
+func (m *MockProjectRepositoryForProject) ListMembers(
 	projectID string,
 ) ([]models.ProjectUser, error) {
 	args := m.Called(projectID)
+
 	return args.Get(0).([]models.ProjectUser), args.Error(1)
 }
 
-func (m *MockProjectRepository) GetUserRole(
+func (m *MockProjectRepositoryForProject) GetUserRole(
 	projectID, userID string,
 ) (models.ProjectRole, error) {
 	args := m.Called(projectID, userID)
+
 	return args.Get(0).(models.ProjectRole), args.Error(1)
 }
 
-func (m *MockProjectRepository) Search(
+func (m *MockProjectRepositoryForProject) Search(
 	query string,
 	limit, offset int,
 ) ([]models.Project, error) {
 	args := m.Called(query, limit, offset)
+
 	return args.Get(0).([]models.Project), args.Error(1)
 }
 
-func (m *MockProjectRepository) Count() (int64, error) {
+func (m *MockProjectRepositoryForProject) Count() (int64, error) {
 	args := m.Called()
+
 	return args.Get(0).(int64), args.Error(1)
 }
 
-func (m *MockProjectRepository) CountByUserID(userID string) (int64, error) {
+func (m *MockProjectRepositoryForProject) CountByUserID(
+	userID string,
+) (int64, error) {
 	args := m.Called(userID)
+
 	return args.Get(0).(int64), args.Error(1)
 }
 
-// UserRepository mock methods
-func (m *MockUserRepository) Create(user *models.User) error {
+func (m *MockProjectRepositoryForProject) Exists(id string) (bool, error) {
+	args := m.Called(id)
+
+	return args.Bool(0), args.Error(1)
+}
+
+func (m *MockProjectRepositoryForProject) HasUserWithRole(
+	projectID, userID string,
+	role models.ProjectRole,
+) (bool, error) {
+	args := m.Called(projectID, userID, role)
+
+	return args.Bool(0), args.Error(1)
+}
+
+// UserRepository mock methods.
+func (m *MockUserRepositoryForProject) Create(user *models.User) error {
 	args := m.Called(user)
+
 	return args.Error(0)
 }
 
-func (m *MockUserRepository) GetByID(id string) (*models.User, error) {
+func (m *MockUserRepositoryForProject) GetByID(
+	id string,
+) (*models.User, error) {
 	args := m.Called(id)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
+
 	return args.Get(0).(*models.User), args.Error(1)
 }
 
-func (m *MockUserRepository) GetByEmail(email string) (*models.User, error) {
+func (m *MockUserRepositoryForProject) GetByEmail(
+	email string,
+) (*models.User, error) {
 	args := m.Called(email)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
+
 	return args.Get(0).(*models.User), args.Error(1)
 }
 
-func (m *MockUserRepository) Update(user *models.User) error {
+func (m *MockUserRepositoryForProject) Update(user *models.User) error {
 	args := m.Called(user)
+
 	return args.Error(0)
 }
 
-func (m *MockUserRepository) Delete(id string) error {
+func (m *MockUserRepositoryForProject) Delete(id string) error {
 	args := m.Called(id)
+
 	return args.Error(0)
 }
 
-func (m *MockUserRepository) List(limit, offset int) ([]models.User, error) {
+func (m *MockUserRepositoryForProject) List(
+	limit, offset int,
+) ([]models.User, error) {
 	args := m.Called(limit, offset)
+
 	return args.Get(0).([]models.User), args.Error(1)
 }
 
 func TestNewProjectService(t *testing.T) {
 	t.Parallel()
 
-	projectRepo := &MockProjectRepository{}
-	userRepo := &MockUserRepository{}
+	projectRepo := &MockProjectRepositoryForProject{}
+	userRepo := &MockUserRepositoryForProject{}
 
 	service := NewProjectService(projectRepo, userRepo)
 
@@ -220,13 +275,15 @@ func TestProjectService_Create(t *testing.T) {
 	userID := uuid.Must(uuid.NewV7())
 
 	type fields struct {
-		projectRepo *MockProjectRepository
-		userRepo    *MockUserRepository
+		projectRepo *MockProjectRepositoryForProject
+		userRepo    *MockUserRepositoryForProject
 	}
+
 	type args struct {
 		project *models.Project
 		ownerID string
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
@@ -236,12 +293,13 @@ func TestProjectService_Create(t *testing.T) {
 		{
 			name: "successful project creation",
 			fields: fields{
-				projectRepo: func() *MockProjectRepository {
-					m := &MockProjectRepository{}
+				projectRepo: func() *MockProjectRepositoryForProject {
+					m := &MockProjectRepositoryForProject{}
 					m.On("Create", mock.AnythingOfType("*models.Project")).Return(nil)
+
 					return m
 				}(),
-				userRepo: &MockUserRepository{},
+				userRepo: &MockUserRepositoryForProject{},
 			},
 			args: args{
 				project: &models.Project{
@@ -256,8 +314,8 @@ func TestProjectService_Create(t *testing.T) {
 		{
 			name: "nil project",
 			fields: fields{
-				projectRepo: &MockProjectRepository{},
-				userRepo:    &MockUserRepository{},
+				projectRepo: &MockProjectRepositoryForProject{},
+				userRepo:    &MockUserRepositoryForProject{},
 			},
 			args: args{
 				project: nil,
@@ -268,8 +326,8 @@ func TestProjectService_Create(t *testing.T) {
 		{
 			name: "empty owner ID",
 			fields: fields{
-				projectRepo: &MockProjectRepository{},
-				userRepo:    &MockUserRepository{},
+				projectRepo: &MockProjectRepositoryForProject{},
+				userRepo:    &MockUserRepositoryForProject{},
 			},
 			args: args{
 				project: &models.Project{Name: "Test"},
@@ -280,8 +338,8 @@ func TestProjectService_Create(t *testing.T) {
 		{
 			name: "empty project name",
 			fields: fields{
-				projectRepo: &MockProjectRepository{},
-				userRepo:    &MockUserRepository{},
+				projectRepo: &MockProjectRepositoryForProject{},
+				userRepo:    &MockUserRepositoryForProject{},
 			},
 			args: args{
 				project: &models.Project{Name: ""},
@@ -292,8 +350,8 @@ func TestProjectService_Create(t *testing.T) {
 		{
 			name: "invalid visibility",
 			fields: fields{
-				projectRepo: &MockProjectRepository{},
-				userRepo:    &MockUserRepository{},
+				projectRepo: &MockProjectRepositoryForProject{},
+				userRepo:    &MockUserRepositoryForProject{},
 			},
 			args: args{
 				project: &models.Project{
@@ -307,13 +365,14 @@ func TestProjectService_Create(t *testing.T) {
 		{
 			name: "repository error",
 			fields: fields{
-				projectRepo: func() *MockProjectRepository {
-					m := &MockProjectRepository{}
+				projectRepo: func() *MockProjectRepositoryForProject {
+					m := &MockProjectRepositoryForProject{}
 					m.On("Create", mock.AnythingOfType("*models.Project")).
 						Return(errors.New("db error"))
+
 					return m
 				}(),
-				userRepo: &MockUserRepository{},
+				userRepo: &MockUserRepositoryForProject{},
 			},
 			args: args{
 				project: &models.Project{Name: "Test Project"},
@@ -325,6 +384,7 @@ func TestProjectService_Create(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			s := &projectService{
 				projectRepo: tt.fields.projectRepo,
 				userRepo:    tt.fields.userRepo,
@@ -352,13 +412,15 @@ func TestProjectService_GetByID(t *testing.T) {
 	userID := uuid.Must(uuid.NewV7())
 
 	type fields struct {
-		projectRepo *MockProjectRepository
-		userRepo    *MockUserRepository
+		projectRepo *MockProjectRepositoryForProject
+		userRepo    *MockUserRepositoryForProject
 	}
+
 	type args struct {
 		id     string
 		userID string
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
@@ -368,8 +430,8 @@ func TestProjectService_GetByID(t *testing.T) {
 		{
 			name: "successful project retrieval",
 			fields: fields{
-				projectRepo: func() *MockProjectRepository {
-					m := &MockProjectRepository{}
+				projectRepo: func() *MockProjectRepositoryForProject {
+					m := &MockProjectRepositoryForProject{}
 					project := &models.Project{
 						ID:    projectID,
 						Name:  "Test Project",
@@ -379,9 +441,10 @@ func TestProjectService_GetByID(t *testing.T) {
 					m.On("GetByIDWithMembers", projectID.String()).Return(project, nil)
 					m.On("GetUserRole", projectID.String(), userID.String()).
 						Return(models.ProjectRoleOwner, nil)
+
 					return m
 				}(),
-				userRepo: &MockUserRepository{},
+				userRepo: &MockUserRepositoryForProject{},
 			},
 			args: args{
 				id:     projectID.String(),
@@ -392,8 +455,8 @@ func TestProjectService_GetByID(t *testing.T) {
 		{
 			name: "empty project ID",
 			fields: fields{
-				projectRepo: &MockProjectRepository{},
-				userRepo:    &MockUserRepository{},
+				projectRepo: &MockProjectRepositoryForProject{},
+				userRepo:    &MockUserRepositoryForProject{},
 			},
 			args: args{
 				id:     "",
@@ -404,13 +467,14 @@ func TestProjectService_GetByID(t *testing.T) {
 		{
 			name: "project not found",
 			fields: fields{
-				projectRepo: func() *MockProjectRepository {
-					m := &MockProjectRepository{}
+				projectRepo: func() *MockProjectRepositoryForProject {
+					m := &MockProjectRepositoryForProject{}
 					m.On("GetByIDWithMembers", projectID.String()).
 						Return(nil, errors.New("not found"))
+
 					return m
 				}(),
-				userRepo: &MockUserRepository{},
+				userRepo: &MockUserRepositoryForProject{},
 			},
 			args: args{
 				id:     projectID.String(),
@@ -422,6 +486,7 @@ func TestProjectService_GetByID(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			s := &projectService{
 				projectRepo: tt.fields.projectRepo,
 				userRepo:    tt.fields.userRepo,
@@ -454,15 +519,17 @@ func TestProjectService_AddMember(t *testing.T) {
 	memberID := uuid.Must(uuid.FromString("019a6cc1-4fed-7fc0-8d8d-40bcc19e1e06"))
 
 	type fields struct {
-		projectRepo *MockProjectRepository
-		userRepo    *MockUserRepository
+		projectRepo *MockProjectRepositoryForProject
+		userRepo    *MockUserRepositoryForProject
 	}
+
 	type args struct {
 		projectID   string
 		userID      string
 		memberEmail string
 		role        string
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
@@ -472,8 +539,8 @@ func TestProjectService_AddMember(t *testing.T) {
 		{
 			name: "successful member addition",
 			fields: fields{
-				projectRepo: func() *MockProjectRepository {
-					m := &MockProjectRepository{}
+				projectRepo: func() *MockProjectRepositoryForProject {
+					m := &MockProjectRepositoryForProject{}
 					project := &models.Project{
 						ID:      projectID,
 						OwnerID: userID,
@@ -497,14 +564,16 @@ func TestProjectService_AddMember(t *testing.T) {
 					}
 					m.On("GetMember", projectID.String(), memberID.String()).
 						Return(createdMember, nil)
+
 					return m
 				}(),
-				userRepo: func() *MockUserRepository {
-					m := &MockUserRepository{}
+				userRepo: func() *MockUserRepositoryForProject {
+					m := &MockUserRepositoryForProject{}
 					m.On("GetByEmail", "member@example.com").Return(&models.User{
 						ID:    memberID,
 						Email: "member@example.com",
 					}, nil)
+
 					return m
 				}(),
 			},
@@ -519,8 +588,8 @@ func TestProjectService_AddMember(t *testing.T) {
 		{
 			name: "invalid role",
 			fields: fields{
-				projectRepo: &MockProjectRepository{},
-				userRepo:    &MockUserRepository{},
+				projectRepo: &MockProjectRepositoryForProject{},
+				userRepo:    &MockUserRepositoryForProject{},
 			},
 			args: args{
 				projectID:   projectID.String(),
@@ -533,8 +602,8 @@ func TestProjectService_AddMember(t *testing.T) {
 		{
 			name: "user not found",
 			fields: fields{
-				projectRepo: func() *MockProjectRepository {
-					m := &MockProjectRepository{}
+				projectRepo: func() *MockProjectRepositoryForProject {
+					m := &MockProjectRepositoryForProject{}
 					// Mock GetByID for CheckAccess method
 					project := &models.Project{
 						ID:   projectID,
@@ -544,12 +613,14 @@ func TestProjectService_AddMember(t *testing.T) {
 					// Add GetUserRole mock for CheckAccess method
 					m.On("GetUserRole", projectID.String(), userID.String()).
 						Return(models.ProjectRoleOwner, nil)
+
 					return m
 				}(),
-				userRepo: func() *MockUserRepository {
-					m := &MockUserRepository{}
+				userRepo: func() *MockUserRepositoryForProject {
+					m := &MockUserRepositoryForProject{}
 					m.On("GetByEmail", "nonexistent@example.com").
 						Return(nil, errors.New("not found"))
+
 					return m
 				}(),
 			},
@@ -565,6 +636,7 @@ func TestProjectService_AddMember(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			s := &projectService{
 				projectRepo: tt.fields.projectRepo,
 				userRepo:    tt.fields.userRepo,
@@ -599,14 +671,16 @@ func TestProjectService_CheckAccess(t *testing.T) {
 	userID := uuid.Must(uuid.NewV7())
 
 	type fields struct {
-		projectRepo *MockProjectRepository
-		userRepo    *MockUserRepository
+		projectRepo *MockProjectRepositoryForProject
+		userRepo    *MockUserRepositoryForProject
 	}
+
 	type args struct {
 		projectID    string
 		userID       string
 		requiredRole models.ProjectRole
 	}
+
 	tests := []struct {
 		name       string
 		fields     fields
@@ -616,16 +690,17 @@ func TestProjectService_CheckAccess(t *testing.T) {
 		{
 			name: "owner access granted",
 			fields: fields{
-				projectRepo: func() *MockProjectRepository {
-					m := &MockProjectRepository{}
+				projectRepo: func() *MockProjectRepositoryForProject {
+					m := &MockProjectRepositoryForProject{}
 					project := &models.Project{
 						ID:      projectID,
 						OwnerID: userID,
 					}
 					m.On("GetByID", projectID.String()).Return(project, nil)
+
 					return m
 				}(),
-				userRepo: &MockUserRepository{},
+				userRepo: &MockUserRepositoryForProject{},
 			},
 			args: args{
 				projectID:    projectID.String(),
@@ -637,13 +712,14 @@ func TestProjectService_CheckAccess(t *testing.T) {
 		{
 			name: "project not found",
 			fields: fields{
-				projectRepo: func() *MockProjectRepository {
-					m := &MockProjectRepository{}
+				projectRepo: func() *MockProjectRepositoryForProject {
+					m := &MockProjectRepositoryForProject{}
 					m.On("GetByID", projectID.String()).
 						Return(nil, errors.New("not found"))
+
 					return m
 				}(),
-				userRepo: &MockUserRepository{},
+				userRepo: &MockUserRepositoryForProject{},
 			},
 			args: args{
 				projectID:    projectID.String(),
@@ -656,6 +732,7 @@ func TestProjectService_CheckAccess(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			s := &projectService{
 				projectRepo: tt.fields.projectRepo,
 				userRepo:    tt.fields.userRepo,

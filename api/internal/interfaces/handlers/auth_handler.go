@@ -31,8 +31,6 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package handlers
 
 import (
-	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -40,6 +38,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog"
 
+	apperrors "github.com/ditwrd/yawn/api/internal/domain/errors"
 	"github.com/ditwrd/yawn/api/internal/domain/models"
 	"github.com/ditwrd/yawn/api/internal/domain/services"
 	"github.com/ditwrd/yawn/api/internal/interfaces/dto"
@@ -120,11 +119,10 @@ func (h *AuthHandler) Register(c echo.Context) error {
 			Str("email", req.Email).
 			Msg("Registration attempt with existing email")
 
-		return c.JSON(http.StatusConflict, dto.ErrorResponse{
-			Error:   "User with this email already exists",
-			Code:    "USER_EXISTS",
-			Details: "Please use a different email address or try logging in",
-		})
+		return apperrors.NewConflictError(
+			"User with this email already exists",
+			apperrors.OriginWebHandler,
+		).WithDetails("Please use a different email address or try logging in")
 	}
 
 	// Hash password
@@ -135,11 +133,11 @@ func (h *AuthHandler) Register(c echo.Context) error {
 			Str("email", req.Email).
 			Msg("Failed to hash password during registration")
 
-		return c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-			Error:   "Failed to process registration",
-			Code:    "INTERNAL_ERROR",
-			Details: "Please try again later",
-		})
+		return apperrors.NewSystemError(
+			apperrors.CodeInternalError,
+			"Failed to process registration",
+			apperrors.OriginWebHandler,
+		).WithCause(err).WithDetails("Please try again later")
 	}
 
 	// Create user
@@ -157,11 +155,11 @@ func (h *AuthHandler) Register(c echo.Context) error {
 			Str("email", user.Email).
 			Msg("Failed to create user during registration")
 
-		return c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-			Error:   "Failed to create account",
-			Code:    "CREATE_FAILED",
-			Details: "Please try again later",
-		})
+		return apperrors.NewSystemError(
+			apperrors.CodeInternalError,
+			"Failed to create account",
+			apperrors.OriginWebHandler,
+		).WithCause(err).WithDetails("Please try again later")
 	}
 
 	h.logger.Info().
@@ -222,11 +220,11 @@ func (h *AuthHandler) Login(c echo.Context) error {
 			Str("email", req.Email).
 			Msg("Login attempt with non-existent email")
 
-		return c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
-			Error:   "Invalid email or password",
-			Code:    "INVALID_CREDENTIALS",
-			Details: "Please check your credentials and try again",
-		})
+		return apperrors.NewAuthError(
+			apperrors.CodeInvalidCredentials,
+			"Invalid email or password",
+			apperrors.OriginWebHandler,
+		).WithDetails("Please check your credentials and try again")
 	}
 
 	// Validate password
@@ -412,30 +410,54 @@ func (h *AuthHandler) Logout(c echo.Context) error {
 // validateRegisterRequest validates the registration request.
 func (h *AuthHandler) validateRegisterRequest(req *dto.RegisterRequest) error {
 	if req.Email == "" {
-		return errors.New("email is required")
+		return apperrors.NewValidationError(
+			apperrors.CodeMissingField,
+			"Email is required",
+			apperrors.OriginWebHandler,
+		)
 	}
 
 	if req.Password == "" {
-		return errors.New("password is required")
+		return apperrors.NewValidationError(
+			apperrors.CodeMissingField,
+			"Password is required",
+			apperrors.OriginWebHandler,
+		)
 	}
 
 	if len(req.Email) > 255 {
-		return errors.New("email address is too long (max 255 characters)")
+		return apperrors.NewValidationError(
+			apperrors.CodeInvalidFormat,
+			"Email address is too long (max 255 characters)",
+			apperrors.OriginWebHandler,
+		)
 	}
 
 	if len(req.Password) > 128 {
-		return errors.New("password is too long (max 128 characters)")
+		return apperrors.NewValidationError(
+			apperrors.CodeInvalidFormat,
+			"Password is too long (max 128 characters)",
+			apperrors.OriginWebHandler,
+		)
 	}
 
 	// Basic email validation
 	if !strings.Contains(req.Email, "@") || !strings.Contains(req.Email, ".") {
-		return errors.New("invalid email format")
+		return apperrors.NewValidationError(
+			apperrors.CodeInvalidFormat,
+			"Invalid email format",
+			apperrors.OriginWebHandler,
+		)
 	}
 
 	// Validate password strength
 	err := h.passwordService.CheckPasswordStrength(req.Password)
 	if err != nil {
-		return fmt.Errorf("password does not meet requirements: %w", err)
+		return apperrors.NewValidationError(
+			apperrors.CodeInvalidFormat,
+			"Password does not meet requirements",
+			apperrors.OriginWebHandler,
+		).WithCause(err)
 	}
 
 	return nil
@@ -444,19 +466,35 @@ func (h *AuthHandler) validateRegisterRequest(req *dto.RegisterRequest) error {
 // validateLoginRequest validates the login request.
 func (h *AuthHandler) validateLoginRequest(req *dto.LoginRequest) error {
 	if req.Email == "" {
-		return errors.New("email is required")
+		return apperrors.NewValidationError(
+			apperrors.CodeMissingField,
+			"Email is required",
+			apperrors.OriginWebHandler,
+		)
 	}
 
 	if req.Password == "" {
-		return errors.New("password is required")
+		return apperrors.NewValidationError(
+			apperrors.CodeMissingField,
+			"Password is required",
+			apperrors.OriginWebHandler,
+		)
 	}
 
 	if len(req.Email) > 255 {
-		return errors.New("email address is too long (max 255 characters)")
+		return apperrors.NewValidationError(
+			apperrors.CodeInvalidFormat,
+			"Email address is too long (max 255 characters)",
+			apperrors.OriginWebHandler,
+		)
 	}
 
 	if len(req.Password) > 128 {
-		return errors.New("password is too long (max 128 characters)")
+		return apperrors.NewValidationError(
+			apperrors.CodeInvalidFormat,
+			"Password is too long (max 128 characters)",
+			apperrors.OriginWebHandler,
+		)
 	}
 
 	return nil
@@ -465,11 +503,19 @@ func (h *AuthHandler) validateLoginRequest(req *dto.LoginRequest) error {
 // validateRefreshRequest validates the refresh request.
 func (h *AuthHandler) validateRefreshRequest(req *dto.RefreshRequest) error {
 	if req.RefreshToken == "" {
-		return errors.New("refresh_token is required")
+		return apperrors.NewValidationError(
+			apperrors.CodeMissingField,
+			"Refresh token is required",
+			apperrors.OriginWebHandler,
+		)
 	}
 
 	if len(req.RefreshToken) > 2048 {
-		return errors.New("refresh token is too long")
+		return apperrors.NewValidationError(
+			apperrors.CodeInvalidFormat,
+			"Refresh token is too long",
+			apperrors.OriginWebHandler,
+		)
 	}
 
 	return nil
@@ -478,11 +524,19 @@ func (h *AuthHandler) validateRefreshRequest(req *dto.RefreshRequest) error {
 // validateLogoutRequest validates the logout request.
 func (h *AuthHandler) validateLogoutRequest(req *dto.LogoutRequest) error {
 	if req.AccessToken == "" {
-		return errors.New("access_token is required")
+		return apperrors.NewValidationError(
+			apperrors.CodeMissingField,
+			"Access token is required",
+			apperrors.OriginWebHandler,
+		)
 	}
 
 	if len(req.AccessToken) > 2048 {
-		return errors.New("access token is too long")
+		return apperrors.NewValidationError(
+			apperrors.CodeInvalidFormat,
+			"Access token is too long",
+			apperrors.OriginWebHandler,
+		)
 	}
 
 	return nil

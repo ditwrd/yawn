@@ -43,7 +43,7 @@ type MockProjectService struct {
 	mock.Mock
 }
 
-// Ensure MockProjectService implements the interface
+// Ensure MockProjectService implements the interface.
 var _ services.ProjectService = (*MockProjectService)(nil)
 
 func (m *MockProjectService) Create(
@@ -51,6 +51,7 @@ func (m *MockProjectService) Create(
 	ownerID string,
 ) error {
 	args := m.Called(project, ownerID)
+
 	return args.Error(0)
 }
 
@@ -61,6 +62,7 @@ func (m *MockProjectService) GetByID(
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
+
 	return args.Get(0).(*models.Project), args.Error(1)
 }
 
@@ -69,6 +71,7 @@ func (m *MockProjectService) List(
 	limit, offset int,
 ) ([]models.Project, error) {
 	args := m.Called(userID, limit, offset)
+
 	return args.Get(0).([]models.Project), args.Error(1)
 }
 
@@ -77,6 +80,7 @@ func (m *MockProjectService) Search(
 	limit, offset int,
 ) ([]models.Project, error) {
 	args := m.Called(userID, query, limit, offset)
+
 	return args.Get(0).([]models.Project), args.Error(1)
 }
 
@@ -85,11 +89,13 @@ func (m *MockProjectService) Update(
 	userID string,
 ) error {
 	args := m.Called(project, userID)
+
 	return args.Error(0)
 }
 
 func (m *MockProjectService) Delete(id, userID string) error {
 	args := m.Called(id, userID)
+
 	return args.Error(0)
 }
 
@@ -100,6 +106,7 @@ func (m *MockProjectService) AddMember(
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
+
 	return args.Get(0).(*models.ProjectUser), args.Error(1)
 }
 
@@ -107,6 +114,7 @@ func (m *MockProjectService) RemoveMember(
 	projectID, userID, memberUserID string,
 ) error {
 	args := m.Called(projectID, userID, memberUserID)
+
 	return args.Error(0)
 }
 
@@ -117,6 +125,7 @@ func (m *MockProjectService) UpdateMemberRole(
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
+
 	return args.Get(0).(*models.ProjectUser), args.Error(1)
 }
 
@@ -124,6 +133,7 @@ func (m *MockProjectService) ListMembers(
 	projectID, userID string,
 ) ([]models.ProjectUser, error) {
 	args := m.Called(projectID, userID)
+
 	return args.Get(0).([]models.ProjectUser), args.Error(1)
 }
 
@@ -131,6 +141,7 @@ func (m *MockProjectService) GetUserRole(
 	projectID, userID string,
 ) (models.ProjectRole, error) {
 	args := m.Called(projectID, userID)
+
 	return args.Get(0).(models.ProjectRole), args.Error(1)
 }
 
@@ -139,10 +150,11 @@ func (m *MockProjectService) CheckAccess(
 	requiredRole models.ProjectRole,
 ) bool {
 	args := m.Called(projectID, userID, requiredRole)
+
 	return args.Bool(0)
 }
 
-// Helper function to create test project
+// Helper function to create test project.
 func createTestProject() *models.Project {
 	// Use fixed UUIDs for consistent testing
 	projectID := uuid.Must(
@@ -186,9 +198,11 @@ func TestProjectHandler_CreateProject(t *testing.T) {
 		userService    *MockUserService
 		logger         *zerolog.Logger
 	}
+
 	type args struct {
 		c echo.Context
 	}
+
 	tests := []struct {
 		name       string
 		fields     fields
@@ -202,10 +216,12 @@ func TestProjectHandler_CreateProject(t *testing.T) {
 				projectService: func() *MockProjectService {
 					m := &MockProjectService{}
 					project := createTestProject()
+
 					m.On("Create", mock.AnythingOfType("*models.Project"), "test-user-id").
 						Return(nil)
 					m.On("GetByID", mock.AnythingOfType("string"), "test-user-id").
 						Return(project, nil)
+
 					return m
 				}(),
 				userService: &MockUserService{},
@@ -226,9 +242,11 @@ func TestProjectHandler_CreateProject(t *testing.T) {
 						bytes.NewReader(reqBody),
 					)
 					request.Header.Set("Content-Type", "application/json")
+
 					rec := httptest.NewRecorder()
 					c := e.NewContext(request, rec)
 					c.Set("user_id", "test-user-id")
+
 					return c
 				}(),
 			},
@@ -256,9 +274,11 @@ func TestProjectHandler_CreateProject(t *testing.T) {
 						bytes.NewReader(reqBody),
 					)
 					request.Header.Set("Content-Type", "application/json")
+
 					rec := httptest.NewRecorder()
 					c := e.NewContext(request, rec)
 					c.Set("user_id", "test-user-id")
+
 					return c
 				}(),
 			},
@@ -281,9 +301,11 @@ func TestProjectHandler_CreateProject(t *testing.T) {
 						bytes.NewReader([]byte("invalid")),
 					)
 					request.Header.Set("Content-Type", "application/json")
+
 					rec := httptest.NewRecorder()
 					c := e.NewContext(request, rec)
 					c.Set("user_id", "test-user-id")
+
 					return c
 				}(),
 			},
@@ -297,6 +319,7 @@ func TestProjectHandler_CreateProject(t *testing.T) {
 					m := &MockProjectService{}
 					m.On("Create", mock.AnythingOfType("*models.Project"), "test-user-id").
 						Return(errors.New("database error"))
+
 					return m
 				}(),
 				userService: &MockUserService{},
@@ -317,9 +340,11 @@ func TestProjectHandler_CreateProject(t *testing.T) {
 						bytes.NewReader(reqBody),
 					)
 					request.Header.Set("Content-Type", "application/json")
+
 					rec := httptest.NewRecorder()
 					c := e.NewContext(request, rec)
 					c.Set("user_id", "test-user-id")
+
 					return c
 				}(),
 			},
@@ -331,6 +356,7 @@ func TestProjectHandler_CreateProject(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			h := &ProjectHandler{
 				projectService: tt.fields.projectService,
 				userService:    tt.fields.userService,
@@ -360,9 +386,11 @@ func TestProjectHandler_GetProject(t *testing.T) {
 		userService    *MockUserService
 		logger         *zerolog.Logger
 	}
+
 	type args struct {
 		c echo.Context
 	}
+
 	tests := []struct {
 		name       string
 		fields     fields
@@ -378,6 +406,7 @@ func TestProjectHandler_GetProject(t *testing.T) {
 					project := createTestProject()
 					projectID := project.ID.String()
 					m.On("GetByID", projectID, "test-user-id").Return(project, nil)
+
 					return m
 				}(),
 				userService: &MockUserService{},
@@ -398,6 +427,7 @@ func TestProjectHandler_GetProject(t *testing.T) {
 					c.SetParamNames("id")
 					c.SetParamValues(projectID)
 					c.Set("user_id", "test-user-id")
+
 					return c
 				}(),
 			},
@@ -413,6 +443,7 @@ func TestProjectHandler_GetProject(t *testing.T) {
 						String()
 					m.On("GetByID", projectID, "test-user-id").
 						Return(nil, errors.New("not found"))
+
 					return m
 				}(),
 				userService: &MockUserService{},
@@ -433,6 +464,7 @@ func TestProjectHandler_GetProject(t *testing.T) {
 					c.SetParamNames("id")
 					c.SetParamValues(projectID)
 					c.Set("user_id", "test-user-id")
+
 					return c
 				}(),
 			},
@@ -459,6 +491,7 @@ func TestProjectHandler_GetProject(t *testing.T) {
 					c.SetParamNames("id")
 					c.SetParamValues("invalid-uuid")
 					c.Set("user_id", "test-user-id")
+
 					return c
 				}(),
 			},
@@ -470,6 +503,7 @@ func TestProjectHandler_GetProject(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			h := &ProjectHandler{
 				projectService: tt.fields.projectService,
 				userService:    tt.fields.userService,
@@ -499,9 +533,11 @@ func TestProjectHandler_ListProjects(t *testing.T) {
 		userService    *MockUserService
 		logger         *zerolog.Logger
 	}
+
 	type args struct {
 		c echo.Context
 	}
+
 	tests := []struct {
 		name       string
 		fields     fields
@@ -516,6 +552,7 @@ func TestProjectHandler_ListProjects(t *testing.T) {
 					m := &MockProjectService{}
 					projects := []models.Project{*createTestProject()}
 					m.On("List", "test-user-id", 20, 0).Return(projects, nil)
+
 					return m
 				}(),
 				userService: &MockUserService{},
@@ -528,6 +565,7 @@ func TestProjectHandler_ListProjects(t *testing.T) {
 					rec := httptest.NewRecorder()
 					c := e.NewContext(request, rec)
 					c.Set("user_id", "test-user-id")
+
 					return c
 				}(),
 			},
@@ -541,6 +579,7 @@ func TestProjectHandler_ListProjects(t *testing.T) {
 					m := &MockProjectService{}
 					projects := []models.Project{*createTestProject()}
 					m.On("List", "test-user-id", 10, 10).Return(projects, nil)
+
 					return m
 				}(),
 				userService: &MockUserService{},
@@ -557,6 +596,7 @@ func TestProjectHandler_ListProjects(t *testing.T) {
 					rec := httptest.NewRecorder()
 					c := e.NewContext(request, rec)
 					c.Set("user_id", "test-user-id")
+
 					return c
 				}(),
 			},
@@ -570,6 +610,7 @@ func TestProjectHandler_ListProjects(t *testing.T) {
 					m := &MockProjectService{}
 					projects := []models.Project{*createTestProject()}
 					m.On("Search", "test-user-id", "test", 20, 0).Return(projects, nil)
+
 					return m
 				}(),
 				userService: &MockUserService{},
@@ -586,6 +627,7 @@ func TestProjectHandler_ListProjects(t *testing.T) {
 					rec := httptest.NewRecorder()
 					c := e.NewContext(request, rec)
 					c.Set("user_id", "test-user-id")
+
 					return c
 				}(),
 			},
@@ -599,6 +641,7 @@ func TestProjectHandler_ListProjects(t *testing.T) {
 					m := &MockProjectService{}
 					m.On("List", "test-user-id", 20, 0).
 						Return([]models.Project{}, errors.New("database error"))
+
 					return m
 				}(),
 				userService: &MockUserService{},
@@ -611,6 +654,7 @@ func TestProjectHandler_ListProjects(t *testing.T) {
 					rec := httptest.NewRecorder()
 					c := e.NewContext(request, rec)
 					c.Set("user_id", "test-user-id")
+
 					return c
 				}(),
 			},
@@ -622,6 +666,7 @@ func TestProjectHandler_ListProjects(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			h := &ProjectHandler{
 				projectService: tt.fields.projectService,
 				userService:    tt.fields.userService,

@@ -113,10 +113,12 @@ func TestRootCommandStructure(t *testing.T) {
 
 func Test_runServe(t *testing.T) {
 	t.Parallel()
+
 	type args struct {
 		cmd  *cobra.Command
 		args []string
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -127,7 +129,9 @@ func Test_runServe(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			if err := runServe(tt.args.cmd, tt.args.args); (err != nil) != tt.wantErr {
+			err := runServe(tt.args.cmd, tt.args.args)
+
+			if (err != nil) != tt.wantErr {
 				t.Errorf("runServe() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -136,6 +140,7 @@ func Test_runServe(t *testing.T) {
 
 func Test_loadCommandConfig(t *testing.T) {
 	t.Parallel()
+
 	tests := []struct {
 		name    string
 		want    *config.Config
@@ -146,13 +151,16 @@ func Test_loadCommandConfig(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			got, err := loadCommandConfig()
 			if (err != nil) != tt.wantErr {
 				t.Fatalf("loadCommandConfig() error = %v, wantErr %v", err, tt.wantErr)
 			}
+
 			if tt.wantErr {
 				return
 			}
+
 			if !cmp.Equal(tt.want, got) {
 				t.Errorf(
 					"loadCommandConfig() = %v, want %v\ndiff=%s",
@@ -167,9 +175,11 @@ func Test_loadCommandConfig(t *testing.T) {
 
 func Test_printServerInfo(t *testing.T) {
 	t.Parallel()
+
 	type args struct {
 		config *config.Config
 	}
+
 	tests := []struct {
 		name string
 		args args

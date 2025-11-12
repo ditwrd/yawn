@@ -29,8 +29,10 @@ import (
 
 	"github.com/ditwrd/yawn/api/internal/config"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	echomiddleware "github.com/labstack/echo/v4/middleware"
 	"github.com/rs/zerolog"
+
+	appmiddleware "github.com/ditwrd/yawn/api/internal/infrastructure/web/middleware"
 )
 
 // NewEcho creates a new Echo instance with middleware and server configuration.
@@ -43,27 +45,32 @@ func NewEcho(cfg *config.Config, logger *zerolog.Logger) *echo.Echo {
 
 	// Configure Echo logger to use zerolog
 	e.Logger.SetOutput(zerolog.NewConsoleWriter())
-	e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
-		LogURI:    true,
-		LogStatus: true,
-		LogMethod: true,
-		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
-			logger.Info().
-				Str("method", v.Method).
-				Str("uri", v.URI).
-				Int("status", v.Status).
-				Dur("duration", time.Since(v.StartTime)).
-				Msg("HTTP Request")
+	e.Use(
+		echomiddleware.RequestLoggerWithConfig(echomiddleware.RequestLoggerConfig{
+			LogURI:    true,
+			LogStatus: true,
+			LogMethod: true,
+			LogValuesFunc: func(c echo.Context, v echomiddleware.RequestLoggerValues) error {
+				logger.Info().
+					Str("method", v.Method).
+					Str("uri", v.URI).
+					Int("status", v.Status).
+					Dur("duration", time.Since(v.StartTime)).
+					Msg("HTTP Request")
 
-			return nil
-		},
-	}))
+				return nil
+			},
+		}),
+	)
+
+	// Global error handling middleware
+	e.Use(appmiddleware.ErrorMiddleware(logger))
 
 	// Recovery middleware
-	e.Use(middleware.Recover())
+	e.Use(echomiddleware.Recover())
 
 	// CORS middleware
-	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+	e.Use(echomiddleware.CORSWithConfig(echomiddleware.CORSConfig{
 		AllowOrigins: []string{"*"}, // Configure appropriately for production
 		AllowMethods: []string{
 			echo.GET,
@@ -81,10 +88,10 @@ func NewEcho(cfg *config.Config, logger *zerolog.Logger) *echo.Echo {
 	}))
 
 	// Request ID middleware
-	e.Use(middleware.RequestID())
+	e.Use(echomiddleware.RequestID())
 
 	// Remove trailing slashes
-	e.Pre(middleware.RemoveTrailingSlash())
+	e.Pre(echomiddleware.RemoveTrailingSlash())
 
 	// Configure server
 	e.Server.ReadTimeout = time.Duration(cfg.Server.ReadTimeout) * time.Second

@@ -47,14 +47,15 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-// createTestLogger creates a zerolog logger for testing
+// createTestLogger creates a zerolog logger for testing.
 func createTestLogger() zerolog.Logger {
 	return zerolog.New(zerolog.NewConsoleWriter())
 }
 
-// createTestLoggerPtr creates a pointer to a zerolog logger for testing
+// createTestLoggerPtr creates a pointer to a zerolog logger for testing.
 func createTestLoggerPtr() *zerolog.Logger {
 	logger := createTestLogger()
+
 	return &logger
 }
 
@@ -65,6 +66,7 @@ func TestNewUserHandler(t *testing.T) {
 		userService services.UserService
 		logger      *zerolog.Logger
 	}
+
 	tests := []struct {
 		name string
 		args args
@@ -80,6 +82,7 @@ func TestNewUserHandler(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			got := NewUserHandler(tt.args.userService, tt.args.logger)
 
 			// Verify that the handler is not nil
@@ -93,13 +96,16 @@ func TestNewUserHandler(t *testing.T) {
 
 func TestUserHandler_ListUsers(t *testing.T) {
 	t.Parallel()
+
 	type fields struct {
 		userService *MockUserService
 		logger      *zerolog.Logger
 	}
+
 	type args struct {
 		c echo.Context
 	}
+
 	tests := []struct {
 		name       string
 		fields     fields
@@ -125,6 +131,7 @@ func TestUserHandler_ListUsers(t *testing.T) {
 						},
 					}
 					m.On("List", 20, 0).Return(users, nil)
+
 					return m
 				}(),
 				logger: createTestLoggerPtr(),
@@ -134,6 +141,7 @@ func TestUserHandler_ListUsers(t *testing.T) {
 					e := echo.New()
 					req := httptest.NewRequest(http.MethodGet, "/users", nil)
 					rec := httptest.NewRecorder()
+
 					return e.NewContext(req, rec)
 				}(),
 			},
@@ -153,6 +161,7 @@ func TestUserHandler_ListUsers(t *testing.T) {
 						},
 					}
 					m.On("List", 10, 10).Return(users, nil)
+
 					return m
 				}(),
 				logger: createTestLoggerPtr(),
@@ -166,6 +175,7 @@ func TestUserHandler_ListUsers(t *testing.T) {
 						nil,
 					)
 					rec := httptest.NewRecorder()
+
 					return e.NewContext(req, rec)
 				}(),
 			},
@@ -179,6 +189,7 @@ func TestUserHandler_ListUsers(t *testing.T) {
 					m := &MockUserService{}
 					m.On("List", mock.AnythingOfType("int"), mock.AnythingOfType("int")).
 						Return([]models.User{}, errors.New("database error"))
+
 					return m
 				}(),
 				logger: createTestLoggerPtr(),
@@ -188,6 +199,7 @@ func TestUserHandler_ListUsers(t *testing.T) {
 					e := echo.New()
 					req := httptest.NewRequest(http.MethodGet, "/users", nil)
 					rec := httptest.NewRecorder()
+
 					return e.NewContext(req, rec)
 				}(),
 			},
@@ -201,6 +213,7 @@ func TestUserHandler_ListUsers(t *testing.T) {
 					m := &MockUserService{}
 					users := []models.User{}
 					m.On("List", 20, 0).Return(users, nil)
+
 					return m
 				}(),
 				logger: createTestLoggerPtr(),
@@ -214,6 +227,7 @@ func TestUserHandler_ListUsers(t *testing.T) {
 						nil,
 					)
 					rec := httptest.NewRecorder()
+
 					return e.NewContext(req, rec)
 				}(),
 			},
@@ -224,6 +238,7 @@ func TestUserHandler_ListUsers(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			h := &UserHandler{
 				userService: tt.fields.userService,
 				logger:      tt.fields.logger,
@@ -251,9 +266,11 @@ func TestUserHandler_GetUser(t *testing.T) {
 		userService *MockUserService
 		logger      *zerolog.Logger
 	}
+
 	type args struct {
 		c echo.Context
 	}
+
 	tests := []struct {
 		name       string
 		fields     fields
@@ -272,6 +289,7 @@ func TestUserHandler_GetUser(t *testing.T) {
 						Role:  models.UserRoleUser,
 					}
 					m.On("GetByID", mock.AnythingOfType("string")).Return(user, nil)
+
 					return m
 				}(),
 				logger: createTestLoggerPtr(),
@@ -290,6 +308,7 @@ func TestUserHandler_GetUser(t *testing.T) {
 					c.SetParamValues("123e4567-e89b-12d3-a456-426614174000")
 					c.Set("user_id", "admin-id")
 					c.Set("user_role", "admin")
+
 					return c
 				}(),
 			},
@@ -307,6 +326,7 @@ func TestUserHandler_GetUser(t *testing.T) {
 						Role:  models.UserRoleUser,
 					}
 					m.On("GetByID", mock.AnythingOfType("string")).Return(user, nil)
+
 					return m
 				}(),
 				logger: createTestLoggerPtr(),
@@ -325,6 +345,7 @@ func TestUserHandler_GetUser(t *testing.T) {
 					c.SetParamValues("123e4567-e89b-12d3-a456-426614174000")
 					c.Set("user_id", "123e4567-e89b-12d3-a456-426614174000")
 					c.Set("user_role", "user")
+
 					return c
 				}(),
 			},
@@ -338,6 +359,7 @@ func TestUserHandler_GetUser(t *testing.T) {
 					m := &MockUserService{}
 					m.On("GetByID", mock.AnythingOfType("string")).
 						Return(nil, errors.New("user not found"))
+
 					return m
 				}(),
 				logger: createTestLoggerPtr(),
@@ -356,6 +378,7 @@ func TestUserHandler_GetUser(t *testing.T) {
 					c.SetParamValues("123e4567-e89b-12d3-a456-426614174000")
 					c.Set("user_id", "admin-id")
 					c.Set("user_role", "admin")
+
 					return c
 				}(),
 			},
@@ -373,6 +396,7 @@ func TestUserHandler_GetUser(t *testing.T) {
 						Role:  models.UserRoleUser,
 					}
 					m.On("GetByID", mock.AnythingOfType("string")).Return(user, nil)
+
 					return m
 				}(),
 				logger: createTestLoggerPtr(),
@@ -391,6 +415,7 @@ func TestUserHandler_GetUser(t *testing.T) {
 					c.SetParamValues("123e4567-e89b-12d3-a456-426614174000")
 					c.Set("user_id", "different-user-id")
 					c.Set("user_role", "user")
+
 					return c
 				}(),
 			},
@@ -401,6 +426,7 @@ func TestUserHandler_GetUser(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			h := &UserHandler{
 				userService: tt.fields.userService,
 				logger:      tt.fields.logger,
@@ -428,9 +454,11 @@ func TestUserHandler_UpdateUser(t *testing.T) {
 		userService *MockUserService
 		logger      *zerolog.Logger
 	}
+
 	type args struct {
 		c echo.Context
 	}
+
 	tests := []struct {
 		name       string
 		fields     fields
@@ -450,6 +478,7 @@ func TestUserHandler_UpdateUser(t *testing.T) {
 					}
 					m.On("GetByID", mock.AnythingOfType("string")).Return(user, nil)
 					m.On("Update", mock.AnythingOfType("*models.User")).Return(nil)
+
 					return m
 				}(),
 				logger: createTestLoggerPtr(),
@@ -468,12 +497,14 @@ func TestUserHandler_UpdateUser(t *testing.T) {
 						bytes.NewReader(reqBody),
 					)
 					req.Header.Set("Content-Type", "application/json")
+
 					rec := httptest.NewRecorder()
 					c := e.NewContext(req, rec)
 					c.SetParamNames("id")
 					c.SetParamValues("123e4567-e89b-12d3-a456-426614174000")
 					c.Set("user_id", "admin-id")
 					c.Set("user_role", "admin")
+
 					return c
 				}(),
 			},
@@ -492,6 +523,7 @@ func TestUserHandler_UpdateUser(t *testing.T) {
 					}
 					m.On("GetByID", mock.AnythingOfType("string")).Return(user, nil)
 					m.On("Update", mock.AnythingOfType("*models.User")).Return(nil)
+
 					return m
 				}(),
 				logger: createTestLoggerPtr(),
@@ -509,12 +541,14 @@ func TestUserHandler_UpdateUser(t *testing.T) {
 						bytes.NewReader(reqBody),
 					)
 					req.Header.Set("Content-Type", "application/json")
+
 					rec := httptest.NewRecorder()
 					c := e.NewContext(req, rec)
 					c.SetParamNames("id")
 					c.SetParamValues("123e4567-e89b-12d3-a456-426614174000")
 					c.Set("user_id", "123e4567-e89b-12d3-a456-426614174000")
 					c.Set("user_role", "user")
+
 					return c
 				}(),
 			},
@@ -528,6 +562,7 @@ func TestUserHandler_UpdateUser(t *testing.T) {
 					m := &MockUserService{}
 					m.On("GetByID", mock.AnythingOfType("string")).
 						Return(nil, errors.New("user not found"))
+
 					return m
 				}(),
 				logger: createTestLoggerPtr(),
@@ -545,12 +580,14 @@ func TestUserHandler_UpdateUser(t *testing.T) {
 						bytes.NewReader(reqBody),
 					)
 					req.Header.Set("Content-Type", "application/json")
+
 					rec := httptest.NewRecorder()
 					c := e.NewContext(req, rec)
 					c.SetParamNames("id")
 					c.SetParamValues("123e4567-e89b-12d3-a456-426614174000")
 					c.Set("user_id", "admin-id")
 					c.Set("user_role", "admin")
+
 					return c
 				}(),
 			},
@@ -568,6 +605,7 @@ func TestUserHandler_UpdateUser(t *testing.T) {
 						Role:  models.UserRoleUser,
 					}
 					m.On("GetByID", mock.AnythingOfType("string")).Return(user, nil)
+
 					return m
 				}(),
 				logger: createTestLoggerPtr(),
@@ -585,12 +623,14 @@ func TestUserHandler_UpdateUser(t *testing.T) {
 						bytes.NewReader(reqBody),
 					)
 					req.Header.Set("Content-Type", "application/json")
+
 					rec := httptest.NewRecorder()
 					c := e.NewContext(req, rec)
 					c.SetParamNames("id")
 					c.SetParamValues("123e4567-e89b-12d3-a456-426614174000")
 					c.Set("user_id", "different-user-id")
 					c.Set("user_role", "user")
+
 					return c
 				}(),
 			},
@@ -612,12 +652,14 @@ func TestUserHandler_UpdateUser(t *testing.T) {
 						bytes.NewReader([]byte("invalid")),
 					)
 					req.Header.Set("Content-Type", "application/json")
+
 					rec := httptest.NewRecorder()
 					c := e.NewContext(req, rec)
 					c.SetParamNames("id")
 					c.SetParamValues("123e4567-e89b-12d3-a456-426614174000")
 					c.Set("user_id", "admin-id")
 					c.Set("user_role", "admin")
+
 					return c
 				}(),
 			},
@@ -628,6 +670,7 @@ func TestUserHandler_UpdateUser(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			h := &UserHandler{
 				userService: tt.fields.userService,
 				logger:      tt.fields.logger,
@@ -655,9 +698,11 @@ func TestUserHandler_DeleteUser(t *testing.T) {
 		userService *MockUserService
 		logger      *zerolog.Logger
 	}
+
 	type args struct {
 		c echo.Context
 	}
+
 	tests := []struct {
 		name       string
 		fields     fields
@@ -677,6 +722,7 @@ func TestUserHandler_DeleteUser(t *testing.T) {
 					}
 					m.On("GetByID", mock.AnythingOfType("string")).Return(user, nil)
 					m.On("Delete", mock.AnythingOfType("string")).Return(nil)
+
 					return m
 				}(),
 				logger: createTestLoggerPtr(),
@@ -695,6 +741,7 @@ func TestUserHandler_DeleteUser(t *testing.T) {
 					c.SetParamValues("123e4567-e89b-12d3-a456-426614174000")
 					c.Set("user_id", "admin-id")
 					c.Set("user_role", "admin")
+
 					return c
 				}(),
 			},
@@ -713,6 +760,7 @@ func TestUserHandler_DeleteUser(t *testing.T) {
 					}
 					m.On("GetByID", mock.AnythingOfType("string")).Return(user, nil)
 					m.On("Delete", mock.AnythingOfType("string")).Return(nil)
+
 					return m
 				}(),
 				logger: createTestLoggerPtr(),
@@ -731,6 +779,7 @@ func TestUserHandler_DeleteUser(t *testing.T) {
 					c.SetParamValues("123e4567-e89b-12d3-a456-426614174000")
 					c.Set("user_id", "123e4567-e89b-12d3-a456-426614174000")
 					c.Set("user_role", "user")
+
 					return c
 				}(),
 			},
@@ -744,6 +793,7 @@ func TestUserHandler_DeleteUser(t *testing.T) {
 					m := &MockUserService{}
 					m.On("GetByID", mock.AnythingOfType("string")).
 						Return(nil, errors.New("user not found"))
+
 					return m
 				}(),
 				logger: createTestLoggerPtr(),
@@ -762,6 +812,7 @@ func TestUserHandler_DeleteUser(t *testing.T) {
 					c.SetParamValues("123e4567-e89b-12d3-a456-426614174000")
 					c.Set("user_id", "admin-id")
 					c.Set("user_role", "admin")
+
 					return c
 				}(),
 			},
@@ -798,6 +849,7 @@ func TestUserHandler_DeleteUser(t *testing.T) {
 					c.SetParamValues("123e4567-e89b-12d3-a456-426614174000")
 					c.Set("user_id", "different-user-id")
 					c.Set("user_role", "user")
+
 					return c
 				}(),
 			},
@@ -817,6 +869,7 @@ func TestUserHandler_DeleteUser(t *testing.T) {
 					m.On("GetByID", mock.AnythingOfType("string")).Return(user, nil)
 					m.On("Delete", mock.AnythingOfType("string")).
 						Return(errors.New("database error"))
+
 					return m
 				}(),
 				logger: createTestLoggerPtr(),
@@ -835,6 +888,7 @@ func TestUserHandler_DeleteUser(t *testing.T) {
 					c.SetParamValues("123e4567-e89b-12d3-a456-426614174000")
 					c.Set("user_id", "admin-id")
 					c.Set("user_role", "admin")
+
 					return c
 				}(),
 			},
@@ -845,6 +899,7 @@ func TestUserHandler_DeleteUser(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			h := &UserHandler{
 				userService: tt.fields.userService,
 				logger:      tt.fields.logger,

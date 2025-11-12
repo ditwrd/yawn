@@ -29,6 +29,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 //   - Follow Go naming conventions
 package dto
 
+import "github.com/gofrs/uuid"
+
 // CreateProjectRequest represents a project creation request.
 type CreateProjectRequest struct {
 	Name        string `example:"My Web Application"                     json:"name"                  validate:"required,min=1,max=255"`
@@ -39,10 +41,11 @@ type CreateProjectRequest struct {
 
 // UpdateProjectRequest represents a project update request.
 type UpdateProjectRequest struct {
-	Name        string `example:"Updated Project Name"                 json:"name,omitempty"        validate:"omitempty,min=1,max=255"`
-	Description string `example:"Updated project description"          json:"description,omitempty" validate:"omitempty,max=1000"`
-	Repository  string `example:"https://github.com/user/new-repo.git" json:"repository,omitempty"  validate:"omitempty,url"`
-	Visibility  string `example:"public"                               json:"visibility,omitempty"  validate:"omitempty,oneof=public private"`
+	ProjectID   uuid.UUID `param:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	Name        string    `           example:"Updated Project Name"                 json:"name,omitempty"        validate:"omitempty,min=1,max=255"`
+	Description string    `           example:"Updated project description"          json:"description,omitempty" validate:"omitempty,max=1000"`
+	Repository  string    `           example:"https://github.com/user/new-repo.git" json:"repository,omitempty"  validate:"omitempty,url"`
+	Visibility  string    `           example:"public"                               json:"visibility,omitempty"  validate:"omitempty,oneof=public private"`
 }
 
 // ProjectResponse represents project information returned by API endpoints.
@@ -76,14 +79,17 @@ type ProjectListResponse struct {
 
 // AddProjectMemberRequest represents a request to add a member to a project.
 type AddProjectMemberRequest struct {
-	Email string `example:"user@example.com" json:"email" validate:"required,email"`
-	Role  string `example:"maintainer"       json:"role"  validate:"required,oneof=owner maintainer viewer"`
+	ProjectID uuid.UUID `param:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	Email     string    `           example:"user@example.com"                     json:"email" validate:"required,email"`
+	Role      string    `           example:"maintainer"                           json:"role"  validate:"required,oneof=owner maintainer viewer"`
 }
 
 // UpdateProjectMemberRequest represents a request to update a project member
 // role.
 type UpdateProjectMemberRequest struct {
-	Role string `example:"viewer" json:"role" validate:"required,oneof=owner maintainer viewer"`
+	ProjectID uuid.UUID `param:"id"       example:"123e4567-e89b-12d3-a456-426614174000"`
+	UserID    uuid.UUID `param:"memberId" example:"456e7890-f12c-34d5-a678-426614174111"`
+	Role      string    `                 example:"viewer"                               json:"role" validate:"required,oneof=owner maintainer viewer"`
 }
 
 // ProjectMemberResponse represents a project member response.
@@ -104,4 +110,17 @@ type ProjectMemberListResponse struct {
 // ProjectDeleteResponse represents a successful project deletion response.
 type ProjectDeleteResponse struct {
 	Message string `example:"Project deleted successfully" json:"message"`
+}
+
+// ProjectRequestsWithID represents a request that needs Project ID as path
+// parameter.
+type ProjectRequestsWithID struct {
+	ProjectID uuid.UUID `param:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
+}
+
+// ProjectMembersRequests represents a request that needs Project ID and User ID
+// as path parameters.
+type ProjectMembersRequests struct {
+	ProjectID uuid.UUID `param:"id"       example:"123e4567-e89b-12d3-a456-426614174000"`
+	UserID    uuid.UUID `param:"memberId" example:"456e7890-f12c-34d5-a678-426614174111"`
 }
