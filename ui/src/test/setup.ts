@@ -50,24 +50,12 @@ const sessionStorageMock = {
 }
 vi.stubGlobal('sessionStorage', sessionStorageMock)
 
-// Setup basic HTML structure
-beforeAll(() => {
-  // Create a basic document structure if it doesn't exist
-  if (!document.body) {
-    const body = document.createElement('body')
-    document.appendChild(body)
-  }
-})
-
 // Cleanup after each test
 afterEach(() => {
   // Clean up any DOM modifications
-  document.body.innerHTML = ''
+  if (document.body) {
+    document.body.innerHTML = ''
+  }
   // Clear all mocks
   vi.clearAllMocks()
-})
-
-afterAll(() => {
-  // Clean up any global mocks
-  vi.unstubAllGlobals()
 })
