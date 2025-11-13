@@ -202,34 +202,34 @@ code, pre {
 @layer components {
   /* Button micro-interactions */
   .btn-base {
-    @apply inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-all duration-fast;
+    @apply inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-all duration-150;
     @apply focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
     @apply disabled:pointer-events-none disabled:opacity-50;
   }
 
   .btn-hover-lift {
-    @apply hover:scale-105 active:scale-95 transition-transform duration-fast ease-out;
+    @apply hover:scale-105 active:scale-95 transition-transform duration-150 ease-out;
   }
 
   /* Card hover effects */
   .card-hover {
-    @apply transition-all duration-normal ease-out hover:shadow-lg hover:shadow-primary/5 hover:border-primary/20;
+    @apply transition-all duration-300 ease-out hover:shadow-lg hover:shadow-primary/5 hover:border-primary/20;
   }
 
   /* Interactive list items */
   .interactive-item {
-    @apply transition-all duration-fast ease-out hover:bg-accent hover:text-accent-foreground;
+    @apply transition-all duration-150 ease-out hover:bg-accent hover:text-accent-foreground;
     @apply focus:bg-accent focus:text-accent-foreground outline-none rounded-md;
   }
 
   /* Smooth transitions for layout changes */
   .layout-transition {
-    @apply transition-all duration-normal ease-in-out;
+    @apply transition-all duration-300 ease-in-out;
   }
 
   /* Sidebar specific transitions */
   .sidebar-transition {
-    @apply transition-all duration-normal ease-in-out;
+    @apply transition-all duration-300 ease-in-out;
   }
 
   /* Loading skeleton animation */
@@ -268,7 +268,7 @@ code, pre {
   }
 
   .fade-in {
-    animation: fadeIn duration-normal ease-out;
+    animation: fadeIn 300ms ease-out;
   }
 
   /* Slide in from right */
@@ -284,7 +284,7 @@ code, pre {
   }
 
   .slide-in-right {
-    animation: slideInRight duration-normal ease-out;
+    animation: slideInRight 300ms ease-out;
   }
 
   /* Pulse animation for notifications */
@@ -298,16 +298,16 @@ code, pre {
   }
 
   .pulse-subtle {
-    animation: pulse-subtle duration-slow ease-in-out infinite;
+    animation: pulse-subtle 600ms ease-in-out infinite;
   }
 
   /* Mobile navigation menu animation */
   .mobile-menu-enter {
-    animation: slideInRight duration-normal ease-out;
+    animation: slideInRight 300ms ease-out;
   }
 
   .mobile-menu-exit {
-    animation: slideInRight duration-fast ease-in-out reverse;
+    animation: slideInRight 150ms ease-in-out reverse;
   }
 }
 

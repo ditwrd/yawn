@@ -16,35 +16,52 @@ export function AppShell({
   sidebarCollapsed = false,
   onSidebarToggle,
 }: AppShellProps) {
+  const [isMobile, setIsMobile] = React.useState(false)
+
+  React.useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024)
+    }
+
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  // Close sidebar on mobile when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        isMobile &&
+        !sidebarCollapsed &&
+        !(event.target as Element).closest('aside') &&
+        !(event.target as Element).closest('[aria-label="Toggle sidebar menu"]')
+      ) {
+        onSidebarToggle?.()
+      }
+    }
+
+    if (isMobile && !sidebarCollapsed) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isMobile, sidebarCollapsed, onSidebarToggle])
+
   return (
     <div className={cn(
       "flex h-screen bg-background overflow-hidden",
       "layout-transition",
       className
     )}>
-      {/* Mobile Sidebar Overlay */}
-      {!sidebarCollapsed && (
-        <div
-          className="mobile-sidebar-overlay lg:hidden"
-          onClick={onSidebarToggle}
-          aria-hidden="true"
-        />
-      )}
-
       <Sidebar
         collapsed={sidebarCollapsed}
         onToggle={onSidebarToggle}
-        className={cn(
-          "fixed lg:relative z-50 h-full",
-          "sidebar-transition",
-          sidebarCollapsed && "-translate-x-full lg:translate-x-0"
-        )}
+        className="h-full"
       />
 
       <div className={cn(
         "flex flex-1 flex-col overflow-hidden min-w-0",
-        "transition-all duration-normal ease-in-out",
-        sidebarCollapsed ? "lg:ml-0" : "lg:ml-0"
+        "transition-all duration-300 ease-in-out"
       )}>
         <Header
           onSidebarToggle={onSidebarToggle}
@@ -52,11 +69,15 @@ export function AppShell({
           className="flex-shrink-0"
         />
 
-        <main className={cn(
-          "flex-1 overflow-auto",
-          "container-responsive py-6 lg:py-8",
-          "fade-in"
-        )}>
+        <main
+          id="main-content"
+          className={cn(
+            "flex-1 overflow-auto",
+            "container-responsive py-6 lg:py-8",
+            "fade-in"
+          )}
+          role="main"
+        >
           {children}
         </main>
       </div>

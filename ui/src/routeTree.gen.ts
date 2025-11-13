@@ -12,6 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as Protected_rootRouteImport } from './routes/protected/__root'
 import { Route as Auth_rootRouteImport } from './routes/auth/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProtectedSettingsRouteImport } from './routes/protected/settings'
+import { Route as ProtectedProjectsRouteImport } from './routes/protected/projects'
+import { Route as ProtectedPipelinesRouteImport } from './routes/protected/pipelines'
 import { Route as ProtectedDashboardRouteImport } from './routes/protected/dashboard'
 import { Route as AuthVerifyMfaRouteImport } from './routes/auth/verify-mfa'
 import { Route as AuthRegisterRouteImport } from './routes/auth/register'
@@ -30,6 +33,21 @@ const Auth_rootRoute = Auth_rootRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProtectedSettingsRoute = ProtectedSettingsRouteImport.update({
+  id: '/protected/settings',
+  path: '/protected/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProtectedProjectsRoute = ProtectedProjectsRouteImport.update({
+  id: '/protected/projects',
+  path: '/protected/projects',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProtectedPipelinesRoute = ProtectedPipelinesRouteImport.update({
+  id: '/protected/pipelines',
+  path: '/protected/pipelines',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProtectedDashboardRoute = ProtectedDashboardRouteImport.update({
@@ -72,6 +90,9 @@ export interface FileRoutesByFullPath {
   '/auth/verify-mfa': typeof AuthVerifyMfaRoute
   '/protected': typeof Protected_rootRoute
   '/protected/dashboard': typeof ProtectedDashboardRoute
+  '/protected/pipelines': typeof ProtectedPipelinesRoute
+  '/protected/projects': typeof ProtectedProjectsRoute
+  '/protected/settings': typeof ProtectedSettingsRoute
   '/auth/google/callback': typeof AuthGoogleCallbackRoute
 }
 export interface FileRoutesByTo {
@@ -83,6 +104,9 @@ export interface FileRoutesByTo {
   '/auth/verify-mfa': typeof AuthVerifyMfaRoute
   '/protected': typeof Protected_rootRoute
   '/protected/dashboard': typeof ProtectedDashboardRoute
+  '/protected/pipelines': typeof ProtectedPipelinesRoute
+  '/protected/projects': typeof ProtectedProjectsRoute
+  '/protected/settings': typeof ProtectedSettingsRoute
   '/auth/google/callback': typeof AuthGoogleCallbackRoute
 }
 export interface FileRoutesById {
@@ -95,6 +119,9 @@ export interface FileRoutesById {
   '/auth/verify-mfa': typeof AuthVerifyMfaRoute
   '/protected/__root': typeof Protected_rootRoute
   '/protected/dashboard': typeof ProtectedDashboardRoute
+  '/protected/pipelines': typeof ProtectedPipelinesRoute
+  '/protected/projects': typeof ProtectedProjectsRoute
+  '/protected/settings': typeof ProtectedSettingsRoute
   '/auth/google/callback': typeof AuthGoogleCallbackRoute
 }
 export interface FileRouteTypes {
@@ -108,6 +135,9 @@ export interface FileRouteTypes {
     | '/auth/verify-mfa'
     | '/protected'
     | '/protected/dashboard'
+    | '/protected/pipelines'
+    | '/protected/projects'
+    | '/protected/settings'
     | '/auth/google/callback'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -119,6 +149,9 @@ export interface FileRouteTypes {
     | '/auth/verify-mfa'
     | '/protected'
     | '/protected/dashboard'
+    | '/protected/pipelines'
+    | '/protected/projects'
+    | '/protected/settings'
     | '/auth/google/callback'
   id:
     | '__root__'
@@ -130,6 +163,9 @@ export interface FileRouteTypes {
     | '/auth/verify-mfa'
     | '/protected/__root'
     | '/protected/dashboard'
+    | '/protected/pipelines'
+    | '/protected/projects'
+    | '/protected/settings'
     | '/auth/google/callback'
   fileRoutesById: FileRoutesById
 }
@@ -142,6 +178,9 @@ export interface RootRouteChildren {
   AuthVerifyMfaRoute: typeof AuthVerifyMfaRoute
   Protected_rootRoute: typeof Protected_rootRoute
   ProtectedDashboardRoute: typeof ProtectedDashboardRoute
+  ProtectedPipelinesRoute: typeof ProtectedPipelinesRoute
+  ProtectedProjectsRoute: typeof ProtectedProjectsRoute
+  ProtectedSettingsRoute: typeof ProtectedSettingsRoute
   AuthGoogleCallbackRoute: typeof AuthGoogleCallbackRoute
 }
 
@@ -166,6 +205,27 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/protected/settings': {
+      id: '/protected/settings'
+      path: '/protected/settings'
+      fullPath: '/protected/settings'
+      preLoaderRoute: typeof ProtectedSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/protected/projects': {
+      id: '/protected/projects'
+      path: '/protected/projects'
+      fullPath: '/protected/projects'
+      preLoaderRoute: typeof ProtectedProjectsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/protected/pipelines': {
+      id: '/protected/pipelines'
+      path: '/protected/pipelines'
+      fullPath: '/protected/pipelines'
+      preLoaderRoute: typeof ProtectedPipelinesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/protected/dashboard': {
@@ -222,6 +282,9 @@ const rootRouteChildren: RootRouteChildren = {
   AuthVerifyMfaRoute: AuthVerifyMfaRoute,
   Protected_rootRoute: Protected_rootRoute,
   ProtectedDashboardRoute: ProtectedDashboardRoute,
+  ProtectedPipelinesRoute: ProtectedPipelinesRoute,
+  ProtectedProjectsRoute: ProtectedProjectsRoute,
+  ProtectedSettingsRoute: ProtectedSettingsRoute,
   AuthGoogleCallbackRoute: AuthGoogleCallbackRoute,
 }
 export const routeTree = rootRouteImport

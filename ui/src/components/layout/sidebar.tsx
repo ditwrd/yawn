@@ -29,58 +29,86 @@ interface SidebarProps {
 const navigationItems = [
   {
     title: "Dashboard",
-    href: "/dashboard",
+    href: "/protected/dashboard",
     icon: LayoutDashboard,
     description: "View your workspace overview",
   },
   {
     title: "Projects",
-    href: "/projects",
+    href: "/protected/projects",
     icon: FolderOpen,
-    badge: "3",
+    badge: "4",
     description: "Manage your data projects",
   },
   {
     title: "Pipelines",
-    href: "/pipelines",
+    href: "/protected/pipelines",
     icon: FileText,
     description: "Create and manage pipelines",
   },
   {
     title: "Analytics",
-    href: "/analytics",
+    href: "/protected/analytics",
     icon: BarChart3,
     description: "View performance metrics",
   },
   {
     title: "Team",
-    href: "/team",
+    href: "/protected/team",
     icon: Users,
     description: "Collaborate with your team",
   },
   {
     title: "Settings",
-    href: "/settings",
+    href: "/protected/settings",
     icon: Settings,
     description: "Configure your preferences",
   },
 ]
 
 export function Sidebar({ className, collapsed = false, onToggle }: SidebarProps) {
+  const [isMobile, setIsMobile] = React.useState(false)
+
+  React.useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024)
+    }
+
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
   return (
-    <aside
-      className={cn(
-        "flex flex-col bg-sidebar border-r border-sidebar-border",
-        "sidebar-transition",
-        collapsed
-          ? "w-16 lg:w-16"
-          : "w-72 sm:w-64 lg:w-64",
-        "h-screen overflow-hidden",
-        className
+    <>
+      {/* Mobile overlay */}
+      {isMobile && !collapsed && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={onToggle}
+          aria-hidden="true"
+        />
       )}
-      role="navigation"
-      aria-label="Main navigation"
-    >
+
+      <aside
+        className={cn(
+          "flex flex-col bg-sidebar border-r border-sidebar-border",
+          "sidebar-transition fixed lg:relative z-50",
+          "h-screen overflow-hidden",
+          // Transform for mobile slide-in/out
+          isMobile && !collapsed ? "translate-x-0" : "",
+          isMobile && collapsed ? "-translate-x-full" : "",
+          // Width transitions
+          collapsed
+            ? "w-16"
+            : "w-72 sm:w-64",
+          // Shadow for mobile
+          isMobile && !collapsed && "shadow-xl",
+          className
+        )}
+        role="navigation"
+        aria-label="Main navigation"
+      >
       {/* Header */}
       <header className="flex h-16 items-center justify-between shrink-0 px-3 lg:px-4">
         {!collapsed && (
@@ -142,7 +170,7 @@ export function Sidebar({ className, collapsed = false, onToggle }: SidebarProps
                 "placeholder:text-muted-foreground",
                 "focus:outline-none focus:ring-2 focus:ring-sidebar-ring",
                 "focus:ring-offset-2 focus:ring-offset-sidebar",
-                "transition-all duration-fast"
+                "transition-all duration-150"
               )}
               aria-label="Search navigation"
             />
@@ -171,7 +199,7 @@ export function Sidebar({ className, collapsed = false, onToggle }: SidebarProps
                   "text-sm font-medium text-sidebar-foreground",
                   "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                   "focus:bg-sidebar-accent focus:text-sidebar-accent-foreground",
-                  "transition-all duration-fast",
+                  "transition-all duration-150",
                   collapsed && "justify-center px-2"
                 )}
                 aria-label={item.title}
@@ -181,7 +209,7 @@ export function Sidebar({ className, collapsed = false, onToggle }: SidebarProps
                   className={cn(
                     "h-5 w-5 flex-shrink-0",
                     "group-hover:text-sidebar-primary",
-                    "transition-colors duration-fast"
+                    "transition-colors duration-150"
                   )}
                   aria-hidden="true"
                 />
@@ -224,5 +252,6 @@ export function Sidebar({ className, collapsed = false, onToggle }: SidebarProps
         </Button>
       </footer>
     </aside>
+    </>
   )
 }

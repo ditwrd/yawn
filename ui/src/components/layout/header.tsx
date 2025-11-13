@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
+import { Breadcrumb } from "@/components/navigation/breadcrumb"
+import { ProjectSwitcher } from "@/components/navigation/project-switcher"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,26 +25,65 @@ import {
   LogOut,
   HelpCircle,
 } from "lucide-react"
+import { useLocation } from "@tanstack/react-router"
 
 interface HeaderProps {
   className?: string
   sidebarCollapsed?: boolean
   onSidebarToggle?: () => void
+  showProjectSwitcher?: boolean
+  showBreadcrumbs?: boolean
 }
 
-export function Header({ className, sidebarCollapsed, onSidebarToggle }: HeaderProps) {
+export function Header({
+  className,
+  sidebarCollapsed,
+  onSidebarToggle,
+  showProjectSwitcher = true,
+  showBreadcrumbs = true,
+}: HeaderProps) {
+  const location = useLocation()
+
+  // Generate breadcrumbs from current path
+  const breadcrumbs = React.useMemo(() => {
+    const pathSegments = location.pathname.split('/').filter(Boolean)
+
+    // Skip generating breadcrumbs for root routes
+    if (pathSegments.length === 0) return []
+
+    return [
+      { label: 'Dashboard', href: '/dashboard', current: location.pathname === '/dashboard' },
+      ...pathSegments.slice(1).map((segment, index) => ({
+        label: segment.split('-').map(word =>
+          word.charAt(0).toUpperCase() + word.slice(1)
+        ).join(' '),
+        href: '/' + pathSegments.slice(0, index + 2).join('/'),
+        current: index === pathSegments.length - 2,
+      }))
+    ]
+  }, [location.pathname])
+
+  const handleProjectSelect = (project: any) => {
+    console.log('Selected project:', project)
+    // TODO: Implement project switching logic
+  }
+
+  const handleCreateProject = () => {
+    console.log('Create new project')
+    // TODO: Navigate to project creation
+  }
   return (
     <header
       className={cn(
         "flex h-14 lg:h-16 items-center justify-between",
         "border-b border-border bg-card shrink-0",
-        "px-4 sm:px-6 transition-all duration-normal ease-in-out",
+        "px-4 sm:px-6 transition-all duration-300 ease-in-out",
         className
       )}
       role="banner"
     >
       {/* Left side */}
-      <div className="flex items-center gap-2 sm:gap-4">
+      <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
         {/* Mobile menu toggle */}
         <Button
           variant="ghost"
@@ -51,7 +92,7 @@ export function Header({ className, sidebarCollapsed, onSidebarToggle }: HeaderP
           className={cn(
             "h-8 w-8 text-foreground hover:bg-accent",
             "btn-hover-lift focus-enhanced tap-target",
-            "lg:hidden"
+            "lg:hidden flex-shrink-0"
           )}
           aria-label="Toggle sidebar menu"
           aria-expanded={!sidebarCollapsed}
@@ -59,20 +100,29 @@ export function Header({ className, sidebarCollapsed, onSidebarToggle }: HeaderP
           <Menu className="h-4 w-4" />
         </Button>
 
-        {/* Current page indicator */}
-        <div className="hidden sm:flex items-center gap-2">
-          <Badge
-            variant="outline"
-            className="text-xs font-mono fade-in"
-            aria-label="Current page: Dashboard"
-          >
-            Dashboard
-          </Badge>
-          <Separator
-            orientation="vertical"
-            className="h-4 lg:h-6 bg-border fade-in"
-          />
-        </div>
+        {/* Project Switcher */}
+        {showProjectSwitcher && (
+          <div className="hidden md:block min-w-0">
+            <ProjectSwitcher
+              variant="compact"
+              onProjectSelect={handleProjectSelect}
+              onCreateProject={handleCreateProject}
+              className="min-w-0 max-w-48"
+            />
+          </div>
+        )}
+
+        {/* Breadcrumbs */}
+        {showBreadcrumbs && breadcrumbs.length > 0 && (
+          <div className="hidden sm:flex min-w-0">
+            <Breadcrumb
+              items={breadcrumbs}
+              showHome={false}
+              maxItems={3}
+              className="text-xs"
+            />
+          </div>
+        )}
       </div>
 
       {/* Center - Search (hidden on mobile, visible on larger screens) */}
@@ -91,7 +141,7 @@ export function Header({ className, sidebarCollapsed, onSidebarToggle }: HeaderP
               "placeholder:text-muted-foreground",
               "focus:outline-none focus:ring-2 focus:ring-ring",
               "focus:ring-offset-2 focus:ring-offset-card",
-              "transition-all duration-fast",
+              "transition-all duration-150",
               "font-mono"
             )}
             aria-label="Search"
