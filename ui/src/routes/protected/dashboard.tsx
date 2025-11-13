@@ -7,40 +7,50 @@ export const Route = createFileRoute('/protected/dashboard')({
 
 function Dashboard() {
   return (
-    <div className="space-y-6">
+    <div id="main-content" className="space-y-6 fade-in">
       <div className="space-y-2">
-        <h2 className="text-xl font-semibold text-white">Dashboard</h2>
-        <p className="text-gray-400">Welcome to your protected dashboard</p>
+        <h1 className="text-responsive-2xl font-semibold text-foreground font-mono">
+          Dashboard
+        </h1>
+        <p className="text-muted-foreground font-mono">
+          Welcome to your protected workspace
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Card className="bg-black">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+        <Card className="card-hover">
           <CardHeader>
-            <CardTitle className="text-purple-400">Projects</CardTitle>
+            <CardTitle className="text-primary font-mono">Projects</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-white">12</div>
-            <p className="text-gray-400">Active projects</p>
+            <div className="text-responsive-xl font-bold text-foreground font-mono">
+              12
+            </div>
+            <p className="text-muted-foreground font-mono text-sm">Active projects</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-black">
+        <Card className="card-hover">
           <CardHeader>
-            <CardTitle className="text-purple-400">Tasks</CardTitle>
+            <CardTitle className="text-primary font-mono">Tasks</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-white">48</div>
-            <p className="text-gray-400">Pending tasks</p>
+            <div className="text-responsive-xl font-bold text-foreground font-mono">
+              48
+            </div>
+            <p className="text-muted-foreground font-mono text-sm">Pending tasks</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-black">
+        <Card className="card-hover">
           <CardHeader>
-            <CardTitle className="text-purple-400">Team</CardTitle>
+            <CardTitle className="text-primary font-mono">Team</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-white">6</div>
-            <p className="text-gray-400">Team members</p>
+            <div className="text-responsive-xl font-bold text-foreground font-mono">
+              6
+            </div>
+            <p className="text-muted-foreground font-mono text-sm">Team members</p>
           </CardContent>
         </Card>
       </div>

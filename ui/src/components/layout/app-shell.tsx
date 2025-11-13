@@ -17,14 +17,58 @@ export function AppShell({
   onSidebarToggle,
 }: AppShellProps) {
   return (
-    <div className={cn("flex h-screen bg-background", className)}>
-      <Sidebar collapsed={sidebarCollapsed} onToggle={onSidebarToggle} />
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <Header onSidebarToggle={onSidebarToggle} sidebarCollapsed={sidebarCollapsed} />
-        <main className="flex-1 overflow-auto p-6">
+    <div className={cn(
+      "flex h-screen bg-background overflow-hidden",
+      "layout-transition",
+      className
+    )}>
+      {/* Mobile Sidebar Overlay */}
+      {!sidebarCollapsed && (
+        <div
+          className="mobile-sidebar-overlay lg:hidden"
+          onClick={onSidebarToggle}
+          aria-hidden="true"
+        />
+      )}
+
+      <Sidebar
+        collapsed={sidebarCollapsed}
+        onToggle={onSidebarToggle}
+        className={cn(
+          "fixed lg:relative z-50 h-full",
+          "sidebar-transition",
+          sidebarCollapsed && "-translate-x-full lg:translate-x-0"
+        )}
+      />
+
+      <div className={cn(
+        "flex flex-1 flex-col overflow-hidden min-w-0",
+        "transition-all duration-normal ease-in-out",
+        sidebarCollapsed ? "lg:ml-0" : "lg:ml-0"
+      )}>
+        <Header
+          onSidebarToggle={onSidebarToggle}
+          sidebarCollapsed={sidebarCollapsed}
+          className="flex-shrink-0"
+        />
+
+        <main className={cn(
+          "flex-1 overflow-auto",
+          "container-responsive py-6 lg:py-8",
+          "fade-in"
+        )}>
           {children}
         </main>
       </div>
+
+      {/* Skip to content link for accessibility */}
+      <a
+        href="#main-content"
+        className="skip-to-content"
+        aria-label="Skip to main content"
+      >
+        Skip to main content
+      </a>
     </div>
   )
 }

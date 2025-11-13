@@ -175,3 +175,4 @@ tmp/api
 yawn.db
 specs
 *output.txt
+*.png

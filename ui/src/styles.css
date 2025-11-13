@@ -1,3 +1,4 @@
+/* Import JetBrains Mono with proper font display */
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
 
 @import 'tailwindcss';
@@ -6,17 +7,22 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Typography & Base Styles */
 body {
   @apply m-0;
   font-family: 'JetBrains Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
-code {
+code, pre {
   font-family: 'JetBrains Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
+  font-variant-ligatures: context;
 }
 
+/* Color System - Sleepy YAWN Dark Theme */
 :root {
   --background: oklch(0.98 0.003 240);
   --foreground: oklch(0.15 0.02 250);
@@ -53,42 +59,64 @@ code {
   --sidebar-ring: oklch(0.65 0.25 280);
 }
 
+/* Enhanced Dark Theme - Sleepy YAWN with Purple/Indigo */
 .dark {
-  --background: oklch(0.08 0.01 240);
-  --foreground: oklch(0.95 0.01 240);
-  --card: oklch(0.12 0.02 240);
-  --card-foreground: oklch(0.95 0.01 240);
-  --popover: oklch(0.12 0.02 240);
-  --popover-foreground: oklch(0.95 0.01 240);
-  --primary: oklch(0.7 0.3 280);
-  --primary-foreground: oklch(0.08 0.01 240);
-  --secondary: oklch(0.18 0.02 240);
-  --secondary-foreground: oklch(0.95 0.01 240);
-  --muted: oklch(0.18 0.02 240);
-  --muted-foreground: oklch(0.6 0.02 240);
-  --accent: oklch(0.22 0.03 240);
-  --accent-foreground: oklch(0.95 0.01 240);
-  --destructive: oklch(0.55 0.25 20);
-  --destructive-foreground: oklch(0.95 0.01 240);
-  --border: oklch(0.22 0.03 240);
-  --input: oklch(0.22 0.03 240);
-  --ring: oklch(0.7 0.3 280);
-  --chart-1: oklch(0.7 0.3 280);
-  --chart-2: oklch(0.6 0.25 260);
-  --chart-3: oklch(0.5 0.22 300);
-  --chart-4: oklch(0.75 0.27 250);
-  --chart-5: oklch(0.65 0.2 290);
-  --sidebar: oklch(0.1 0.015 240);
-  --sidebar-foreground: oklch(0.95 0.01 240);
-  --sidebar-primary: oklch(0.7 0.3 280);
-  --sidebar-primary-foreground: oklch(0.08 0.01 240);
-  --sidebar-accent: oklch(0.18 0.02 240);
-  --sidebar-accent-foreground: oklch(0.95 0.01 240);
-  --sidebar-border: oklch(0.22 0.03 240);
-  --sidebar-ring: oklch(0.7 0.3 280);
+  /* Deep dark background with subtle blue tint */
+  --background: oklch(0.06 0.008 240);
+  --foreground: oklch(0.92 0.012 240);
+
+  /* Card surfaces with elevated depth */
+  --card: oklch(0.10 0.015 240);
+  --card-foreground: oklch(0.92 0.012 240);
+  --popover: oklch(0.10 0.015 240);
+  --popover-foreground: oklch(0.92 0.012 240);
+
+  /* Primary purple/indigo accent system */
+  --primary: oklch(0.68 0.28 275);
+  --primary-foreground: oklch(0.06 0.008 240);
+
+  /* Secondary surfaces */
+  --secondary: oklch(0.16 0.02 240);
+  --secondary-foreground: oklch(0.92 0.012 240);
+
+  /* Muted content */
+  --muted: oklch(0.16 0.02 240);
+  --muted-foreground: oklch(0.58 0.025 240);
+
+  /* Interactive accents */
+  --accent: oklch(0.20 0.035 260);
+  --accent-foreground: oklch(0.92 0.012 240);
+
+  /* Status colors */
+  --destructive: oklch(0.52 0.28 20);
+  --destructive-foreground: oklch(0.92 0.012 240);
+
+  /* Borders and inputs */
+  --border: oklch(0.20 0.035 240);
+  --input: oklch(0.20 0.035 240);
+  --ring: oklch(0.68 0.28 275);
+
+  /* Chart colors with purple/indigo theme */
+  --chart-1: oklch(0.68 0.28 275);
+  --chart-2: oklch(0.62 0.24 265);
+  --chart-3: oklch(0.56 0.20 285);
+  --chart-4: oklch(0.72 0.26 255);
+  --chart-5: oklch(0.64 0.18 295);
+
+  /* Enhanced sidebar colors */
+  --sidebar: oklch(0.08 0.012 240);
+  --sidebar-foreground: oklch(0.92 0.012 240);
+  --sidebar-primary: oklch(0.68 0.28 275);
+  --sidebar-primary-foreground: oklch(0.06 0.008 240);
+  --sidebar-accent: oklch(0.16 0.02 240);
+  --sidebar-accent-foreground: oklch(0.92 0.012 240);
+  --sidebar-border: oklch(0.20 0.035 240);
+  --sidebar-ring: oklch(0.68 0.28 275);
 }
 
+/* Responsive Design System & Custom Theme */
 @theme inline {
+  /* Color System */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -113,10 +141,14 @@ code {
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+
+  /* Border Radius System */
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* Sidebar Colors */
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -125,13 +157,247 @@ code {
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Custom Animation Keyframes */
+  --duration-instant: 0ms;
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+  --duration-slower: 600ms;
+
+  /* Easing Functions */
+  --ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-in: cubic-bezier(0.55, 0.085, 0.68, 0.53);
+  --ease-in-out: cubic-bezier(0.445, 0.05, 0.55, 0.95);
 }
 
+/* Base Layer - Foundation */
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Improved focus management */
+  :focus-visible {
+    @apply ring-2 ring-ring ring-offset-2 ring-offset-background outline-none;
+  }
+
+  /* Skip to content link for accessibility */
+  .skip-to-content {
+    @apply absolute -top-16 left-0 bg-primary text-primary-foreground p-2 rounded-md z-50 focus:top-4 focus:left-4;
+  }
+
+  /* Screen reader only content */
+  .sr-only {
+    @apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;
+  }
+}
+
+/* Components Layer - Micro-interactions & Animations */
+@layer components {
+  /* Button micro-interactions */
+  .btn-base {
+    @apply inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-all duration-fast;
+    @apply focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+    @apply disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  .btn-hover-lift {
+    @apply hover:scale-105 active:scale-95 transition-transform duration-fast ease-out;
+  }
+
+  /* Card hover effects */
+  .card-hover {
+    @apply transition-all duration-normal ease-out hover:shadow-lg hover:shadow-primary/5 hover:border-primary/20;
+  }
+
+  /* Interactive list items */
+  .interactive-item {
+    @apply transition-all duration-fast ease-out hover:bg-accent hover:text-accent-foreground;
+    @apply focus:bg-accent focus:text-accent-foreground outline-none rounded-md;
+  }
+
+  /* Smooth transitions for layout changes */
+  .layout-transition {
+    @apply transition-all duration-normal ease-in-out;
+  }
+
+  /* Sidebar specific transitions */
+  .sidebar-transition {
+    @apply transition-all duration-normal ease-in-out;
+  }
+
+  /* Loading skeleton animation */
+  @keyframes skeleton {
+    0% {
+      background-position: -200px 0;
+    }
+    100% {
+      background-position: calc(200px + 100%) 0;
+    }
+  }
+
+  .skeleton {
+    @apply animate-pulse;
+    background-image: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.05),
+      transparent
+    );
+    background-size: 200px 100%;
+    background-repeat: no-repeat;
+    animation: skeleton 1.5s ease-in-out infinite;
+  }
+
+  /* Fade in animation */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .fade-in {
+    animation: fadeIn duration-normal ease-out;
+  }
+
+  /* Slide in from right */
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .slide-in-right {
+    animation: slideInRight duration-normal ease-out;
+  }
+
+  /* Pulse animation for notifications */
+  @keyframes pulse-subtle {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.8;
+    }
+  }
+
+  .pulse-subtle {
+    animation: pulse-subtle duration-slow ease-in-out infinite;
+  }
+
+  /* Mobile navigation menu animation */
+  .mobile-menu-enter {
+    animation: slideInRight duration-normal ease-out;
+  }
+
+  .mobile-menu-exit {
+    animation: slideInRight duration-fast ease-in-out reverse;
+  }
+}
+
+/* Utilities Layer - Responsive & Accessibility Helpers */
+@layer utilities {
+  /* Mobile-first responsive containers */
+  .container-responsive {
+    @apply w-full px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16;
+    @apply max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl 2xl:max-w-4xl;
+  }
+
+  /* Text responsive sizing */
+  .text-responsive-xs {
+    @apply text-xs sm:text-sm;
+  }
+
+  .text-responsive-sm {
+    @apply text-sm sm:text-base;
+  }
+
+  .text-responsive-base {
+    @apply text-base sm:text-lg;
+  }
+
+  .text-responsive-lg {
+    @apply text-lg sm:text-xl lg:text-2xl;
+  }
+
+  .text-responsive-xl {
+    @apply text-xl sm:text-2xl lg:text-3xl;
+  }
+
+  .text-responsive-2xl {
+    @apply text-2xl sm:text-3xl lg:text-4xl;
+  }
+
+  /* Spacing responsive utilities */
+  .space-y-responsive {
+    @apply space-y-4 sm:space-y-6 md:space-y-8;
+  }
+
+  .gap-responsive {
+    @apply gap-2 sm:gap-4 md:gap-6;
+  }
+
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    .high-contrast-text {
+      @apply text-foreground;
+    }
+
+    .high-contrast-border {
+      @apply border-foreground;
+    }
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Focus visible enhancement */
+  .focus-enhanced:focus-visible {
+    @apply ring-2 ring-ring ring-offset-2 ring-offset-background outline-none;
+    @apply ring-offset-4 dark:ring-offset-background;
+  }
+
+  /* Mobile sidebar specific utilities */
+  .mobile-sidebar-hidden {
+    @apply fixed inset-0 z-50 lg:hidden lg:static lg:inset-auto;
+  }
+
+  .mobile-sidebar-overlay {
+    @apply fixed inset-0 z-40 bg-background/80 backdrop-blur-sm lg:hidden;
+  }
+
+  /* Touch-friendly tap targets */
+  .tap-target {
+    @apply min-h-[44px] min-w-[44px] flex items-center justify-center;
+  }
+
+  /* Keyboard navigation indicators */
+  .keyboard-nav {
+    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
   }
 }

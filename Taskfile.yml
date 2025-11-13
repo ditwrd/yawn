@@ -1,0 +1,94 @@
+# https://taskfile.dev
+
+version: '3'
+
+
+tasks:
+  # Type generation tasks
+  gen-types:
+    desc: "Generate TypeScript types from Go structs"
+    dir: "api"
+    cmds:
+      - echo "Generating TypeScript types..."
+      - tygo generate
+      - echo "TypeScript types generated in shared/"
+    preconditions:
+      - { msg: "tygo must be installed", sh: "command -v tygo" }
+
+  # API development tasks
+  dev:
+    desc: "Start development server with hot reload"
+    dir: "api"
+    cmds:
+      - air
+    preconditions:
+      - { msg: "air must be installed", sh: "command -v air" }
+
+  # Frontend development tasks
+  dev-ui:
+    desc: "Start frontend development server"
+    dir: "ui"
+    cmds:
+      - bun dev
+    preconditions:
+      - { msg: "bun must be installed", sh: "command -v bun" }
+
+  # Build tasks
+  build:
+    desc: "Build the complete application"
+    deps:
+      - gen-types
+      - build-ui
+      - build-api
+
+  build-api:
+    desc: "Build Go API binary"
+    dir: "api"
+    cmds:
+      - go build -o ../dist/yawn .
+
+  build-ui:
+    desc: "Build React frontend"
+    dir: "ui"
+    cmds:
+      - bun run build
+      - mkdir -p ../dist
+      - cp -r dist/* ../dist/
+
+  # Test tasks
+  test:
+    desc: "Run all tests"
+    dir: "api"
+    cmds:
+      - go test -v ./...
+
+  test-coverage:
+    desc: "Run tests with coverage report"
+    dir: "api"
+    cmds:
+      - go test -coverprofile=coverage.out ./...
+      - go tool cover -html=coverage.out -o coverage.html
+      # - echo "Coverage report generated: coverage.html"
+
+  # Linting tasks
+  lint:
+    desc: "Run all linters"
+    dir: "api"
+    cmds:
+      - golangci-lint run
+
+  # Database tasks
+  db-migrate:
+    desc: "Run database migrations"
+    dir: "api"
+    cmds:
+      - go run main.go migrate
+
+  # Clean tasks
+  clean:
+    desc: "Clean build artifacts"
+    cmds:
+      - rm -rf dist/
+      - rm -rf shared/*.ts
+      - rm -f api/coverage.out
+      - rm -f api/coverage.html
