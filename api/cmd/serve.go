@@ -27,7 +27,6 @@ import (
 	"github.com/ditwrd/yawn/api/internal/app"
 	"github.com/ditwrd/yawn/api/internal/config"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 // serveCmd represents the serve command.
@@ -76,18 +75,24 @@ func init() {
 		StringP("host", "H", "", "Host to bind the Yawn platform server to")
 	serveCmd.Flags().
 		Bool("dev", false, "Enable development mode with hot-reload for workflow testing")
-
-	// Bind flags to viper
-	viper.BindPFlag("server.port", serveCmd.Flags().Lookup("port"))
-	viper.BindPFlag("server.host", serveCmd.Flags().Lookup("host"))
-	viper.BindPFlag("dev", serveCmd.Flags().Lookup("dev"))
 }
 
 func runServe(cmd *cobra.Command, args []string) error {
-	// Load configuration (this will use the viper instance from root.go)
-	config, err := loadCommandConfig()
+	// Get config file path from flag
+	configFile, _ := cmd.Flags().GetString("config")
+
+	// Load configuration using the new config system
+	config, err := config.LoadConfig(configFile)
 	if err != nil {
 		return fmt.Errorf("failed to load configuration: %w", err)
+	}
+
+	// Override with CLI flags if provided
+	if port, _ := cmd.Flags().GetString("port"); port != "" {
+		config.Server.Port = port
+	}
+	if host, _ := cmd.Flags().GetString("host"); host != "" {
+		config.Server.Host = host
 	}
 
 	// Create fx application with configuration
@@ -111,8 +116,11 @@ func runServe(cmd *cobra.Command, args []string) error {
 		}
 	}()
 
+	// Get dev flag for printing server info
+	dev, _ := cmd.Flags().GetBool("dev")
+
 	// Print server information
-	printServerInfo(config)
+	printServerInfo(config, dev)
 
 	// Wait for either shutdown signal or error
 	select {
@@ -139,21 +147,9 @@ func runServe(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// loadCommandConfig loads configuration for commands, reusing the viper from
-// root.go.
-func loadCommandConfig() (*config.Config, error) {
-	var cfg config.Config
-
-	err := viper.Unmarshal(&cfg)
-	if err != nil {
-		return nil, fmt.Errorf("unable to decode config: %w", err)
-	}
-
-	return &cfg, nil
-}
 
 // printServerInfo prints server startup information.
-func printServerInfo(config *config.Config) {
+func printServerInfo(config *config.Config, dev bool) {
 	fmt.Printf("🚀 Starting Yawn Platform Server\n")
 	fmt.Printf(
 		"📡 Server: http://%s:%s\n",
@@ -162,7 +158,7 @@ func printServerInfo(config *config.Config) {
 	)
 	fmt.Printf("💾 Database: %s\n", config.Database.Type)
 
-	if viper.GetBool("dev") {
+	if dev {
 		fmt.Printf("🔧 Development mode: enabled (hot-reload for workflows)\n")
 	}
 

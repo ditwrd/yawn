@@ -73,7 +73,10 @@ func NewEcho(cfg *config.Config, logger *zerolog.Logger) *echo.Echo {
 
 	// CORS middleware with configurable settings
 	e.Use(echomiddleware.CORSWithConfig(echomiddleware.CORSConfig{
-		AllowOrigins:     processAllowedOrigins(cfg.CORS.AllowedOrigins, cfg.CORS.EnableWildcardPort),
+		AllowOrigins: processAllowedOrigins(
+			cfg.CORS.AllowedOrigins,
+			cfg.CORS.EnableWildcardPort,
+		),
 		AllowCredentials: cfg.CORS.AllowCredentials,
 		AllowMethods:     cfg.CORS.AllowedMethods,
 		AllowHeaders:     cfg.CORS.AllowedHeaders,

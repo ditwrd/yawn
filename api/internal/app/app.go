@@ -39,60 +39,13 @@ import (
 	"gorm.io/gorm"
 )
 
-// NewFxApp creates a new fx application with all dependencies configured.
-func NewFxApp() *fx.App {
-	return fx.New(
-		// Provide configuration
-		fx.Provide(
-			loadConfig,
-			logger.NewLogger,
-			database.NewDatabase,
-			web.NewEcho,
-
-			// Infrastructure providers
-			newJWTService,
-			newPasswordService,
-
-			// Repository providers
-			newUserRepository,
-			newProjectRepository,
-			newAssetRepository,
-			newPipelineRepository,
-			newRepositoryRepository,
-
-			// Service providers
-			newUserService,
-			newAuthService,
-			newProjectService,
-			newAssetService,
-			newPipelineService,
-			newGitOpsService,
-
-			// Middleware providers
-			newAuthMiddleware,
-			newAuthzMiddleware,
-
-			// Handler providers
-			newAuthHandler,
-			newUserHandler,
-			newProjectHandler,
-			newAssetHandler,
-			newPipelineHandler,
-			newGitOpsHandler,
-		),
-
-		// Start HTTP server
-		fx.Invoke(startServer, setupRoutes),
-
-		// Use default fx logger for now
-	)
-}
 
 // NewFxAppWithConfig creates a new fx application using provided configuration.
 func NewFxAppWithConfig(cfg *config.Config) *fx.App {
 	return fx.New(
 		// Provide configuration
 		fx.Provide(
+			// Use the provided config directly
 			func() (*config.Config, error) { return cfg, nil },
 			logger.NewLogger,
 			database.NewDatabase,
@@ -137,10 +90,6 @@ func NewFxAppWithConfig(cfg *config.Config) *fx.App {
 	)
 }
 
-// loadConfig loads the application configuration from default locations.
-func loadConfig() (*config.Config, error) {
-	return config.LoadConfig("")
-}
 
 // startServer starts the HTTP server with graceful shutdown support.
 func startServer(lc fx.Lifecycle, e *echo.Echo) {
@@ -164,29 +113,29 @@ func startServer(lc fx.Lifecycle, e *echo.Echo) {
 
 // Infrastructure providers
 
-func newJWTService() services.JWTService {
+func newJWTService(cfg *config.Config) services.JWTService {
 	return services.NewJWTService(&services.JWTConfig{
-		AccessSecret:  "your-access-secret-key",  // Use config in production
-		RefreshSecret: "your-refresh-secret-key", // Use config in production
-		AccessExpiry:  15 * time.Minute,
-		RefreshExpiry: 7 * 24 * time.Hour, // 7 days
-		Issuer:        "yawn-api",
-		Audience:      "yawn-client",
+		AccessSecret:  cfg.JWT.AccessSecret,
+		RefreshSecret: cfg.JWT.RefreshSecret,
+		AccessExpiry:  time.Duration(cfg.JWT.AccessExpiry) * time.Minute,
+		RefreshExpiry: time.Duration(cfg.JWT.RefreshExpiry) * time.Hour,
+		Issuer:        cfg.JWT.Issuer,
+		Audience:      cfg.JWT.Audience,
 	})
 }
 
-func newPasswordService() services.PasswordService {
+func newPasswordService(cfg *config.Config) services.PasswordService {
 	return services.NewPasswordService(&services.PasswordConfig{
-		Memory:              19456, // 19 MiB in KiB
-		Iterations:          2,
-		Parallelism:         1,
-		SaltLength:          16,
-		KeyLength:           32,
-		MinLength:           8,
-		RequireUppercase:    true,
-		RequireLowercase:    true,
-		RequireNumbers:      true,
-		RequireSpecialChars: true,
+		Memory:              cfg.Password.Memory,
+		Iterations:          cfg.Password.Iterations,
+		Parallelism:         cfg.Password.Parallelism,
+		SaltLength:          cfg.Password.SaltLength,
+		KeyLength:           cfg.Password.KeyLength,
+		MinLength:           cfg.Password.MinLength,
+		RequireUppercase:    cfg.Password.RequireUppercase,
+		RequireLowercase:    cfg.Password.RequireLowercase,
+		RequireNumbers:      cfg.Password.RequireNumbers,
+		RequireSpecialChars: cfg.Password.RequireSpecialChars,
 	})
 }
 
@@ -248,14 +197,15 @@ func newAuthService(
 	logger *zerolog.Logger,
 	jwtService services.JWTService,
 	passwordService services.PasswordService,
+	cfg *config.Config,
 ) services.AuthService {
 	return services.NewAuthService(
 		userRepo,
 		projectRepo,
 		logger,
-		[]byte("your-jwt-secret-key"),
-		"",
-		"",
+		[]byte(cfg.JWT.Secret),
+		cfg.OAuth2.GoogleClientID,
+		cfg.OAuth2.GoogleClientSecret,
 	)
 }
 

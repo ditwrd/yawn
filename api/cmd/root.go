@@ -17,15 +17,10 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
-	"fmt"
 	"os"
-	"strings"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
-
-var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands.
 var rootCmd = &cobra.Command{
@@ -56,89 +51,7 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
-
 	// Global persistent flags
 	rootCmd.PersistentFlags().
-		StringVar(&cfgFile, "config", "", "config file for Yawn platform settings (default is $HOME/.yawn.yaml, ./config.yaml, or ./yawn.yaml)")
-	rootCmd.PersistentFlags().
-		Bool("verbose", false, "enable verbose logging for workflow execution and platform operations")
-	rootCmd.PersistentFlags().
-		StringP("log-level", "l", "info", "log level for platform and workflow logging (debug, info, warn, error)")
-
-	// Bind flags to viper
-	viper.BindPFlag("verbose", rootCmd.PersistentFlags().Lookup("verbose"))
-	viper.BindPFlag(
-		"logger.level",
-		rootCmd.PersistentFlags().Lookup("log-level"),
-	)
-
-	// Set default values
-	viper.SetDefault("verbose", false)
-	viper.SetDefault("logger.level", "info")
-}
-
-// initConfig reads config file and environment variables.
-func initConfig() {
-	if cfgFile != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
-	} else {
-		// Set config file name and search paths
-		viper.SetConfigName("config")
-		viper.SetConfigName("yawn")
-		viper.SetConfigType("yaml")
-
-		// Add search paths in order of preference
-		viper.AddConfigPath(".")
-		viper.AddConfigPath("./config")
-		viper.AddConfigPath("/etc/yawn")
-
-		// Add home directory as last resort
-		if home, err := os.UserHomeDir(); err == nil {
-			viper.AddConfigPath(home)
-			viper.SetConfigName(".yawn")
-		}
-	}
-
-	// Set environment variable prefix and replacer
-	viper.SetEnvPrefix("YAWN")
-	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-	viper.AutomaticEnv()
-
-	// Set application defaults
-	setAppDefaults()
-
-	// If a config file is found, read it in.
-	err := viper.ReadInConfig()
-	if err == nil {
-		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
-	}
-}
-
-// setAppDefaults sets default application configuration values.
-func setAppDefaults() {
-	// Server defaults
-	viper.SetDefault("server.port", "8080")
-	viper.SetDefault("server.host", "0.0.0.0")
-	viper.SetDefault("server.read_timeout", 30)
-	viper.SetDefault("server.write_timeout", 30)
-
-	// Database defaults
-	viper.SetDefault("database.type", "sqlite")
-	viper.SetDefault("database.path", "./yawn.db")
-	viper.SetDefault("database.host", "localhost")
-	viper.SetDefault("database.port", "5432")
-	viper.SetDefault("database.name", "yawn")
-	viper.SetDefault("database.user", "yawn")
-	viper.SetDefault("database.password", "")
-	viper.SetDefault("database.ssl_mode", "disable")
-
-	// JWT defaults
-	viper.SetDefault("jwt.secret", "change-me-in-production")
-	viper.SetDefault("jwt.ttl", 3600) // 1 hour
-
-	// Logger defaults
-	viper.SetDefault("logger.level", "info")
-	viper.SetDefault("logger.format", "json")
+		String("config", "", "config file for Yawn platform settings (default is ./config.yaml, ./yawn.yaml, or environment variables)")
 }

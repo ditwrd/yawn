@@ -20,9 +20,7 @@ import (
 	"testing"
 
 	"github.com/ditwrd/yawn/api/internal/config"
-	"github.com/google/go-cmp/cmp"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 func TestServeCommand(t *testing.T) {
@@ -59,29 +57,44 @@ func TestServeCommand(t *testing.T) {
 	}
 }
 
-func TestServeCommandFlagBinding(t *testing.T) {
-	// Reset viper for this test
-	viper.Reset()
-
-	// Test flag binding to viper using existing serveCmd
+func TestServeCommandFlagFunctionality(t *testing.T) {
+	// Test that CLI flags work correctly with the new config system
 	if serveCmd == nil {
 		t.Fatal("serveCmd is nil")
 	}
 
-	// Test setting flag
+	// Test setting port flag
 	err := serveCmd.Flags().Set("port", "9000")
 	if err != nil {
 		t.Errorf("Failed to set port flag: %v", err)
 	}
 
-	// Test that viper gets the value (after binding)
-	viper.BindPFlag("server.port", serveCmd.Flags().Lookup("port"))
+	// Test setting host flag
+	err = serveCmd.Flags().Set("host", "127.0.0.1")
+	if err != nil {
+		t.Errorf("Failed to set host flag: %v", err)
+	}
 
-	if viper.GetString("server.port") != "9000" {
-		t.Errorf(
-			"Expected viper to get port value '9000', got '%s'",
-			viper.GetString("server.port"),
-		)
+	// Test setting dev flag
+	err = serveCmd.Flags().Set("dev", "true")
+	if err != nil {
+		t.Errorf("Failed to set dev flag: %v", err)
+	}
+
+	// Verify flag values can be retrieved
+	port, _ := serveCmd.Flags().GetString("port")
+	if port != "9000" {
+		t.Errorf("Expected port to be '9000', got '%s'", port)
+	}
+
+	host, _ := serveCmd.Flags().GetString("host")
+	if host != "127.0.0.1" {
+		t.Errorf("Expected host to be '127.0.0.1', got '%s'", host)
+	}
+
+	dev, _ := serveCmd.Flags().GetBool("dev")
+	if !dev {
+		t.Error("Expected dev to be true")
 	}
 }
 
@@ -139,58 +152,54 @@ func Test_runServe(t *testing.T) {
 	}
 }
 
-func Test_loadCommandConfig(t *testing.T) {
-	t.Parallel()
-
-	tests := []struct {
-		name    string
-		want    *config.Config
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			got, err := loadCommandConfig()
-			if (err != nil) != tt.wantErr {
-				t.Fatalf("loadCommandConfig() error = %v, wantErr %v", err, tt.wantErr)
-			}
-
-			if tt.wantErr {
-				return
-			}
-
-			if !cmp.Equal(tt.want, got) {
-				t.Errorf(
-					"loadCommandConfig() = %v, want %v\ndiff=%s",
-					got,
-					tt.want,
-					cmp.Diff(tt.want, got),
-				)
-			}
-		})
-	}
-}
 
 func Test_printServerInfo(t *testing.T) {
 	t.Parallel()
 
 	type args struct {
 		config *config.Config
+		dev    bool
 	}
 
 	tests := []struct {
 		name string
 		args args
 	}{
-		// TODO: Add test cases.
+		{
+			name: "Production mode",
+			args: args{
+				config: &config.Config{
+					Server: config.ServerConfig{
+						Host: "0.0.0.0",
+						Port: "8080",
+					},
+					Database: config.DatabaseConfig{
+						Type: "sqlite",
+					},
+				},
+				dev: false,
+			},
+		},
+		{
+			name: "Development mode",
+			args: args{
+				config: &config.Config{
+					Server: config.ServerConfig{
+						Host: "localhost",
+						Port: "3000",
+					},
+					Database: config.DatabaseConfig{
+						Type: "sqlite",
+					},
+				},
+				dev: true,
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			printServerInfo(tt.args.config)
+			printServerInfo(tt.args.config, tt.args.dev)
 		})
 	}
 }
